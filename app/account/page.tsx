@@ -1,0 +1,141 @@
+import { redirect } from "next/navigation";
+import { auth, signOut } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { PasskeyEnroll } from "@/components/passkey-enroll";
+import { formatPrice, formatDate } from "@/lib/utils";
+import { LogOut, Package, Fingerprint } from "lucide-react";
+
+export default async function AccountPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/auth/signin");
+  }
+
+  const [orders, passkeys] = await Promise.all([
+    db.order.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.passkey.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  return (
+    <div className="container mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">My Account</h1>
+            <p className="text-neutral-600 mt-1">{session.user.email}</p>
+          </div>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}
+          >
+            <Button variant="outline" type="submit" className="gap-2">
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </form>
+        </div>
+
+        {passkeys.length === 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <h3 className="font-semibold text-amber-900 mb-2">Secure Your Account</h3>
+            <p className="text-sm text-amber-800 mb-4">
+              Set up a passkey for passwordless authentication using your fingerprint or face.
+            </p>
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <PasskeyEnroll />
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Fingerprint className="h-5 w-5" />
+                Your Passkeys
+              </CardTitle>
+              <CardDescription>
+                Manage your registered passkeys
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {passkeys.length === 0 ? (
+                <p className="text-sm text-neutral-600">No passkeys registered yet</p>
+              ) : (
+                <ul className="space-y-3">
+                  {passkeys.map((passkey) => (
+                    <li
+                      key={passkey.id}
+                      className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium text-sm">{passkey.name}</p>
+                        <p className="text-xs text-neutral-600">
+                          Last used: {formatDate(passkey.lastUsed)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Order History
+            </CardTitle>
+            <CardDescription>
+              View your past purchases
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {orders.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-neutral-600">No orders yet</p>
+                <a href="/shop" className="text-amber-900 hover:underline text-sm mt-2 inline-block">
+                  Start shopping
+                </a>
+              </div>
+            ) : (
+              <ul className="space-y-4">
+                {orders.map((order) => (
+                  <li
+                    key={order.id}
+                    className="flex items-center justify-between p-4 border border-neutral-100 rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-neutral-600">
+                        {formatDate(order.createdAt)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-amber-900">
+                        {formatPrice(order.totalCents)}
+                      </p>
+                      <p className="text-xs text-neutral-600 capitalize">{order.status}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

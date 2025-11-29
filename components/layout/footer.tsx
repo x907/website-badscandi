@@ -1,0 +1,72 @@
+import Link from "next/link";
+
+export function Footer() {
+  return (
+    <footer className="border-t border-neutral-100 bg-white mt-auto">
+      <div className="container mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div>
+            <h3 className="font-semibold mb-4">Bad Scandi</h3>
+            <p className="text-sm text-neutral-600 leading-relaxed">
+              Scandinavian minimalist design for modern living.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-medium mb-4 text-sm">Shop</h4>
+            <ul className="space-y-2 text-sm text-neutral-600">
+              <li>
+                <Link href="/shop" className="hover:text-amber-900 transition-colors">
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link href="/shop?featured=true" className="hover:text-amber-900 transition-colors">
+                  Featured
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-medium mb-4 text-sm">Company</h4>
+            <ul className="space-y-2 text-sm text-neutral-600">
+              <li>
+                <Link href="/about" className="hover:text-amber-900 transition-colors">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-amber-900 transition-colors">
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-medium mb-4 text-sm">Legal</h4>
+            <ul className="space-y-2 text-sm text-neutral-600">
+              <li>
+                <Link href="/privacy" className="hover:text-amber-900 transition-colors">
+                  Privacy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-amber-900 transition-colors">
+                  Terms
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-neutral-100">
+          <p className="text-sm text-neutral-600 text-center">
+            © {new Date().getFullYear()} Bad Scandi. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
