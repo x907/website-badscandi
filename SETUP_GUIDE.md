@@ -101,11 +101,7 @@ cp .env.example .env
 # Database (from Supabase)
 DATABASE_URL="postgresql://postgres:[password]@db.xxx.supabase.co:5432/postgres"
 
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-here"  # Generate with: openssl rand -base64 32
-
-# WebAuthn
+# Better Auth - WebAuthn Configuration
 RP_NAME="Bad Scandi"
 RP_ID="localhost"
 RP_ORIGIN="http://localhost:3000"
@@ -127,14 +123,18 @@ STRIPE_SECRET_KEY="sk_test_..."
 STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET=""  # Leave empty for now, add after deployment
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+
+# AWS SES (for Magic Link emails)
+AWS_REGION="us-west-2"
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+EMAIL_FROM="noreply@yourdomain.com"
+
+# Resend (Optional - for contact form emails)
+RESEND_API_KEY=""
 ```
 
-5. Generate NextAuth secret:
-```bash
-openssl rand -base64 32
-```
-
-6. Push database schema to Supabase:
+5. Push database schema to Supabase:
 ```bash
 npm run db:push
 ```
@@ -149,7 +149,7 @@ npm run db:seed
 npm run dev
 ```
 
-9. Open http://localhost:3000 in your browser!
+7. Open http://localhost:3000 in your browser!
 
 ## Step 5: Deploy to Vercel
 
@@ -178,14 +178,17 @@ Click "Environment Variables" and add all variables from your `.env` file, BUT u
 
 ```env
 # Update these for production:
-NEXTAUTH_URL="https://your-domain.vercel.app"
 RP_ID="your-domain.vercel.app"
 RP_ORIGIN="https://your-domain.vercel.app"
+NEXT_PUBLIC_SITE_URL="https://your-domain.vercel.app"
 
 # Rest stays the same (copy from .env)
 DATABASE_URL="..."
-NEXTAUTH_SECRET="..."
 GOOGLE_CLIENT_ID="..."
+AWS_REGION="..."
+AWS_ACCESS_KEY_ID="..."
+AWS_SECRET_ACCESS_KEY="..."
+EMAIL_FROM="..."
 # etc...
 ```
 
@@ -228,10 +231,10 @@ GOOGLE_CLIENT_ID="..."
 2. Add your custom domain
 3. Update DNS records as instructed
 4. Wait for SSL certificate (~5 minutes)
-5. Update environment variables:
-   - `NEXTAUTH_URL`: `https://yourdomain.com`
+5. Update environment variables in Vercel:
    - `RP_ID`: `yourdomain.com`
    - `RP_ORIGIN`: `https://yourdomain.com`
+   - `NEXT_PUBLIC_SITE_URL`: `https://yourdomain.com`
 6. Update OAuth redirect URIs with new domain
 
 ## Database Management
@@ -283,7 +286,7 @@ npm run db:push
 
 Before launching:
 
-- [ ] Set strong `NEXTAUTH_SECRET`
+- [ ] Configure AWS SES with verified email domain
 - [ ] Switch Stripe to production mode
 - [ ] Update Stripe webhook with production URL
 - [ ] Update OAuth redirect URIs with production domain
@@ -307,11 +310,11 @@ Before launching:
 
 ## Support
 
-- **Documentation**: See [README.md](./README.md)
+- **Documentation**: See [README.md](./README.md) and [BETTER_AUTH_MIGRATION.md](./BETTER_AUTH_MIGRATION.md)
 - **Issues**: Open a GitHub issue
 - **Next.js Docs**: https://nextjs.org/docs
 - **Prisma Docs**: https://www.prisma.io/docs
-- **SimpleWebAuthn Docs**: https://simplewebauthn.dev
+- **Better Auth Docs**: https://www.better-auth.com/docs
 
 ---
 
