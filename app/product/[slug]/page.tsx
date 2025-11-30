@@ -4,6 +4,7 @@ import { getProductBySlug } from "@/lib/products";
 import { formatPrice } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import { CheckoutButton } from "@/components/checkout-button";
+import { ProductViewTracker } from "@/components/product-view-tracker";
 
 interface ProductPageProps {
   params: Promise<{
@@ -23,6 +24,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="container mx-auto px-6 py-12">
+      <ProductViewTracker product={product} />
       <div className="grid lg:grid-cols-2 gap-12">
         <div className="aspect-square relative rounded-2xl overflow-hidden bg-neutral-100">
           <Image
@@ -48,7 +50,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           <div className="space-y-4 pt-4">
             {session?.user ? (
-              <CheckoutButton productId={product.id} />
+              <CheckoutButton
+                productId={product.id}
+                productName={product.name}
+                productPrice={product.priceCents}
+              />
             ) : (
               <div className="space-y-2">
                 <p className="text-sm text-neutral-600">

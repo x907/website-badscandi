@@ -3,17 +3,29 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
+import { trackCheckoutStarted } from "@/lib/analytics";
 
 interface CheckoutButtonProps {
   productId: string;
+  productName?: string;
+  productPrice?: number;
 }
 
-export function CheckoutButton({ productId }: CheckoutButtonProps) {
+export function CheckoutButton({ productId, productName, productPrice }: CheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
 
   async function handleCheckout() {
     try {
       setLoading(true);
+
+      // Track checkout started event
+      if (productName && productPrice) {
+        trackCheckoutStarted({
+          id: productId,
+          name: productName,
+          price: productPrice,
+        });
+      }
 
       const response = await fetch("/api/checkout", {
         method: "POST",

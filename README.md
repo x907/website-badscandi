@@ -10,6 +10,7 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 - **Payments**: Stripe Checkout integration
 - **Database**: Supabase PostgreSQL with Prisma ORM
 - **UI Components**: shadcn/ui with Scandinavian minimalist design
+- **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag (optional)
 - **Auto-Deploy**: Vercel with GitHub integration
 
 ## Tech Stack
@@ -21,6 +22,7 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 - **Database**: Supabase (PostgreSQL)
 - **ORM**: Prisma
 - **Payments**: Stripe
+- **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag
 - **Hosting**: Vercel
 
 ## Getting Started
