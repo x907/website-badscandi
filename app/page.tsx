@@ -3,23 +3,28 @@ import { Button } from "@/components/ui/button";
 import { ProductGrid } from "@/components/product-grid";
 import { getFeaturedProducts } from "@/lib/products";
 import { ArrowRight } from "lucide-react";
+import { getBaseMetadata } from "@/lib/metadata";
+import { OrganizationStructuredData } from "@/components/structured-data";
+
+export const metadata = getBaseMetadata();
 
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts();
 
   return (
     <div>
+      <OrganizationStructuredData />
       <section className="container mx-auto px-6 py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
-              Scandinavian
+              Hand-Dyed
               <br />
-              Simplicity
+              Fiber Art
             </h1>
             <p className="text-xl text-neutral-600 leading-relaxed max-w-lg">
-              Discover timeless furniture and home essentials designed for modern living.
-              Clean lines, natural materials, and exceptional craftsmanship.
+              Discover unique boho wall hangings and Scandinavian minimalist tapestries.
+              Each piece is hand-dyed and handcrafted with natural materials for your modern home.
             </p>
             <div className="flex gap-4">
               <Link href="/shop">
@@ -37,8 +42,8 @@ export default async function HomePage() {
           </div>
           <div className="aspect-square rounded-2xl bg-neutral-100 relative overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80"
-              alt="Scandinavian interior"
+              src="https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=800&q=80"
+              alt="Hand-dyed boho wall hanging tapestry in neutral colors"
               className="object-cover w-full h-full"
             />
           </div>
@@ -50,8 +55,8 @@ export default async function HomePage() {
           <div className="container mx-auto px-6">
             <div className="flex items-end justify-between mb-12">
               <div>
-                <h2 className="text-3xl font-bold mb-2">Featured Products</h2>
-                <p className="text-neutral-600">Handpicked essentials for your space</p>
+                <h2 className="text-3xl font-bold mb-2">Featured Wall Hangings</h2>
+                <p className="text-neutral-600">Hand-dyed fiber art for your walls</p>
               </div>
               <Link href="/shop">
                 <Button variant="ghost" className="gap-2">
@@ -69,21 +74,21 @@ export default async function HomePage() {
       <section className="container mx-auto px-6 py-24">
         <div className="grid md:grid-cols-3 gap-12">
           <div className="space-y-3">
-            <h3 className="text-xl font-semibold">Timeless Design</h3>
+            <h3 className="text-xl font-semibold">Hand-Dyed Artistry</h3>
             <p className="text-neutral-600 leading-relaxed">
-              Every piece is carefully crafted to stand the test of time, both in quality and style.
+              Each wall hanging is uniquely hand-dyed using traditional dip dye techniques. No two pieces are exactly alike.
             </p>
           </div>
           <div className="space-y-3">
-            <h3 className="text-xl font-semibold">Sustainable</h3>
+            <h3 className="text-xl font-semibold">Natural Materials</h3>
             <p className="text-neutral-600 leading-relaxed">
-              We source responsibly and prioritize materials that respect both craft and environment.
+              We use premium cotton, wool, and linen yarns in neutral, earthy tones that complement any boho or minimalist space.
             </p>
           </div>
           <div className="space-y-3">
-            <h3 className="text-xl font-semibold">Made to Last</h3>
+            <h3 className="text-xl font-semibold">Handcrafted with Care</h3>
             <p className="text-neutral-600 leading-relaxed">
-              Built with exceptional craftsmanship, our products are designed for generations.
+              Every fiber art piece is lovingly woven and finished by hand, bringing texture and warmth to your walls.
             </p>
           </div>
         </div>

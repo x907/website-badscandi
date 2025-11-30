@@ -74,16 +74,33 @@ model VerificationToken {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  description String
-  priceCents  Int
-  imageUrl    String
-  stock       Int      @default(0)
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  description     String
+  priceCents      Int
+  imageUrl        String
+  stock           Int      @default(0)
+  featured        Boolean  @default(false)
+
+  // SEO fields
+  metaTitle       String?
+  metaDescription String?
+  altText         String?
+
+  // Product details for fiber art
+  category        String?  // "wall-hanging", "tapestry", "macrame", etc.
+  tags            String?  // Comma-separated: "boho,hand-dyed,neutral"
+  materials       String?  // "cotton yarn", "wool blend", etc.
+  colors          String?  // "neutral,beige,cream"
+  dimensions      String?  // "24x36 inches"
+  room            String?  // "living-room", "bedroom", etc.
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@index([featured])
 }
 
 model Order {
