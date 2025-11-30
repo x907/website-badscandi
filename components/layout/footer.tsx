@@ -8,7 +8,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Bad Scandi</h3>
             <p className="text-sm text-neutral-600 leading-relaxed">
-              Scandinavian minimalist design for modern living.
+              Hand-dyed fiber art and boho wall hangings for your home.
             </p>
           </div>
 
