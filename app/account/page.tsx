@@ -1,14 +1,18 @@
 import { redirect } from "next/navigation";
-import { auth, signOut } from "@/lib/auth";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PasskeyEnroll } from "@/components/passkey-enroll";
+import { PasskeyManager } from "@/components/passkey-manager";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { LogOut, Package, Fingerprint } from "lucide-react";
 
 export default async function AccountPage() {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session?.user?.id) {
     redirect("/auth/signin");
@@ -25,6 +29,14 @@ export default async function AccountPage() {
     }),
   ]);
 
+  async function handleSignOut() {
+    "use server";
+    await auth.api.signOut({
+      headers: await headers(),
+    });
+    redirect("/");
+  }
+
   return (
     <div className="container mx-auto px-6 py-12">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -33,12 +45,7 @@ export default async function AccountPage() {
             <h1 className="text-3xl font-bold">My Account</h1>
             <p className="text-neutral-600 mt-1">{session.user.email}</p>
           </div>
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/" });
-            }}
-          >
+          <form action={handleSignOut}>
             <Button variant="outline" type="submit" className="gap-2">
               <LogOut className="h-4 w-4" />
               Sign Out
@@ -69,25 +76,7 @@ export default async function AccountPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {passkeys.length === 0 ? (
-                <p className="text-sm text-neutral-600">No passkeys registered yet</p>
-              ) : (
-                <ul className="space-y-3">
-                  {passkeys.map((passkey) => (
-                    <li
-                      key={passkey.id}
-                      className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium text-sm">{passkey.name}</p>
-                        <p className="text-xs text-neutral-600">
-                          Last used: {formatDate(passkey.lastUsed)}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <PasskeyManager passkeys={passkeys} />
             </CardContent>
           </Card>
         </div>
