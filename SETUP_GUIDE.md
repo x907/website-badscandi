@@ -124,14 +124,14 @@ STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET=""  # Leave empty for now, add after deployment
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 
-# AWS SES (for Magic Link emails)
-AWS_REGION="us-west-2"
-AWS_ACCESS_KEY_ID=""
-AWS_SECRET_ACCESS_KEY=""
-EMAIL_FROM="noreply@yourdomain.com"
-
-# Resend (Optional - for contact form emails)
-RESEND_API_KEY=""
+# AWS SES - Uses AWS SDK API (NOT SMTP) for Magic Link & Contact Form emails
+# IMPORTANT: These must be IAM Access Keys, NOT SMTP credentials
+# See AWS_SES_SETUP.md for detailed setup instructions
+AWS_REGION="us-east-1"
+AWS_ACCESS_KEY_ID=""              # IAM Access Key ID (starts with AKIA...)
+AWS_SECRET_ACCESS_KEY=""          # IAM Secret Access Key
+EMAIL_FROM="noreply@badscandi.com"         # Verified email for magic links
+CONTACT_EMAIL="hello@badscandi.com"        # Where contact form submissions are sent
 ```
 
 5. Push database schema to Supabase:
@@ -286,12 +286,15 @@ npm run db:push
 
 Before launching:
 
-- [ ] Configure AWS SES with verified email domain
+- [ ] Configure AWS SES with verified email domain (use IAM Access Keys, not SMTP)
+- [ ] Request AWS SES production access (to send to any email address)
+- [ ] Test email functionality with `npm run test:ses your-email@example.com`
 - [ ] Switch Stripe to production mode
 - [ ] Update Stripe webhook with production URL
 - [ ] Update OAuth redirect URIs with production domain
 - [ ] Test full purchase flow
 - [ ] Test passkey enrollment and login
+- [ ] Test contact form email delivery
 - [ ] Set up monitoring (Vercel Analytics)
 - [ ] Configure custom domain
 - [ ] Add real product data
@@ -302,7 +305,7 @@ Before launching:
 1. **Add More Products**: Edit `prisma/seed.ts` or use Prisma Studio
 2. **Customize Design**: Edit Tailwind classes in components
 3. **Add More OAuth Providers**: Uncomment in `lib/auth.ts`
-4. **Add Email Notifications**: Integrate with Resend or SendGrid
+4. **Customize Email Templates**: Edit email templates in `/lib/email.ts` and `/app/api/contact/route.ts`
 5. **Add Product Images**: Use Cloudinary or Vercel Blob
 6. **Analytics**: Add Vercel Analytics or Google Analytics
 7. **SEO**: Add metadata to pages

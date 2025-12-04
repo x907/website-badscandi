@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
-import { Mail, MapPin, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact Us - Custom Orders & Inquiries | Bad Scandi",
@@ -27,19 +27,6 @@ export default function ContactPage() {
             <div>
               <h3 className="font-semibold mb-4 text-lg">Contact Information</h3>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-amber-900 mt-0.5" />
-                  <div>
-                    <p className="font-medium">Email</p>
-                    <a
-                      href="mailto:hello@badscandi.com"
-                      className="text-neutral-600 hover:text-amber-900 transition-colors"
-                    >
-                      hello@badscandi.com
-                    </a>
-                  </div>
-                </div>
-
                 <div className="flex items-start gap-3">
                   <Clock className="h-5 w-5 text-amber-900 mt-0.5" />
                   <div>

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { PasskeyEnroll } from "@/components/passkey-enroll";
 import { PasskeyManager } from "@/components/passkey-manager";
 import { formatPrice, formatDate } from "@/lib/utils";
-import { LogOut, Package, Fingerprint } from "lucide-react";
+import { LogOut, Package, Fingerprint, Star, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 export default async function AccountPage() {
   const session = await auth.api.getSession({
@@ -100,26 +101,75 @@ export default async function AccountPage() {
                 </a>
               </div>
             ) : (
-              <ul className="space-y-4">
-                {orders.map((order) => (
-                  <li
-                    key={order.id}
-                    className="flex items-center justify-between p-4 border border-neutral-100 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-neutral-600">
-                        {formatDate(order.createdAt)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-amber-900">
-                        {formatPrice(order.totalCents)}
-                      </p>
-                      <p className="text-xs text-neutral-600 capitalize">{order.status}</p>
-                    </div>
-                  </li>
-                ))}
+              <ul className="space-y-6">
+                {orders.map((order) => {
+                  const items = JSON.parse(order.items as string) as Array<{
+                    id: string;
+                    name: string;
+                    priceCents: number;
+                    quantity: number;
+                    imageUrl: string;
+                  }>;
+
+                  return (
+                    <li
+                      key={order.id}
+                      className="border border-neutral-200 rounded-lg overflow-hidden"
+                    >
+                      <div className="bg-neutral-50 px-4 py-3 flex items-center justify-between border-b border-neutral-200">
+                        <div>
+                          <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
+                          <p className="text-sm text-neutral-600">
+                            {formatDate(order.createdAt)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-amber-900">
+                            {formatPrice(order.totalCents)}
+                          </p>
+                          <p className="text-xs text-neutral-600 capitalize">{order.status}</p>
+                        </div>
+                      </div>
+
+                      <div className="p-4">
+                        <div className="space-y-3 mb-4">
+                          {items.map((item, index) => (
+                            <div key={index} className="flex gap-3">
+                              <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="w-16 h-16 object-cover rounded border border-neutral-200"
+                              />
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{item.name}</p>
+                                <p className="text-xs text-neutral-600">
+                                  Qty: {item.quantity} • {formatPrice(item.priceCents)}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex gap-2 pt-3 border-t border-neutral-100">
+                          <Link href={`/account/orders/${order.id}`} className="flex-1">
+                            <Button variant="outline" className="w-full gap-2" size="sm">
+                              View Details
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          {order.status === "completed" && (
+                            <Link href="/submit-review" className="flex-1">
+                              <Button className="w-full gap-2" size="sm">
+                                <Star className="h-4 w-4" />
+                                Write Review
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </CardContent>

@@ -103,3 +103,15 @@ export function getShopMetadata(): Metadata {
     },
   };
 }
+
+export function getAboutMetadata(): Metadata {
+  return {
+    title: "About - Handcrafted Fiber Art & Custom Commissions",
+    description: "Learn about Bad Scandi's handcrafted fiber art process. We create unique boho wall hangings using traditional hand-dyeing techniques and natural materials. Custom commissions available.",
+    openGraph: {
+      title: "About Bad Scandi - Handcrafted Fiber Art",
+      description: "Learn about our hand-dyeing process and custom fiber art commissions.",
+      url: `${SITE_URL}/about`,
+    },
+  };
+}

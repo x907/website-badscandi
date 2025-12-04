@@ -7,7 +7,8 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 - **Modern Stack**: Next.js 15 App Router, TypeScript, Tailwind CSS
 - **Native Passkey Auth**: WebAuthn/Passkeys via SimpleWebAuthn (no third-party auth service)
 - **Social Login**: Google, Apple, Facebook, Microsoft OAuth via NextAuth
-- **Payments**: Stripe Checkout integration
+- **Payments**: Stripe Checkout integration with automatic order creation
+- **Email Integration**: AWS SES for magic link authentication & contact form
 - **Database**: Supabase PostgreSQL with Prisma ORM
 - **UI Components**: shadcn/ui with Scandinavian minimalist design
 - **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag (optional)
@@ -22,6 +23,7 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 - **Database**: Supabase (PostgreSQL)
 - **ORM**: Prisma
 - **Payments**: Stripe
+- **Email**: AWS SES (via AWS SDK, not SMTP)
 - **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag
 - **Hosting**: Vercel
 
@@ -30,8 +32,9 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Supabase account
-- Stripe account
+- Supabase account (PostgreSQL database)
+- Stripe account (payment processing)
+- AWS account (for SES email service - uses IAM credentials, not SMTP)
 - OAuth credentials (Google, Apple, etc.)
 
 ### Installation
@@ -55,8 +58,9 @@ cp .env.example .env
 Edit `.env` and fill in your credentials:
 - `DATABASE_URL`: Your Supabase PostgreSQL connection string
 - `NEXTAUTH_SECRET`: Generate with `openssl rand -base64 32`
-- OAuth provider credentials
+- OAuth provider credentials (Google, etc.)
 - Stripe API keys
+- AWS SES credentials (IAM Access Keys - see `AWS_SES_SETUP.md`)
 
 4. Set up the database:
 ```bash
@@ -89,7 +93,8 @@ app/
     ├── auth/[...nextauth]/    # NextAuth endpoints
     ├── passkey/               # Passkey registration/authentication
     ├── checkout/              # Stripe checkout session
-    └── stripe-webhook/        # Payment confirmations
+    ├── webhooks/stripe/       # Payment confirmations
+    └── contact/               # Contact form email handler
 
 components/
 ├── ui/                        # shadcn/ui components
@@ -103,6 +108,7 @@ lib/
 ├── db.ts                      # Prisma client
 ├── auth.ts                    # NextAuth configuration
 ├── webauthn.ts                # SimpleWebAuthn helpers
+├── email.ts                   # AWS SES email helpers
 ├── products.ts                # Product queries
 ├── stripe.ts                  # Stripe client
 └── utils.ts                   # Utility functions
@@ -186,6 +192,13 @@ npm run db:studio
 
 # Seed database
 npx tsx prisma/seed.ts
+```
+
+### Email Testing
+
+```bash
+# Test AWS SES credentials
+npm run test:ses your-email@example.com
 ```
 
 ### Stripe Testing

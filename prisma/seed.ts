@@ -131,6 +131,69 @@ async function main() {
     console.log(`Created/Updated product: ${product.name}`);
   }
 
+  // Seed reviews
+  const reviews = [
+    {
+      id: "review_1",
+      customerName: "Sarah M.",
+      rating: 5,
+      comment: "Absolutely love this wall hanging! The hand-dyed colors are even more beautiful in person. It adds such a cozy, bohemian feel to my living room. The quality is outstanding and it arrived perfectly packaged.",
+      imageUrl: "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?w=400&q=80",
+      productName: "Neutral Boho Wall Hanging Tapestry",
+      featured: true,
+      verified: true,
+    },
+    {
+      id: "review_2",
+      customerName: "Jessica T.",
+      rating: 5,
+      comment: "I've been searching for the perfect piece for my bedroom and this exceeded all expectations. The craftsmanship is incredible and you can really tell each piece is made with care. Highly recommend!",
+      imageUrl: null,
+      productName: "Woven Wall Hanging - Bedroom Wall Decor",
+      featured: true,
+      verified: true,
+    },
+    {
+      id: "review_3",
+      customerName: "Emily R.",
+      rating: 5,
+      comment: "This tapestry is stunning! The gradient colors are so warm and inviting. It was the perfect housewarming gift for my sister. She absolutely loves it and gets compliments from everyone who visits.",
+      imageUrl: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&q=80",
+      productName: "Hand-Dyed Yarn Tapestry",
+      featured: true,
+      verified: true,
+    },
+    {
+      id: "review_4",
+      customerName: "Amanda K.",
+      rating: 5,
+      comment: "The minimalist design is exactly what I was looking for. It fits perfectly in my Scandinavian-style home office. The neutral tones are calming and the quality is superb. Will definitely be ordering more!",
+      imageUrl: null,
+      productName: "Scandinavian Minimalist Fiber Art",
+      featured: true,
+      verified: true,
+    },
+    {
+      id: "review_5",
+      customerName: "Rachel P.",
+      rating: 4,
+      comment: "Beautiful macrame work! The size is perfect for my living room wall. Only giving 4 stars because shipping took a bit longer than expected, but the quality makes up for it. The piece itself is gorgeous!",
+      imageUrl: "https://images.unsplash.com/photo-1600684659818-0099a1b51420?w=400&q=80",
+      productName: "Large Macrame Wall Hanging",
+      featured: true,
+      verified: true,
+    },
+  ];
+
+  for (const review of reviews) {
+    await prisma.review.upsert({
+      where: { id: review.id },
+      update: review,
+      create: review,
+    });
+    console.log(`Created/Updated review from: ${review.customerName}`);
+  }
+
   console.log("Seeding completed!");
 }
 

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import Image from "next/image";
+import Link from "next/link";
 import { getProductBySlug } from "@/lib/products";
 import { formatPrice } from "@/lib/utils";
 import { auth } from "@/lib/auth";
@@ -33,7 +35,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   const altText = product.altText || product.name;
 
   return (
@@ -60,18 +64,37 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <div className="space-y-8">
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold">{product.name}</h1>
-            <p className="text-3xl font-semibold text-amber-900">
-              {formatPrice(product.priceCents)}
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-3xl font-semibold text-amber-900">
+                {formatPrice(product.priceCents)}
+              </p>
+              {product.stock === 0 && (
+                <span className="px-3 py-1 text-sm font-medium bg-neutral-100 text-neutral-600 rounded-full">
+                  SOLD OUT
+                </span>
+              )}
+            </div>
+            <h1 className="text-lg font-normal text-neutral-600">{product.name}</h1>
           </div>
 
-          <div className="prose prose-neutral">
-            <p className="text-neutral-600 leading-relaxed">{product.description}</p>
+          <div className="prose prose-neutral max-w-none">
+            <p className="text-neutral-600 leading-relaxed whitespace-pre-line">{product.description}</p>
           </div>
 
           <div className="space-y-4 pt-4">
-            {session?.user ? (
+            {product.stock === 0 ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-center gap-2 h-11 px-6 py-2 bg-neutral-100 text-neutral-500 rounded-xl">
+                  <span className="font-medium">This piece has been sold</span>
+                </div>
+                <p className="text-sm text-neutral-600 text-center">
+                  Interested in a custom commission?{" "}
+                  <Link href="/contact" className="text-amber-900 hover:underline font-medium">
+                    Visit our contact page
+                  </Link>
+                </p>
+              </div>
+            ) : session?.user ? (
               <CheckoutButton
                 productId={product.id}
                 productName={product.name}
@@ -119,10 +142,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <dd className="font-medium capitalize">{product.category.replace('-', ' ')}</dd>
                 </div>
               )}
-              <div className="flex justify-between">
-                <dt className="text-neutral-600">Shipping</dt>
-                <dd className="font-medium">Free Worldwide</dd>
-              </div>
             </dl>
           </div>
         </div>

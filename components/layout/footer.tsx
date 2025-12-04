@@ -62,6 +62,27 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-neutral-100">
+          <div className="mb-8">
+            <h4 className="font-semibold mb-4 text-sm">Shop Policies</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm text-neutral-600">
+              <div>
+                <h5 className="font-medium text-neutral-900 mb-2">Shipping</h5>
+                <p className="text-xs">See item details for estimated arrival times.</p>
+              </div>
+              <div>
+                <h5 className="font-medium text-neutral-900 mb-2">Customs & Import Taxes</h5>
+                <p className="text-xs">Buyers are responsible for any customs and import taxes. We're not responsible for delays due to customs.</p>
+              </div>
+              <div>
+                <h5 className="font-medium text-neutral-900 mb-2">Returns & Exchanges</h5>
+                <p className="text-xs">See item details for return and exchange eligibility.</p>
+              </div>
+              <div>
+                <h5 className="font-medium text-neutral-900 mb-2">Cancellations</h5>
+                <p className="text-xs">Accepted within 24 hours of purchase.</p>
+              </div>
+            </div>
+          </div>
           <p className="text-sm text-neutral-600 text-center">
             © {new Date().getFullYear()} Bad Scandi. All rights reserved.
           </p>

@@ -10,9 +10,18 @@ interface ProductCardProps {
   description: string;
   priceCents: number;
   imageUrl: string;
+  stock: number;
 }
 
-export function ProductCard({ slug, name, description, priceCents, imageUrl }: ProductCardProps) {
+export function ProductCard({ slug, name, description, priceCents, imageUrl, stock }: ProductCardProps) {
+  // Remove duplicate name from description if it appears at the start
+  const cleanDescription = description.startsWith(name)
+    ? description.slice(name.length).trim()
+    : description;
+
+  // Only show description if it has meaningful content after cleaning
+  const showDescription = cleanDescription.length > 0 && cleanDescription !== description;
+
   return (
     <Link href={`/product/${slug}`}>
       <Card className="group overflow-hidden hover:shadow-md transition-all duration-300">
@@ -23,11 +32,25 @@ export function ProductCard({ slug, name, description, priceCents, imageUrl }: P
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
+          {stock === 0 && (
+            <div className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-white/90 backdrop-blur-sm text-neutral-700 rounded-full shadow-md">
+              SOLD
+            </div>
+          )}
         </div>
         <CardContent className="p-6">
-          <h3 className="font-medium text-lg mb-2">{name}</h3>
-          <p className="text-sm text-neutral-600 mb-4 line-clamp-2">{description}</p>
-          <p className="text-lg font-semibold text-amber-900">{formatPrice(priceCents)}</p>
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-lg font-semibold text-amber-900">{formatPrice(priceCents)}</p>
+            {stock === 0 && (
+              <span className="px-2 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-600 rounded-full">
+                SOLD
+              </span>
+            )}
+          </div>
+          <h3 className="font-normal text-sm mb-2 text-neutral-600">{name}</h3>
+          {showDescription && (
+            <p className="text-sm text-neutral-500 line-clamp-2">{cleanDescription}</p>
+          )}
         </CardContent>
       </Card>
     </Link>

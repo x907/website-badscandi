@@ -1,0 +1,89 @@
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { ReviewSubmissionForm } from "@/components/review-submission-form";
+import { getBaseMetadata } from "@/lib/metadata";
+import { auth } from "@/lib/auth";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
+export const metadata = getBaseMetadata({
+  title: "Submit a Review",
+  description: "Share your experience with Bad Scandi's hand-dyed fiber art wall hangings",
+});
+
+interface SubmitReviewPageProps {
+  searchParams: Promise<{
+    product?: string;
+  }>;
+}
+
+export default async function SubmitReviewPage({ searchParams }: SubmitReviewPageProps) {
+  const { product } = await searchParams;
+
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <div className="container mx-auto px-6 py-24">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold mb-4">Submit a Review</h1>
+              <p className="text-neutral-600 text-lg">
+                Only verified customers can submit reviews
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 md:p-12 text-center">
+              <p className="text-neutral-600 mb-6">
+                You must be signed in and have purchased a product to submit a review.
+                This helps us ensure all reviews are from real customers.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Link href="/auth/signin">
+                  <Button size="lg">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/shop">
+                  <Button size="lg" variant="outline">
+                    Browse Products
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      <div className="container mx-auto px-6 py-24">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold mb-4">Share Your Experience</h1>
+            <p className="text-neutral-600 text-lg">
+              We'd love to hear about your Bad Scandi wall hanging!
+              Your review helps other customers and supports our small business.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 md:p-12">
+            <ReviewSubmissionForm preSelectedProductId={product} />
+          </div>
+
+          <div className="mt-8 text-center text-sm text-neutral-500">
+            <p>
+              Reviews are moderated and will appear on the site after approval.
+              Thank you for your support!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

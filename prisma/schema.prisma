@@ -13,6 +13,7 @@ model User {
   name          String?
   emailVerified Boolean   @default(false)
   image         String?
+  isAdmin       Boolean   @default(false)
   passkeys      Passkey[]
   accounts      Account[]
   sessions      Session[]
@@ -116,16 +117,38 @@ model Product {
 }
 
 model Order {
-  id         String   @id @default(cuid())
-  userId     String
-  stripeId   String   @unique
-  totalCents Int
-  status     String   @default("pending")
-  user       User     @relation(fields: [userId], references: [id])
-  items      Json
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  stripeId        String   @unique
+  totalCents      Int
+  shippingCents   Int      @default(0)
+  status          String   @default("pending")
+  customerEmail   String?
+  shippingAddress Json?    // Stripe shipping address object
+  user            User     @relation(fields: [userId], references: [id])
+  items           Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([userId])
   @@index([stripeId])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  customerName String
+  email       String?  // Optional - for follow-up and review request emails
+  rating      Int      // 1-5 stars
+  comment     String
+  imageUrls   String[] // Support multiple review photos
+  productName String?  // What they purchased (optional)
+  featured    Boolean  @default(false) // Show on homepage
+  approved    Boolean  @default(false) // Admin approval required
+  verified    Boolean  @default(false) // Verified purchase
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([featured])
+  @@index([approved])
+  @@index([rating])
 }

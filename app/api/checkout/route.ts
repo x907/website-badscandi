@@ -40,12 +40,38 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
+      shipping_address_collection: {
+        allowed_countries: ["US", "CA"], // US and Canada shipping
+      },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: 0, // Free shipping
+              currency: "usd",
+            },
+            display_name: "Free Standard Shipping",
+            delivery_estimate: {
+              minimum: {
+                unit: "business_day",
+                value: 5,
+              },
+              maximum: {
+                unit: "business_day",
+                value: 7,
+              },
+            },
+          },
+        },
+      ],
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/account?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/product/${product.slug}?canceled=true`,
       customer_email: session.user.email,
       metadata: {
         userId: session.user.id,
         productId: product.id,
+        productName: product.name,
       },
     });
 

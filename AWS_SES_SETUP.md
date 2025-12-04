@@ -1,6 +1,22 @@
 # AWS SES Setup Guide
 
-This guide will help you set up AWS SES (Simple Email Service) for sending magic link authentication emails.
+This guide will help you set up AWS SES (Simple Email Service) for sending transactional emails via the **AWS SDK** (not SMTP).
+
+## ⚠️ IMPORTANT: AWS SDK vs SMTP
+
+**This application uses the AWS SES API via the AWS SDK, NOT SMTP.**
+
+- **We use:** IAM Access Keys with `@aws-sdk/client-ses` (HTTPS API on port 443)
+- **We do NOT use:** SMTP credentials or email server ports (25/587/465)
+- **Why this matters:** SMTP credentials from AWS SES Console will NOT work with this application
+
+If you have SMTP credentials, you need to create IAM Access Keys instead (see Step 3 below).
+
+## What AWS SES is Used For
+
+This application uses AWS SES to send:
+1. **Magic link authentication emails** (passwordless login)
+2. **Contact form submissions** (forwarded to your email)
 
 ## Prerequisites
 
@@ -70,33 +86,54 @@ To send emails to any address:
 
 ## Step 4: Configure Your Application
 
-Add the credentials to your `.env` file:
+Add the IAM credentials (NOT SMTP credentials) to your `.env` file:
 
 ```env
-# AWS SES (for Magic Link emails)
+# AWS SES - Uses AWS SDK API (NOT SMTP)
 AWS_REGION="us-east-1"                     # The region where you set up SES
-AWS_ACCESS_KEY_ID="AKIAIOSFODNN7EXAMPLE"   # Your Access Key ID from Step 3
-AWS_SECRET_ACCESS_KEY="wJalrXUtnFEMI..."   # Your Secret Access Key from Step 3
-EMAIL_FROM="noreply@badscandi.com"         # Your verified email from Step 2
+AWS_ACCESS_KEY_ID="AKIAIOSFODNN7EXAMPLE"   # Your IAM Access Key ID from Step 3 (NOT SMTP username)
+AWS_SECRET_ACCESS_KEY="wJalrXUtnFEMI..."   # Your IAM Secret Access Key from Step 3 (NOT SMTP password)
+EMAIL_FROM="noreply@badscandi.com"         # Your verified email from Step 2 (sender for magic links)
+CONTACT_EMAIL="hello@badscandi.com"        # Where contact form submissions are sent
 ```
+
+**Remember:** These are IAM Access Keys, NOT SMTP credentials. SMTP credentials will not work.
 
 ## Step 5: Test the Setup
 
-### Local Testing
+### Test AWS SES Connection
 
-1. Make sure both sender AND recipient emails are verified in SES
+First, test that your AWS credentials work:
+
+```bash
+npm run test:ses your-email@example.com
+```
+
+This will send a test email to verify your credentials are configured correctly. In Sandbox mode, make sure the recipient email is verified in AWS SES Console.
+
+### Test Magic Link Authentication
+
+1. Make sure both sender AND recipient emails are verified in SES (Sandbox mode)
 2. Start your dev server: `npm run dev`
 3. Go to http://localhost:3000/auth/signin
 4. Enter a verified email address
 5. Click "Continue with Email"
 6. Check your email for the magic link
 
+### Test Contact Form
+
+1. Go to http://localhost:3000/contact (or your contact page)
+2. Fill out the contact form
+3. Submit the form
+4. Check the email address specified in `CONTACT_EMAIL` for the submission
+
 ### Production Testing
 
 1. Complete "Request production access" (Step 2.3)
 2. Verify your domain in SES (optional but recommended)
 3. Deploy your application
-4. Test with any email address
+4. Update environment variables in your hosting platform
+5. Test with any email address
 
 ## Costs
 
@@ -111,6 +148,12 @@ For a typical e-commerce site:
 
 ## Troubleshooting
 
+### "SignatureDoesNotMatch" or Authentication Errors
+- **Most common issue:** You're using SMTP credentials instead of IAM Access Keys
+- Solution: Generate IAM Access Keys following Step 3 above
+- SMTP credentials (username/password format) will NOT work with this application
+- You need IAM credentials (starts with `AKIA...`)
+
 ### "Email address is not verified"
 - Make sure you verified the sender email in SES Console
 - In Sandbox mode, also verify the recipient email
@@ -118,15 +161,18 @@ For a typical e-commerce site:
 ### "User not authorized to perform: ses:SendEmail"
 - Check that your IAM user has `AmazonSESFullAccess` policy
 - Verify the Access Key ID and Secret Access Key are correct
+- Make sure you're using IAM credentials, not SMTP credentials
 
 ### "MessageRejected: Email address is not verified"
 - You're in Sandbox mode
 - Either verify the recipient's email OR request production access
 
-### Magic link not arriving
+### Magic link or contact form emails not arriving
 - Check spam/junk folder
 - Verify AWS region matches in `.env` and SES Console
+- Test with `npm run test:ses your-email@example.com` first
 - Check CloudWatch logs in AWS Console for errors
+- In Sandbox mode, verify BOTH sender and recipient emails
 
 ## Security Best Practices
 

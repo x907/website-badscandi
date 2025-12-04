@@ -7,6 +7,7 @@ interface Product {
   description: string;
   priceCents: number;
   imageUrl: string;
+  stock: number;
 }
 
 interface ProductGridProps {
