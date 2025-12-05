@@ -4,14 +4,17 @@ const SITE_NAME = "Bad Scandi";
 const SITE_DESCRIPTION = "Hand-dyed fiber art, boho wall hangings, and Scandinavian minimalist tapestries. Unique textile wall art for modern homes.";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
 
-export function getBaseMetadata(): Metadata {
+export function getBaseMetadata(overrides?: {
+  title?: string;
+  description?: string;
+}): Metadata {
   return {
     metadataBase: new URL(SITE_URL),
-    title: {
+    title: overrides?.title || {
       default: "Bad Scandi - Hand-Dyed Fiber Art & Boho Wall Hangings",
       template: "%s | Bad Scandi",
     },
-    description: SITE_DESCRIPTION,
+    description: overrides?.description || SITE_DESCRIPTION,
     keywords: [
       "hand dyed fiber art",
       "boho wall hanging",
