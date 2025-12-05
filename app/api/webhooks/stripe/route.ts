@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           shippingAddress: fullSession.shipping_details
             ? {
                 name: fullSession.shipping_details.name,
-                address: fullSession.shipping_details.address,
+                address: fullSession.shipping_details.address as any,
               }
             : undefined,
           items: JSON.stringify(items),
