@@ -18,6 +18,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
     productId: preSelectedProductId || "",
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
@@ -40,6 +41,22 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
         });
     }
   }, [preSelectedProductId]);
+
+  // Create and cleanup object URLs for selected files
+  useEffect(() => {
+    // Revoke old URLs
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+
+    // Create new URLs
+    const newUrls = selectedFiles.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(newUrls);
+
+    // Cleanup on unmount
+    return () => {
+      newUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFiles]); // previewUrls intentionally excluded to prevent infinite loop
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -134,8 +151,10 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
         rating: 5,
         comment: "",
         productName: "",
+        productId: preSelectedProductId || "",
       });
       setSelectedFiles([]);
+      setPreviewUrls([]);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to submit review. Please try again.";
       setSubmitStatus({
@@ -292,13 +311,13 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           {/* Selected Files Preview */}
           {selectedFiles.length > 0 && (
             <div className="grid grid-cols-3 gap-3">
-              {selectedFiles.map((file, index) => (
+              {previewUrls.map((url, index) => (
                 <div
                   key={index}
                   className="relative aspect-square rounded-lg overflow-hidden border border-neutral-200"
                 >
                   <img
-                    src={URL.createObjectURL(file)}
+                    src={url}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
