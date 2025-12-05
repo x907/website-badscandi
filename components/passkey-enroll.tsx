@@ -50,10 +50,10 @@ export function PasskeyEnroll() {
 
       // Step 2: Force cross-platform authenticator (QR code/phone only)
       const publicKeyOptions: PublicKeyCredentialCreationOptions = {
-        challenge: base64UrlToUint8Array(options.challenge),
+        challenge: base64UrlToUint8Array(options.challenge) as BufferSource,
         rp: options.rp,
         user: {
-          id: base64UrlToUint8Array(options.user.id),
+          id: base64UrlToUint8Array(options.user.id) as BufferSource,
           name: options.user.name,
           displayName: options.user.displayName,
         },
