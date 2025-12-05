@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "./ui/button";
 import { Star, Upload, X } from "lucide-react";
 
@@ -18,12 +18,23 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
     productId: preSelectedProductId || "",
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
+
+  // Create sanitized preview data using useMemo
+  const previewData = useMemo(() => {
+    // Create blob URLs for each file
+    const urls = selectedFiles.map((file) => URL.createObjectURL(file));
+
+    // Return array of sanitized preview objects
+    return urls.map((url) => ({
+      // Only return blob URLs, never arbitrary strings
+      url: url.startsWith('blob:') ? url : '/placeholder-image.jpg',
+    }));
+  }, [selectedFiles]);
 
   // Fetch product details if pre-selected
   useEffect(() => {
@@ -42,21 +53,17 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
     }
   }, [preSelectedProductId]);
 
-  // Create and cleanup object URLs for selected files
+  // Cleanup blob URLs on unmount or when files change
   useEffect(() => {
-    // Revoke old URLs
-    previewUrls.forEach((url) => URL.revokeObjectURL(url));
-
-    // Create new URLs
-    const newUrls = selectedFiles.map((file) => URL.createObjectURL(file));
-    setPreviewUrls(newUrls);
-
-    // Cleanup on unmount
+    const urls = previewData.map((preview) => preview.url);
     return () => {
-      newUrls.forEach((url) => URL.revokeObjectURL(url));
+      urls.forEach((url) => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFiles]); // previewUrls intentionally excluded to prevent infinite loop
+  }, [previewData]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -97,16 +104,6 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
 
   const removeFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Validate that URL is a safe blob URL
-  const safeBlobUrl = (url: string): string => {
-    // Only allow blob URLs which are safe references to in-memory blobs
-    if (url.startsWith('blob:')) {
-      return url;
-    }
-    // Fallback to placeholder for any non-blob URLs
-    return '/placeholder-image.jpg';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -321,13 +318,13 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           {/* Selected Files Preview */}
           {selectedFiles.length > 0 && (
             <div className="grid grid-cols-3 gap-3">
-              {previewUrls.map((url, index) => (
+              {previewData.map((preview, index) => (
                 <div
                   key={index}
                   className="relative aspect-square rounded-lg overflow-hidden border border-neutral-200"
                 >
                   <img
-                    src={safeBlobUrl(url)}
+                    src={preview.url}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
