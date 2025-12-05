@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
                 name: fullSession.shipping_details.name,
                 address: fullSession.shipping_details.address,
               }
-            : null,
+            : undefined,
           items: JSON.stringify(items),
         },
       });
