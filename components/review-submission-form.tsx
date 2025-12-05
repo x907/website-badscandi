@@ -8,6 +8,21 @@ interface ReviewSubmissionFormProps {
   preSelectedProductId?: string;
 }
 
+// Sanitization barrier for CodeQL: validates that URLs are safe blob: protocol
+function getSafeImageUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    // Only allow blob: protocol URLs which are browser-generated and safe
+    if (parsed.protocol === 'blob:') {
+      return url;
+    }
+  } catch {
+    // Invalid URL format
+  }
+  // Fallback to placeholder for any non-blob URLs
+  return '/placeholder-image.jpg';
+}
+
 export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionFormProps) {
   const [formData, setFormData] = useState({
     customerName: "",
@@ -323,7 +338,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
                   className="relative aspect-square rounded-lg overflow-hidden border border-neutral-200"
                 >
                   <img
-                    src={preview.url}
+                    src={getSafeImageUrl(preview.url)}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
