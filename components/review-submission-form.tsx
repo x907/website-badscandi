@@ -161,7 +161,6 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
         productId: preSelectedProductId || "",
       });
       setSelectedFiles([]);
-      setPreviewUrls([]);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to submit review. Please try again.";
       setSubmitStatus({
