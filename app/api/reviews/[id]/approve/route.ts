@@ -4,11 +4,12 @@ import { prisma } from "@/lib/prisma";
 // PATCH - Approve a review
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const review = await prisma.review.update({
-      where: { id: params.id },
+      where: { id },
       data: { approved: true },
     });
 
