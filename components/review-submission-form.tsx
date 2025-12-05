@@ -99,6 +99,16 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Validate that URL is a safe blob URL
+  const safeBlobUrl = (url: string): string => {
+    // Only allow blob URLs which are safe references to in-memory blobs
+    if (url.startsWith('blob:')) {
+      return url;
+    }
+    // Fallback to placeholder for any non-blob URLs
+    return '/placeholder-image.jpg';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -317,7 +327,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
                   className="relative aspect-square rounded-lg overflow-hidden border border-neutral-200"
                 >
                   <img
-                    src={url}
+                    src={safeBlobUrl(url)}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
