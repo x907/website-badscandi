@@ -18,22 +18,42 @@ type EtsyListing = {
 
 function filterLargeImages(images: string[]): string[] {
   return images.filter((url) => {
-    // Keep only large images (il_794xN pattern)
-    if (!url.includes("il_794xN")) return false;
+    try {
+      // Parse URL to validate it
+      const parsedUrl = new URL(url);
 
-    // Skip tracking pixels and junk images
-    if (
-      url.includes("facebook.com") ||
-      url.includes("bing.com") ||
-      url.includes("ispot.tv") ||
-      url.includes("/iap/") ||
-      url.includes("/iusa/") ||
-      url.includes("/isla/")
-    ) {
+      // Keep only large images (il_794xN pattern)
+      if (!url.includes("il_794xN")) return false;
+
+      // Allowed hosts for Etsy images
+      const allowedHosts = ["i.etsystatic.com", "v5.airtableusercontent.com"];
+
+      // Check if host is in allowed list
+      const isAllowedHost = allowedHosts.some(host => parsedUrl.hostname.endsWith(host));
+      if (!isAllowedHost) return false;
+
+      // Skip tracking pixels and junk images by checking full hostname and path
+      const blockedPatterns = [
+        "facebook.com",
+        "bing.com",
+        "ispot.tv"
+      ];
+
+      const blockedPaths = ["/iap/", "/iusa/", "/isla/"];
+
+      if (blockedPatterns.some(pattern => parsedUrl.hostname.includes(pattern))) {
+        return false;
+      }
+
+      if (blockedPaths.some(path => parsedUrl.pathname.includes(path))) {
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      // Invalid URL, skip it
       return false;
     }
-
-    return true;
   });
 }
 

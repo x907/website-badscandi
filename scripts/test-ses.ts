@@ -11,8 +11,8 @@ async function testSESConnection() {
 
   console.log("Checking environment variables:");
   console.log(`✓ AWS_REGION: ${awsRegion ? awsRegion : "❌ NOT SET"}`);
-  console.log(`✓ AWS_ACCESS_KEY_ID: ${awsAccessKeyId ? awsAccessKeyId.substring(0, 8) + "..." : "❌ NOT SET"}`);
-  console.log(`✓ AWS_SECRET_ACCESS_KEY: ${awsSecretAccessKey ? "[HIDDEN] (length: " + awsSecretAccessKey.length + ")" : "❌ NOT SET"}`);
+  console.log(`✓ AWS_ACCESS_KEY_ID: ${awsAccessKeyId ? "[SET]" : "❌ NOT SET"}`);
+  console.log(`✓ AWS_SECRET_ACCESS_KEY: ${awsSecretAccessKey ? "[SET]" : "❌ NOT SET"}`);
   console.log(`✓ EMAIL_FROM: ${emailFrom ? emailFrom : "❌ NOT SET"}\n`);
 
   if (!awsRegion || !awsAccessKeyId || !awsSecretAccessKey || !emailFrom) {

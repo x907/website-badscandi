@@ -301,6 +301,9 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
                     src={URL.createObjectURL(file)}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/placeholder-image.jpg";
+                    }}
                   />
                   <button
                     type="button"
