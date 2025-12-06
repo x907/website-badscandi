@@ -37,6 +37,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "badscandi-cart";
+const CART_CLEARED_KEY = "badscandi-cart-cleared";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -67,6 +68,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Sync with database when user logs in
   useEffect(() => {
     if (session?.user?.id && !isLoading) {
+      // Check if cart was recently cleared (e.g., after checkout)
+      const cartCleared = localStorage.getItem(CART_CLEARED_KEY);
+      if (cartCleared) {
+        // Don't sync from server - cart was intentionally cleared
+        // Clear the flag after a short delay to allow server cart to be deleted
+        setTimeout(() => {
+          localStorage.removeItem(CART_CLEARED_KEY);
+        }, 5000);
+        return;
+      }
       syncCartWithDatabase();
     }
   }, [session?.user?.id, isLoading]);
@@ -182,6 +193,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([]);
+    localStorage.removeItem(CART_STORAGE_KEY);
+    // Set a flag to prevent syncing from server (cart was intentionally cleared)
+    localStorage.setItem(CART_CLEARED_KEY, Date.now().toString());
     saveToServer([]);
   }, [saveToServer]);
 
