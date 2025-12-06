@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { getProductBySlug } from "@/lib/products";
 import { formatPrice } from "@/lib/utils";
 import { AddToCartButton } from "@/components/add-to-cart-button";
@@ -48,6 +49,32 @@ export default async function ProductPage({ params }: ProductPageProps) {
           { name: product.name, url: `${siteUrl}/product/${product.slug}` },
         ]}
       />
+
+      {/* Visible Breadcrumb Navigation */}
+      <nav aria-label="Breadcrumb" className="mb-6">
+        <ol className="flex items-center gap-1 text-sm text-neutral-600">
+          <li>
+            <Link href="/" className="hover:text-neutral-900 transition-colors">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">
+            <ChevronRight className="h-4 w-4" />
+          </li>
+          <li>
+            <Link href="/shop" className="hover:text-neutral-900 transition-colors">
+              Shop
+            </Link>
+          </li>
+          <li aria-hidden="true">
+            <ChevronRight className="h-4 w-4" />
+          </li>
+          <li aria-current="page" className="text-neutral-900 font-medium truncate max-w-[200px]">
+            {product.name}
+          </li>
+        </ol>
+      </nav>
+
       <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
         <div className="aspect-square relative rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-100">
           <Image

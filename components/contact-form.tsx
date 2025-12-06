@@ -5,11 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [subject, setSubject] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -21,7 +29,7 @@ export function ContactForm() {
     const data = {
       name: formData.get("name"),
       email: formData.get("email"),
-      subject: formData.get("subject"),
+      subject: subject,
       message: formData.get("message"),
     };
 
@@ -98,20 +106,19 @@ export function ContactForm() {
 
             <div className="space-y-2">
               <Label htmlFor="subject">Subject *</Label>
-              <select
-                id="subject"
-                name="subject"
-                required
-                className="flex h-11 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2"
-              >
-                <option value="">Select a subject...</option>
-                <option value="general">General Inquiry</option>
-                <option value="custom-order">Custom Order Request</option>
-                <option value="wholesale">Wholesale Inquiry</option>
-                <option value="existing-order">Question About Existing Order</option>
-                <option value="shipping">Shipping Question</option>
-                <option value="other">Other</option>
-              </select>
+              <Select value={subject} onValueChange={setSubject} required>
+                <SelectTrigger id="subject">
+                  <SelectValue placeholder="Select a subject..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General Inquiry</SelectItem>
+                  <SelectItem value="custom-order">Custom Order Request</SelectItem>
+                  <SelectItem value="wholesale">Wholesale Inquiry</SelectItem>
+                  <SelectItem value="existing-order">Question About Existing Order</SelectItem>
+                  <SelectItem value="shipping">Shipping Question</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
