@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
+import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
 
 interface CartItemInput {
   productId: string;
@@ -10,6 +11,10 @@ interface CartItemInput {
 }
 
 export async function POST(request: Request) {
+  // Rate limiting
+  const rateLimitResponse = checkRateLimit(request, "checkout", rateLimits.checkout);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const session = await auth.api.getSession({
       headers: await headers(),

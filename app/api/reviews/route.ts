@@ -3,8 +3,13 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { uploadToS3 } from "@/lib/s3";
 import { auth } from "@/lib/auth";
+import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  // Rate limiting - 3 review submissions per hour
+  const rateLimitResponse = checkRateLimit(request, "review-submit", rateLimits.reviewSubmit);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Check if user is authenticated
     const session = await auth.api.getSession({

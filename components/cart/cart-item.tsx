@@ -43,18 +43,19 @@ export function CartItem({ item }: CartItemProps) {
           {formatPrice(item.priceCents)}
         </p>
 
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-2" role="group" aria-label={`Quantity controls for ${item.name}`}>
           <Button
             variant="outline"
             size="icon"
             className="h-10 w-10"
             onClick={() => updateQuantity(item.productId, item.quantity - 1)}
             disabled={item.quantity <= 1}
+            aria-label="Decrease quantity"
           >
-            <Minus className="w-4 h-4" />
+            <Minus className="w-4 h-4" aria-hidden="true" />
           </Button>
 
-          <span className="text-sm w-8 text-center">{item.quantity}</span>
+          <span className="text-sm w-8 text-center" aria-label={`Quantity: ${item.quantity}`}>{item.quantity}</span>
 
           <Button
             variant="outline"
@@ -62,8 +63,9 @@ export function CartItem({ item }: CartItemProps) {
             className="h-10 w-10"
             onClick={() => updateQuantity(item.productId, item.quantity + 1)}
             disabled={item.quantity >= item.stock}
+            aria-label="Increase quantity"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
           </Button>
 
           {item.quantity >= item.stock && (

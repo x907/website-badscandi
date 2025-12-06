@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
 
 // Valid event types for the drip system
 const EVENT_TYPES = [
@@ -40,6 +41,10 @@ const eventSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // Rate limiting - 60 events per minute
+  const rateLimitResponse = checkRateLimit(request, "events", rateLimits.events);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Get current user session if logged in
     const session = await auth.api.getSession({

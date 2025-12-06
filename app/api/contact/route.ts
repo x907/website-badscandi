@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
 
 const sesClient = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -10,6 +11,10 @@ const sesClient = new SESClient({
 });
 
 export async function POST(request: Request) {
+  // Rate limiting
+  const rateLimitResponse = checkRateLimit(request, "contact", rateLimits.contact);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const { name, email, subject, message } = body;

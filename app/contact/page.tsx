@@ -1,11 +1,8 @@
-import { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { Clock } from "lucide-react";
+import { getContactMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Contact Us - Custom Orders & Inquiries | Bad Scandi",
-  description: "Get in touch about custom fiber art orders, wholesale inquiries, or questions about our hand-dyed wall hangings. We'd love to hear from you!",
-};
+export const metadata = getContactMetadata();
 
 export default function ContactPage() {
   return (

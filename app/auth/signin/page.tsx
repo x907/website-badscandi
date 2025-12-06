@@ -132,7 +132,7 @@ export default function SignInPage() {
               <>
                 <div className="text-center py-4">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mail className="h-8 w-8 text-green-600" />
+                    <Mail className="h-8 w-8 text-green-600" aria-hidden="true" />
                   </div>
                   <p className="font-medium mb-2">Check your email!</p>
                   <p className="text-neutral-600 text-sm mb-4">
@@ -163,10 +163,10 @@ export default function SignInPage() {
                   onClick={handlePasskeySignIn}
                   disabled={loading !== null}
                 >
-                  <Fingerprint className="h-5 w-5 mr-2" />
+                  <Fingerprint className="h-5 w-5 mr-2" aria-hidden="true" />
                   {loading === "passkey" ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
                       Authenticating...
                     </>
                   ) : (
@@ -188,7 +188,9 @@ export default function SignInPage() {
 
                 {/* Email Sign-In */}
                 <form onSubmit={handleEmailSubmit} className="space-y-3">
+                  <label htmlFor="signin-email" className="sr-only">Email address</label>
                   <Input
+                    id="signin-email"
                     type="email"
                     placeholder="you@example.com"
                     value={email}
@@ -203,10 +205,10 @@ export default function SignInPage() {
                     className="w-full"
                     disabled={loading !== null}
                   >
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="h-4 w-4 mr-2" aria-hidden="true" />
                     {loading === "email" ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
                         Sending...
                       </>
                     ) : (
@@ -231,7 +233,7 @@ export default function SignInPage() {
                   onClick={() => handleSocialSignIn("google")}
                   disabled={loading !== null}
                 >
-                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       fill="currentColor"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
