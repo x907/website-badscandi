@@ -4,8 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import { ShoppingBag, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
+import { useSession } from "@/lib/auth-client";
 import { trackAddToCart } from "@/lib/analytics";
 import { events } from "@/lib/event-tracker";
+import Link from "next/link";
 
 interface AddToCartButtonProps {
   product: {
@@ -23,8 +25,10 @@ export function AddToCartButton({
   showQuantitySelector = true,
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
+  const { data: session } = useSession();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const isMounted = useRef(true);
 
   // Track mounted state to prevent state updates after unmount
@@ -35,6 +39,12 @@ export function AddToCartButton({
   }, []);
 
   const handleAddToCart = () => {
+    // If not logged in, show sign-in prompt
+    if (!session?.user) {
+      setShowSignInPrompt(true);
+      return;
+    }
+
     setIsAdding(true);
 
     addItem(
@@ -127,6 +137,20 @@ export function AddToCartButton({
         <p className="text-sm text-amber-700 text-center">
           Only {product.stock} left in stock
         </p>
+      )}
+
+      {showSignInPrompt && (
+        <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-lg text-center">
+          <p className="text-sm text-neutral-700 mb-2">
+            Sign in to add items to your cart
+          </p>
+          <Link
+            href="/auth/signin"
+            className="text-sm font-medium text-neutral-900 underline hover:no-underline"
+          >
+            Sign in or create account
+          </Link>
+        </div>
       )}
     </div>
   );
