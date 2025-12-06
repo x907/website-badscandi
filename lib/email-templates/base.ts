@@ -68,11 +68,22 @@ export function baseEmailTemplate(content: string, options?: BaseTemplateOptions
 }
 
 // Helper to create plain text version from content
+// Uses iterative approach to safely remove all HTML tags
 export function stripHtml(html: string): string {
-  return html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  let result = html;
+  let previous = "";
+
+  // Remove style and script tags with content first
+  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
+  result = result.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
+  // Iteratively remove HTML tags until no more tags remain
+  // This prevents multi-character sanitization bypass attacks
+  while (result !== previous) {
+    previous = result;
+    result = result.replace(/<[^>]*>/g, " ");
+  }
+
+  // Clean up whitespace
+  return result.replace(/\s+/g, " ").trim();
 }

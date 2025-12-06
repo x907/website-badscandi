@@ -15,6 +15,9 @@ on:
           - "true"
           - "false"
 
+# Minimal permissions - this workflow only makes external HTTP requests
+permissions: {}
+
 jobs:
   send-cart-abandonment:
     runs-on: ubuntu-latest
