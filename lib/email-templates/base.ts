@@ -1,0 +1,78 @@
+// Base email template wrapper with consistent styling
+// All drip emails use this wrapper for brand consistency
+import { createHmac } from "crypto";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
+
+// Generate unsubscribe token for a user
+export function generateUnsubscribeToken(userId: string, email: string): string {
+  const secret = process.env.CRON_SHARED_SECRET || "default-secret";
+  const data = `${userId}:${email}`;
+  return createHmac("sha256", secret).update(data).digest("hex").slice(0, 32);
+}
+
+// Build unsubscribe URL with token
+export function buildUnsubscribeUrl(userId: string, email: string): string {
+  const token = generateUnsubscribeToken(userId, email);
+  return `${siteUrl}/unsubscribe?userId=${userId}&email=${encodeURIComponent(email)}&token=${token}`;
+}
+
+export interface BaseTemplateOptions {
+  userId?: string;
+  email?: string;
+}
+
+export function baseEmailTemplate(content: string, options?: BaseTemplateOptions): string {
+  // Build unsubscribe URL - use tokenized link if we have user info, otherwise generic
+  const unsubscribeUrl = options?.userId && options?.email
+    ? buildUnsubscribeUrl(options.userId, options.email)
+    : `${siteUrl}/unsubscribe`;
+
+  return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bad Scandi</title>
+  </head>
+  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f5f5f5;">
+    <div style="background-color: #ffffff; margin: 20px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+      <!-- Header -->
+      <div style="background-color: #1a1a1a; padding: 24px; text-align: center;">
+        <a href="${siteUrl}" style="text-decoration: none;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px;">BAD SCANDI</h1>
+        </a>
+      </div>
+
+      <!-- Content -->
+      <div style="padding: 32px 24px;">
+        ${content}
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f8f9fa; padding: 24px; text-align: center; border-top: 1px solid #e0e0e0;">
+        <p style="font-size: 13px; color: #666; margin: 0 0 8px 0;">
+          Bad Scandi - Handcrafted Fiber Art
+        </p>
+        <p style="font-size: 12px; color: #999; margin: 0;">
+          <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
+          &nbsp;|&nbsp;
+          <a href="${siteUrl}/privacy" style="color: #999; text-decoration: underline;">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+`;
+}
+
+// Helper to create plain text version from content
+export function stripHtml(html: string): string {
+  return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}

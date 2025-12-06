@@ -2,7 +2,8 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, User } from "lucide-react";
+import { User } from "lucide-react";
+import { CartButton } from "@/components/cart/cart-button";
 
 export async function Header() {
   const session = await auth.api.getSession({
@@ -32,7 +33,8 @@ export async function Header() {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <CartButton />
             {session?.user ? (
               <Link href="/account">
                 <Button variant="ghost" size="icon">

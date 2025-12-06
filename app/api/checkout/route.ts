@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
-import { getProductById } from "@/lib/products";
+import { db } from "@/lib/db";
+
+interface CartItemInput {
+  productId: string;
+  quantity: number;
+}
 
 export async function POST(request: Request) {
   try {
@@ -15,40 +20,78 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { productId } = body;
+    const { items } = body as { items: CartItemInput[] };
 
-    const product = await getProductById(productId);
-
-    if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: "No items in cart" }, { status: 400 });
     }
+
+    // Fetch all products
+    const productIds = items.map((item) => item.productId);
+    const products = await db.product.findMany({
+      where: { id: { in: productIds } },
+    });
+
+    if (products.length !== items.length) {
+      return NextResponse.json({ error: "Some products not found" }, { status: 404 });
+    }
+
+    // Validate stock for all items
+    for (const item of items) {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) {
+        return NextResponse.json({ error: `Product not found: ${item.productId}` }, { status: 404 });
+      }
+      if (product.stock < item.quantity) {
+        return NextResponse.json(
+          { error: `Insufficient stock for ${product.name}. Available: ${product.stock}` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Create line items for Stripe
+    const lineItems = items.map((item) => {
+      const product = products.find((p) => p.id === item.productId)!;
+      return {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: product.name,
+            description: product.description,
+            images: [product.imageUrl],
+          },
+          unit_amount: product.priceCents,
+        },
+        quantity: item.quantity,
+      };
+    });
+
+    // Create metadata with all items info
+    const itemsMetadata = items.map((item) => {
+      const product = products.find((p) => p.id === item.productId)!;
+      return {
+        productId: product.id,
+        name: product.name,
+        priceCents: product.priceCents,
+        quantity: item.quantity,
+        imageUrl: product.imageUrl,
+      };
+    });
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: product.name,
-              description: product.description,
-              images: [product.imageUrl],
-            },
-            unit_amount: product.priceCents,
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       shipping_address_collection: {
-        allowed_countries: ["US", "CA"], // US and Canada shipping
+        allowed_countries: ["US", "CA"],
       },
       shipping_options: [
         {
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: {
-              amount: 0, // Free shipping
+              amount: 0,
               currency: "usd",
             },
             display_name: "Free Standard Shipping",
@@ -65,13 +108,12 @@ export async function POST(request: Request) {
           },
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/account?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/product/${product.slug}?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/shop?canceled=true`,
       customer_email: session.user.email,
       metadata: {
         userId: session.user.id,
-        productId: product.id,
-        productName: product.name,
+        items: JSON.stringify(itemsMetadata),
       },
     });
 

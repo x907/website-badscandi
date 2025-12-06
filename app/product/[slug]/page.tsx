@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { getProductBySlug } from "@/lib/products";
 import { formatPrice } from "@/lib/utils";
-import { auth } from "@/lib/auth";
-import { CheckoutButton } from "@/components/checkout-button";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ProductViewTracker } from "@/components/product-view-tracker";
 import { getProductMetadata } from "@/lib/metadata";
 import { ProductStructuredData, BreadcrumbStructuredData } from "@/components/structured-data";
@@ -35,9 +33,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
   const altText = product.altText || product.name;
 
   return (
@@ -94,24 +89,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </Link>
                 </p>
               </div>
-            ) : session?.user ? (
-              <CheckoutButton
-                productId={product.id}
-                productName={product.name}
-                productPrice={product.priceCents}
-              />
             ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-neutral-600">
-                  Please sign in to purchase this product
-                </p>
-                <a
-                  href="/auth/signin"
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors h-11 px-6 py-2 bg-neutral-900 text-neutral-50 shadow hover:bg-neutral-900/90 w-full"
-                >
-                  Sign In to Purchase
-                </a>
-              </div>
+              <AddToCartButton
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  priceCents: product.priceCents,
+                  imageUrl: product.imageUrl,
+                  stock: product.stock,
+                }}
+              />
             )}
           </div>
 

@@ -115,35 +115,40 @@ export const trackAddToCart = (product: {
 };
 
 // Track checkout started
-export const trackCheckoutStarted = (product: {
-  id: string;
-  name: string;
-  price: number;
+export const trackCheckoutStarted = (checkout: {
+  items: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
+  totalValue: number;
 }) => {
   // Google Analytics
   trackGAEvent("begin_checkout", {
     currency: "USD",
-    value: product.price / 100,
-    items: [
-      {
-        item_id: product.id,
-        item_name: product.name,
-        price: product.price / 100,
-      },
-    ],
+    value: checkout.totalValue,
+    items: checkout.items.map((item) => ({
+      item_id: item.id,
+      item_name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+    })),
   });
 
   // Meta Pixel
   trackMetaEvent("InitiateCheckout", {
-    content_ids: [product.id],
-    content_name: product.name,
-    value: product.price / 100,
+    content_ids: checkout.items.map((item) => item.id),
+    content_type: "product",
+    value: checkout.totalValue,
     currency: "USD",
+    num_items: checkout.items.reduce((sum, item) => sum + item.quantity, 0),
   });
 
   // Pinterest
   trackPinterestEvent("checkout", {
-    value: product.price / 100,
+    value: checkout.totalValue,
+    order_quantity: checkout.items.reduce((sum, item) => sum + item.quantity, 0),
     currency: "USD",
   });
 };

@@ -1,0 +1,76 @@
+"use client";
+
+import Image from "next/image";
+import { Minus, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/lib/utils";
+import { useCart, CartItem as CartItemType } from "@/contexts/cart-context";
+
+interface CartItemProps {
+  item: CartItemType;
+}
+
+export function CartItem({ item }: CartItemProps) {
+  const { updateQuantity, removeItem } = useCart();
+
+  return (
+    <div className="flex gap-4 py-4 border-b border-neutral-100">
+      <div className="relative w-20 h-20 flex-shrink-0 bg-neutral-50 rounded-lg overflow-hidden">
+        <Image
+          src={item.imageUrl}
+          alt={item.name}
+          fill
+          className="object-cover"
+          sizes="80px"
+        />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start">
+          <h3 className="text-sm font-medium text-neutral-900 truncate pr-2">
+            {item.name}
+          </h3>
+          <button
+            onClick={() => removeItem(item.productId)}
+            className="text-neutral-400 hover:text-neutral-600 p-1"
+            aria-label="Remove item"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <p className="text-sm text-amber-900 mt-1">
+          {formatPrice(item.priceCents)}
+        </p>
+
+        <div className="flex items-center gap-2 mt-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+            disabled={item.quantity <= 1}
+          >
+            <Minus className="w-3 h-3" />
+          </Button>
+
+          <span className="text-sm w-8 text-center">{item.quantity}</span>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+            disabled={item.quantity >= item.stock}
+          >
+            <Plus className="w-3 h-3" />
+          </Button>
+
+          {item.quantity >= item.stock && (
+            <span className="text-xs text-neutral-500">Max</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

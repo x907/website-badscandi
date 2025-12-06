@@ -3,23 +3,29 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  emailVerified Boolean   @default(false)
-  image         String?
-  isAdmin       Boolean   @default(false)
-  passkeys      Passkey[]
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  name               String?
+  emailVerified      Boolean             @default(false)
+  image              String?
+  isAdmin            Boolean             @default(false)
+  marketingConsent   Boolean             @default(false) // For drip emails
+  passkeys           Passkey[]
+  accounts           Account[]
+  sessions           Session[]
+  orders             Order[]
+  cart               Cart?
+  events             Event[]
+  emailSubscriptions EmailSubscription[]
+  emailLogs          EmailLog[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
 
 model Passkey {
@@ -151,4 +157,70 @@ model Review {
   @@index([featured])
   @@index([approved])
   @@index([rating])
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  items     Json     // [{productId: string, quantity: number}]
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// Email Drip System Models
+// ============================================
+
+// Tracks all user events for segmentation and drip triggers
+model Event {
+  id          String   @id @default(cuid())
+  userId      String?  // Null for anonymous events
+  anonymousId String?  // Cookie-based ID for pre-signup tracking
+  eventType   String   // product_view, add_to_cart, checkout_started, order_placed, email_open, email_click
+  properties  Json?    // {productId, cartId, utm_source, etc.}
+  occurredAt  DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([anonymousId])
+  @@index([eventType])
+  @@index([occurredAt])
+  @@index([userId, eventType, occurredAt])
+}
+
+// User email subscription preferences
+model EmailSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  list      String   // marketing, product_updates, order_updates
+  status    String   @default("subscribed") // subscribed, unsubscribed
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, list])
+  @@index([userId])
+  @@index([list, status])
+}
+
+// Log of all emails sent for deduplication and tracking
+model EmailLog {
+  id              String   @id @default(cuid())
+  userId          String?
+  email           String   // Recipient email (in case user is deleted)
+  templateKey     String   // welcome, cart_abandonment_step_1, winback_step_1
+  step            Int      @default(1) // For multi-step drips
+  relatedEntityId String?  // cartId, orderId, etc.
+  sesMessageId    String?  // AWS SES message ID for tracking
+  configSet       String?  // SES configuration set used
+  status          String   @default("sent") // sent, delivered, opened, clicked, bounced, complained
+  metadata        Json?    // Additional tracking data
+  sentAt          DateTime @default(now())
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([templateKey])
+  @@index([relatedEntityId])
+  @@index([sentAt])
+  @@index([userId, templateKey, relatedEntityId]) // For deduplication queries
 }

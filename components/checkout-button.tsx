@@ -21,9 +21,13 @@ export function CheckoutButton({ productId, productName, productPrice }: Checkou
       // Track checkout started event
       if (productName && productPrice) {
         trackCheckoutStarted({
-          id: productId,
-          name: productName,
-          price: productPrice,
+          items: [{
+            id: productId,
+            name: productName,
+            price: productPrice / 100,
+            quantity: 1,
+          }],
+          totalValue: productPrice / 100,
         });
       }
 

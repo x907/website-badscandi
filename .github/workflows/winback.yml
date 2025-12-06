@@ -1,0 +1,66 @@
+name: Winback Emails
+
+on:
+  schedule:
+    # Run once daily at 10:00 AM UTC
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (no emails sent)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+jobs:
+  send-winback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Trigger Winback Job
+        id: trigger
+        run: |
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+
+          if [ "$DRY_RUN" = "true" ]; then
+            BODY='{"dryRun": true}'
+          else
+            BODY='{}'
+          fi
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-CRON-KEY: ${{ secrets.CRON_SHARED_SECRET }}" \
+            -d "$BODY" \
+            "${{ secrets.SITE_URL }}/api/cron/winback")
+
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response: $BODY"
+
+          echo "http_status=$HTTP_STATUS" >> $GITHUB_OUTPUT
+          echo "response=$BODY" >> $GITHUB_OUTPUT
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "::error::Request failed with status $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "## Winback Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.trigger.outputs.http_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Response:**" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.trigger.outputs.response }}' | jq '.' >> $GITHUB_STEP_SUMMARY || echo '${{ steps.trigger.outputs.response }}' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

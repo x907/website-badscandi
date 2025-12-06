@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/footer";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { PinterestTag } from "@/components/analytics/pinterest-tag";
+import { CartProvider } from "@/contexts/cart-context";
+import { CartDrawer } from "@/components/cart/cart-drawer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,12 +27,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <GoogleAnalytics />
-        <MetaPixel />
-        <PinterestTag />
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+        <CartProvider>
+          <GoogleAnalytics />
+          <MetaPixel />
+          <PinterestTag />
+          <Header />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

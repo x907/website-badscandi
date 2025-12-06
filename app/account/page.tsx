@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { PasskeyEnroll } from "@/components/passkey-enroll";
 import { PasskeyManager } from "@/components/passkey-manager";
+import { MarketingPreferences } from "@/components/marketing-preferences";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { LogOut, Package, Fingerprint, Star, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -19,7 +20,7 @@ export default async function AccountPage() {
     redirect("/auth/signin");
   }
 
-  const [orders, passkeys] = await Promise.all([
+  const [orders, passkeys, user] = await Promise.all([
     db.order.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
@@ -27,6 +28,10 @@ export default async function AccountPage() {
     db.passkey.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
+    }),
+    db.user.findUnique({
+      where: { id: session.user.id },
+      select: { marketingConsent: true },
     }),
   ]);
 
@@ -82,6 +87,8 @@ export default async function AccountPage() {
           </Card>
         </div>
 
+        <MarketingPreferences initialConsent={user?.marketingConsent ?? false} />
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -103,8 +110,12 @@ export default async function AccountPage() {
             ) : (
               <ul className="space-y-6">
                 {orders.map((order) => {
-                  const items = JSON.parse(order.items as string) as Array<{
-                    id: string;
+                  // Handle both JSON string (old orders) and JSON object (new orders)
+                  const items = (typeof order.items === 'string'
+                    ? JSON.parse(order.items)
+                    : order.items) as Array<{
+                    id?: string;
+                    productId?: string;
                     name: string;
                     priceCents: number;
                     quantity: number;

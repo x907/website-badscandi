@@ -4,6 +4,7 @@ import { passkey } from "@better-auth/passkey";
 import { magicLink } from "better-auth/plugins";
 import { db } from "./db";
 import { sendMagicLinkEmail } from "./email";
+import { sendDripEmail, TEMPLATE_KEYS } from "./email-templates";
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
@@ -57,6 +58,36 @@ export const auth = betterAuth({
     process.env.RP_ORIGIN || "http://localhost:3000",
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   ],
+  // Hook to send welcome email on new user signup
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // Send welcome email to new users
+          try {
+            await sendDripEmail(
+              {
+                to: user.email,
+                userId: user.id,
+                templateKey: TEMPLATE_KEYS.WELCOME,
+                step: 1,
+              },
+              {
+                key: "welcome",
+                data: {
+                  firstName: user.name?.split(" ")[0],
+                },
+              }
+            );
+            console.log(`Welcome email sent to ${user.email}`);
+          } catch (error) {
+            // Don't fail signup if email fails
+            console.error("Failed to send welcome email:", error);
+          }
+        },
+      },
+    },
+  },
 });
 
 // Export types for TypeScript

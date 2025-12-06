@@ -37,8 +37,12 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
     notFound();
   }
 
-  const items = JSON.parse(order.items as string) as Array<{
-    id: string;
+  // Handle both JSON string (old orders) and JSON object (new orders)
+  const items = (typeof order.items === 'string'
+    ? JSON.parse(order.items)
+    : order.items) as Array<{
+    id?: string;
+    productId?: string;
     name: string;
     priceCents: number;
     quantity: number;

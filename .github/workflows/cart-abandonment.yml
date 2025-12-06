@@ -1,0 +1,73 @@
+name: Cart Abandonment Emails
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: "*/15 * * * *"
+  workflow_dispatch: # Allow manual triggers
+    inputs:
+      dry_run:
+        description: "Dry run (no emails sent)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+jobs:
+  send-cart-abandonment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Trigger Cart Abandonment Job
+        id: trigger
+        run: |
+          # Determine if this is a dry run
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+
+          # Build the request body
+          if [ "$DRY_RUN" = "true" ]; then
+            BODY='{"dryRun": true}'
+          else
+            BODY='{}'
+          fi
+
+          # Call the cron endpoint
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-CRON-KEY: ${{ secrets.CRON_SHARED_SECRET }}" \
+            -d "$BODY" \
+            "${{ secrets.SITE_URL }}/api/cron/cart-abandonment")
+
+          # Extract HTTP status code (last line)
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
+          # Extract response body (everything except last line)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response: $BODY"
+
+          # Save outputs for summary
+          echo "http_status=$HTTP_STATUS" >> $GITHUB_OUTPUT
+          echo "response=$BODY" >> $GITHUB_OUTPUT
+
+          # Fail if not 2xx status
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "::error::Request failed with status $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "## Cart Abandonment Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.trigger.outputs.http_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Response:**" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.trigger.outputs.response }}' | jq '.' >> $GITHUB_STEP_SUMMARY || echo '${{ steps.trigger.outputs.response }}' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
