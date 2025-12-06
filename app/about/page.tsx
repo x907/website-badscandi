@@ -11,6 +11,30 @@ export default function AboutPage() {
           <p className="text-base sm:text-lg md:text-xl text-neutral-600">
             Hand-dyed fiber art wall hangings inspired by Scandinavian design
           </p>
+
+          {/* Press Feature */}
+          <a
+            href="https://midwestdesignmag.com/interior-spaces/scandinavian-style-tapestries-by-bad-scandi-pay-homage-to-heritage/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-4 p-4 bg-neutral-50 border border-neutral-200 rounded-lg hover:bg-neutral-100 transition-colors"
+          >
+            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded overflow-hidden bg-amber-50 border border-neutral-200 flex items-center justify-center">
+              <span className="text-amber-900 font-serif text-lg sm:text-xl font-medium">MDM</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">As featured in</p>
+              <p className="font-medium text-neutral-900 group-hover:text-amber-900 transition-colors">
+                Midwest Design Magazine
+              </p>
+              <p className="text-sm text-neutral-600 truncate">
+                "Scandinavian-Style Tapestries Pay Homage to Heritage"
+              </p>
+            </div>
+            <svg className="w-5 h-5 text-neutral-400 group-hover:text-amber-900 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
 
         <div className="space-y-4 sm:space-y-6">
@@ -24,19 +48,6 @@ export default function AboutPage() {
           <p className="text-neutral-600 leading-relaxed">
             Each tapestry reflects Ashley's Scandinavian heritage, featuring minimalist aesthetics with neutral color palettes. Her work emphasizes organic patterns and natural beauty, creating pieces that "inspire a sense of calmness and peace" while adding textural depth to any interior.
           </p>
-          <div className="pt-4 border-t border-neutral-200">
-            <p className="text-sm text-neutral-500 italic">
-              Featured in{" "}
-              <a
-                href="https://midwestdesignmag.com/interior-spaces/scandinavian-style-tapestries-by-bad-scandi-pay-homage-to-heritage/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-amber-900 hover:underline"
-              >
-                Midwest Design Magazine
-              </a>
-            </p>
-          </div>
         </div>
 
         <div className="space-y-4 sm:space-y-6">
