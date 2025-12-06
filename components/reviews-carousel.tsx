@@ -54,6 +54,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
                   alt={`Customer photo ${index + 1}`}
                   fill
                   className="object-cover"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                 />
               </div>
             ))}
