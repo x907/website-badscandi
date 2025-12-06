@@ -38,7 +38,7 @@ async function enableRLS() {
         AND policyname = 'Allow all access to ${table}'
       `);
 
-      if (existingPolicy[0].count === 0n) {
+      if (Number(existingPolicy[0].count) === 0) {
         // Create permissive policy
         await prisma.$executeRawUnsafe(`
           CREATE POLICY "Allow all access to ${table}" ON "${table}"
