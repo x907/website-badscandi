@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit2, Check, X } from "lucide-react";
+import { Trash2, Edit2, Check, X, Loader2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { passkey } from "@/lib/auth-client";
 
 type Passkey = {
   id: string;
@@ -14,60 +15,74 @@ type Passkey = {
 export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleDelete(passkeyId: string) {
-    if (!confirm("Are you sure you want to delete this passkey?")) {
-      return;
-    }
+    setDeletingId(passkeyId);
+    setError(null);
 
-    setDeleting(passkeyId);
     try {
-      const res = await fetch("/api/auth/passkey/delete-passkey", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ id: passkeyId }),
-      });
+      // Use Better Auth client for deletion
+      const result = await passkey.deletePasskey({ id: passkeyId });
 
-      if (!res.ok) {
-        throw new Error("Failed to delete passkey");
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to delete passkey");
       }
 
       window.location.reload();
-    } catch (err) {
-      alert("Failed to delete passkey. Please try again.");
-      setDeleting(null);
+    } catch (err: any) {
+      console.error("Delete passkey error:", err);
+      setError(err.message || "Failed to delete passkey. Please try again.");
+      setDeletingId(null);
+      setConfirmDeleteId(null);
     }
   }
 
   async function handleRename(passkeyId: string) {
+    setError(null);
+
     try {
-      const res = await fetch("/api/auth/passkey/update-passkey", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ id: passkeyId, name: editName }),
+      // Use Better Auth client for update
+      const result = await passkey.updatePasskey({
+        id: passkeyId,
+        name: editName.trim()
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to rename passkey");
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to rename passkey");
       }
 
       window.location.reload();
-    } catch (err) {
-      alert("Failed to rename passkey. Please try again.");
+    } catch (err: any) {
+      console.error("Rename passkey error:", err);
+      setError(err.message || "Failed to rename passkey. Please try again.");
     }
   }
 
-  function startEditing(passkey: Passkey) {
-    setEditingId(passkey.id);
-    setEditName(passkey.name || "");
+  function startEditing(pk: Passkey) {
+    setEditingId(pk.id);
+    setEditName(pk.name || "");
+    setConfirmDeleteId(null);
+    setError(null);
   }
 
   function cancelEditing() {
     setEditingId(null);
     setEditName("");
+    setError(null);
+  }
+
+  function requestDelete(passkeyId: string) {
+    setConfirmDeleteId(passkeyId);
+    setEditingId(null);
+    setError(null);
+  }
+
+  function cancelDelete() {
+    setConfirmDeleteId(null);
+    setError(null);
   }
 
   if (passkeys.length === 0) {
@@ -75,69 +90,121 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
   }
 
   return (
-    <ul className="space-y-3">
-      {passkeys.map((passkey) => (
-        <li
-          key={passkey.id}
-          className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg"
-        >
-          <div className="flex-1">
-            {editingId === passkey.id ? (
-              <div className="flex items-center gap-2">
+    <div className="space-y-3">
+      {error && (
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      <ul className="space-y-3">
+        {passkeys.map((pk) => (
+          <li
+            key={pk.id}
+            className="p-3 sm:p-4 bg-neutral-50 rounded-lg"
+          >
+            {/* Delete confirmation state */}
+            {confirmDeleteId === pk.id ? (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-neutral-900">
+                  Delete "{pk.name || "Unnamed Passkey"}"?
+                </p>
+                <p className="text-xs text-neutral-600">
+                  You won't be able to use this passkey to sign in anymore.
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDelete(pk.id)}
+                    disabled={deletingId === pk.id}
+                    className="flex-1 min-h-[44px]"
+                  >
+                    {deletingId === pk.id ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      "Yes, Delete"
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={cancelDelete}
+                    disabled={deletingId === pk.id}
+                    className="flex-1 min-h-[44px]"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : editingId === pk.id ? (
+              /* Edit state */
+              <div className="space-y-3">
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="flex-1 px-2 py-1 text-sm border border-neutral-300 rounded"
+                  className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900"
                   placeholder="Passkey name"
                   autoFocus
                 />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleRename(passkey.id)}
-                  disabled={!editName.trim()}
-                >
-                  <Check className="h-4 w-4 text-green-600" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={cancelEditing}
-                >
-                  <X className="h-4 w-4 text-red-600" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleRename(pk.id)}
+                    disabled={!editName.trim()}
+                    className="flex-1 min-h-[44px]"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Save
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={cancelEditing}
+                    className="flex-1 min-h-[44px]"
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
             ) : (
-              <>
-                <p className="font-medium text-sm">{passkey.name || "Unnamed Passkey"}</p>
-                <p className="text-xs text-neutral-600">
-                  Created: {formatDate(passkey.createdAt)}
-                </p>
-              </>
+              /* Normal state */
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{pk.name || "Unnamed Passkey"}</p>
+                  <p className="text-xs text-neutral-600">
+                    Created: {formatDate(pk.createdAt)}
+                  </p>
+                </div>
+                <div className="flex gap-1 sm:gap-2 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => startEditing(pk)}
+                    className="h-10 w-10 sm:h-9 sm:w-9 p-0"
+                    aria-label="Edit passkey name"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => requestDelete(pk.id)}
+                    className="h-10 w-10 sm:h-9 sm:w-9 p-0"
+                    aria-label="Delete passkey"
+                  >
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button>
+                </div>
+              </div>
             )}
-          </div>
-          {editingId !== passkey.id && (
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => startEditing(passkey)}
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleDelete(passkey.id)}
-                disabled={deleting === passkey.id}
-              >
-                <Trash2 className="h-4 w-4 text-red-600" />
-              </Button>
-            </div>
-          )}
-        </li>
-      ))}
-    </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
