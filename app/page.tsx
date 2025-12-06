@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProductGrid } from "@/components/product-grid";
 import { getFeaturedProducts } from "@/lib/products";
@@ -22,7 +23,7 @@ export default async function HomePage() {
       <section className="container mx-auto px-6 py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
               Hand-Dyed
               <br />
               Fiber Art
@@ -109,10 +110,13 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="aspect-square rounded-2xl bg-neutral-100 relative overflow-hidden">
-            <img
+            <Image
               src="/images/hero-1.jpg"
               alt="Bad Scandi hand-dyed fiber art tapestry featuring neutral tones and organic patterns"
-              className="object-cover w-full h-full"
+              fill
+              priority
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
         </div>

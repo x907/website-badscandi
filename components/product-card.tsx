@@ -47,7 +47,7 @@ export function ProductCard({ slug, name, description, priceCents, imageUrl, sto
               </span>
             )}
           </div>
-          <h3 className="font-normal text-sm mb-2 text-neutral-600">{name}</h3>
+          <h3 className="font-medium text-base mb-2 text-neutral-700">{name}</h3>
           {showDescription && (
             <p className="text-sm text-neutral-500 line-clamp-2">{cleanDescription}</p>
           )}

@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="border-t border-neutral-100 bg-white mt-auto">
       <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
           <div>
             <h3 className="font-semibold mb-4">Bad Scandi</h3>
             <p className="text-sm text-neutral-600 leading-relaxed">
@@ -64,7 +64,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-neutral-100">
           <div className="mb-8">
             <h4 className="font-semibold mb-4 text-sm">Shop Policies</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm text-neutral-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 text-sm text-neutral-600">
               <div>
                 <h5 className="font-medium text-neutral-900 mb-2">Shipping</h5>
                 <p className="text-xs">See item details for estimated arrival times.</p>

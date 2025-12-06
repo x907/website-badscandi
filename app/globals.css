@@ -36,6 +36,13 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Safe area insets for notched devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
   body {
     @apply bg-neutral-50 text-neutral-900 antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
