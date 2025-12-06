@@ -70,9 +70,7 @@ export default function AboutPage() {
           </p>
           <ul className="list-disc list-inside space-y-2 text-neutral-600">
             <li>100% wool fibers for rich texture and durability</li>
-            <li>Natural cotton rope and yarn for classic macrame pieces</li>
-            <li>Linen blends for a refined, minimalist aesthetic</li>
-            <li>Sustainable wood panels (maple and walnut) for hanging</li>
+            <li>Handcrafted wood panels including maple, walnut, and exotic hardwoods</li>
           </ul>
         </div>
 
