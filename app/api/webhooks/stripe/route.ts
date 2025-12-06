@@ -122,52 +122,73 @@ export async function POST(request: NextRequest) {
       const totalCents = fullSession.amount_total || 0;
       const shippingCents = fullSession.total_details?.amount_shipping || 0;
 
-      // Create the order
-      const order = await db.order.create({
-        data: {
-          userId,
-          stripeId: session.id,
-          totalCents,
-          shippingCents,
-          status: "completed",
-          customerEmail: fullSession.customer_details?.email || null,
-          shippingAddress: fullSession.shipping_details
-            ? {
-                name: fullSession.shipping_details.name,
-                address: fullSession.shipping_details.address as any,
-              }
-            : undefined,
-          items: orderItems,
-        },
-      });
+      // Use a transaction to ensure order creation and stock updates are atomic
+      // This prevents partial updates if something fails mid-operation
+      const order = await db.$transaction(async (tx) => {
+        // First, validate stock for all items before creating order
+        for (const item of orderItems) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { id: true, name: true, stock: true },
+          });
 
-      // Update stock for all products atomically
-      // Use updateMany with a stock check to prevent negative stock
-      for (const item of orderItems) {
-        const result = await db.product.updateMany({
-          where: {
-            id: item.productId,
-            stock: { gte: item.quantity }, // Only decrement if enough stock
-          },
+          if (!product) {
+            throw new Error(`Product ${item.productId} not found`);
+          }
+
+          if (product.stock < item.quantity) {
+            console.warn(`Insufficient stock for ${product.name}: requested ${item.quantity}, available ${product.stock}`);
+            // Don't throw - payment already completed, we need to fulfill
+            // Log for manual intervention but continue
+          }
+        }
+
+        // Create the order
+        const newOrder = await tx.order.create({
           data: {
-            stock: {
-              decrement: item.quantity,
-            },
+            userId,
+            stripeId: session.id,
+            totalCents,
+            shippingCents,
+            status: "completed",
+            customerEmail: fullSession.customer_details?.email || null,
+            shippingAddress: fullSession.shipping_details
+              ? {
+                  name: fullSession.shipping_details.name,
+                  address: fullSession.shipping_details.address as any,
+                }
+              : undefined,
+            items: orderItems,
           },
         });
 
-        if (result.count === 0) {
-          console.warn(`Insufficient stock for product ${item.productId} - stock may have already been decremented or is insufficient`);
-        } else {
-          console.log(`Stock updated for product ${item.productId}: -${item.quantity}`);
-        }
-      }
+        // Update stock for all products atomically within the transaction
+        for (const item of orderItems) {
+          const result = await tx.product.updateMany({
+            where: {
+              id: item.productId,
+              stock: { gte: item.quantity }, // Only decrement if enough stock
+            },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          });
 
-      // Clear user's cart after successful order
-      await db.cart.delete({
-        where: { userId },
-      }).catch(() => {
-        // Ignore if cart doesn't exist
+          if (result.count === 0) {
+            console.warn(`Stock update skipped for product ${item.productId} - insufficient stock`);
+          } else {
+            console.log(`Stock updated for product ${item.productId}: -${item.quantity}`);
+          }
+        }
+
+        // Clear user's cart within the transaction
+        await tx.cart.deleteMany({
+          where: { userId },
+        });
+
+        return newOrder;
       });
 
       console.log(`Order created successfully: ${order.id}`);

@@ -8,6 +8,7 @@ import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
 interface CartItemInput {
   productId: string;
   quantity: number;
+  priceCents?: number; // Optional - if provided, will validate against current price
 }
 
 export async function POST(request: Request) {
@@ -44,22 +45,90 @@ export async function POST(request: Request) {
       where: { id: { in: productIds } },
     });
 
-    if (products.length !== items.length) {
-      return NextResponse.json({ error: "Some products not found" }, { status: 404 });
-    }
+    // Check for missing or unavailable products
+    const missingProducts: string[] = [];
+    const unavailableProducts: { id: string; name: string }[] = [];
+    const priceChangedProducts: { id: string; name: string; oldPrice: number; newPrice: number }[] = [];
+    const insufficientStockProducts: { id: string; name: string; requested: number; available: number }[] = [];
 
-    // Validate stock for all items
     for (const item of items) {
       const product = products.find((p) => p.id === item.productId);
+
       if (!product) {
-        return NextResponse.json({ error: `Product not found: ${item.productId}` }, { status: 404 });
+        missingProducts.push(item.productId);
+        continue;
       }
+
+      // Check if product was deleted/unpublished (stock === -1 convention or missing)
+      if (product.stock < 0) {
+        unavailableProducts.push({ id: product.id, name: product.name });
+        continue;
+      }
+
+      // Validate price if provided in cart
+      if (item.priceCents !== undefined && item.priceCents !== product.priceCents) {
+        priceChangedProducts.push({
+          id: product.id,
+          name: product.name,
+          oldPrice: item.priceCents,
+          newPrice: product.priceCents,
+        });
+      }
+
+      // Validate stock
       if (product.stock < item.quantity) {
-        return NextResponse.json(
-          { error: `Insufficient stock for ${product.name}. Available: ${product.stock}` },
-          { status: 400 }
-        );
+        insufficientStockProducts.push({
+          id: product.id,
+          name: product.name,
+          requested: item.quantity,
+          available: product.stock,
+        });
       }
+    }
+
+    // Return appropriate error responses
+    if (missingProducts.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Products not found",
+          code: "PRODUCTS_NOT_FOUND",
+          productIds: missingProducts,
+        },
+        { status: 410 } // 410 Gone - products no longer exist
+      );
+    }
+
+    if (unavailableProducts.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Some products are no longer available",
+          code: "PRODUCTS_UNAVAILABLE",
+          products: unavailableProducts,
+        },
+        { status: 410 }
+      );
+    }
+
+    if (priceChangedProducts.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Prices have changed since items were added to cart",
+          code: "PRICE_CHANGED",
+          products: priceChangedProducts,
+        },
+        { status: 409 } // 409 Conflict
+      );
+    }
+
+    if (insufficientStockProducts.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Insufficient stock for some products",
+          code: "INSUFFICIENT_STOCK",
+          products: insufficientStockProducts,
+        },
+        { status: 400 }
+      );
     }
 
     // Create line items for Stripe
