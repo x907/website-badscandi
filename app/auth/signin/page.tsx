@@ -125,7 +125,7 @@ export default function SignInPage() {
             {error?.includes("No passkey") && (
               <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 p-4 rounded-lg -mt-2">
                 <p className="font-medium mb-1">New to Bad Scandi?</p>
-                <p>Sign in with email or Google first. You can create a passkey afterwards for one-tap sign-ins.</p>
+                <p>Sign in with email first. You can create a passkey afterwards for one-tap sign-ins.</p>
               </div>
             )}
 
