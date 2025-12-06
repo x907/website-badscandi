@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import { Star, Upload, X } from "lucide-react";
 
@@ -8,28 +8,41 @@ interface ReviewSubmissionFormProps {
   preSelectedProductId?: string;
 }
 
-// Placeholder for non-blob URLs
-const PLACEHOLDER_IMAGE = '/placeholder-image.jpg';
+// Component that safely renders a File as an image preview
+// URLs are created and managed internally, never exposed to parent
+function FilePreviewImage({ file, onRemove }: { file: File; onRemove: () => void }) {
+  const imgRef = useRef<HTMLImageElement>(null);
 
-// Sanitization barrier for CodeQL: validates that URLs are safe blob: protocol
-// This function creates a NEW string that is verified to be a blob URL
-function createSafeBlobUrl(url: string): string {
-  // Only process strings that look like blob URLs
-  if (typeof url !== 'string' || !url.startsWith('blob:')) {
-    return PLACEHOLDER_IMAGE;
-  }
+  useEffect(() => {
+    // Create blob URL internally - never exposed outside this component
+    const url = URL.createObjectURL(file);
 
-  try {
-    const parsed = new URL(url);
-    // Strictly verify blob: protocol - browser-generated URLs are safe
-    if (parsed.protocol === 'blob:') {
-      // Return a new string to break taint tracking
-      return String(url);
+    // Set src directly on the DOM element to avoid React data flow
+    if (imgRef.current) {
+      imgRef.current.src = url;
     }
-  } catch {
-    // Invalid URL format - return placeholder
-  }
-  return PLACEHOLDER_IMAGE;
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
+  return (
+    <div className="relative aspect-square rounded-lg overflow-hidden border border-neutral-200">
+      <img
+        ref={imgRef}
+        alt="Preview"
+        className="w-full h-full object-cover"
+      />
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-1 right-1 p-1 bg-white rounded-full shadow-lg hover:bg-neutral-100 transition-colors"
+      >
+        <X className="h-4 w-4 text-neutral-600" />
+      </button>
+    </div>
+  );
 }
 
 export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionFormProps) {
@@ -48,18 +61,6 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
     message: string;
   }>({ type: null, message: "" });
 
-  // Create sanitized preview data using useMemo
-  const previewData = useMemo(() => {
-    // Create blob URLs for each file
-    const urls = selectedFiles.map((file) => URL.createObjectURL(file));
-
-    // Return array of sanitized preview objects
-    return urls.map((url) => ({
-      // Only return blob URLs, never arbitrary strings
-      url: url.startsWith('blob:') ? url : '/placeholder-image.jpg',
-    }));
-  }, [selectedFiles]);
-
   // Fetch product details if pre-selected
   useEffect(() => {
     if (preSelectedProductId) {
@@ -76,18 +77,6 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
         });
     }
   }, [preSelectedProductId]);
-
-  // Cleanup blob URLs on unmount or when files change
-  useEffect(() => {
-    const urls = previewData.map((preview) => preview.url);
-    return () => {
-      urls.forEach((url) => {
-        if (url.startsWith('blob:')) {
-          URL.revokeObjectURL(url);
-        }
-      });
-    };
-  }, [previewData]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -341,27 +330,12 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           {/* Selected Files Preview */}
           {selectedFiles.length > 0 && (
             <div className="grid grid-cols-3 gap-3">
-              {previewData.map((preview, index) => (
-                <div
-                  key={index}
-                  className="relative aspect-square rounded-lg overflow-hidden border border-neutral-200"
-                >
-                  <img
-                    src={createSafeBlobUrl(preview.url)}
-                    alt={`Preview ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = PLACEHOLDER_IMAGE;
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeFile(index)}
-                    className="absolute top-1 right-1 p-1 bg-white rounded-full shadow-lg hover:bg-neutral-100 transition-colors"
-                  >
-                    <X className="h-4 w-4 text-neutral-600" />
-                  </button>
-                </div>
+              {selectedFiles.map((file, index) => (
+                <FilePreviewImage
+                  key={`${file.name}-${file.size}-${index}`}
+                  file={file}
+                  onRemove={() => removeFile(index)}
+                />
               ))}
             </div>
           )}

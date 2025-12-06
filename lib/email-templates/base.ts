@@ -67,23 +67,59 @@ export function baseEmailTemplate(content: string, options?: BaseTemplateOptions
 `;
 }
 
-// Helper to create plain text version from content
-// Uses iterative approach to safely remove all HTML tags
+// Helper to create plain text version from HTML content
+// Uses character-by-character parsing to safely extract text
 export function stripHtml(html: string): string {
-  let result = html;
-  let previous = "";
+  const result: string[] = [];
+  let inTag = false;
+  let inScript = false;
+  let inStyle = false;
+  let tagBuffer = "";
 
-  // Remove style and script tags with content first
-  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
-  result = result.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  for (let i = 0; i < html.length; i++) {
+    const char = html[i];
 
-  // Iteratively remove HTML tags until no more tags remain
-  // This prevents multi-character sanitization bypass attacks
-  while (result !== previous) {
-    previous = result;
-    result = result.replace(/<[^>]*>/g, " ");
+    if (char === "<") {
+      inTag = true;
+      tagBuffer = "";
+    } else if (char === ">" && inTag) {
+      inTag = false;
+      const tagLower = tagBuffer.toLowerCase();
+
+      // Track script/style tags to skip their content
+      if (tagLower.startsWith("script")) {
+        inScript = true;
+      } else if (tagLower === "/script") {
+        inScript = false;
+      } else if (tagLower.startsWith("style")) {
+        inStyle = true;
+      } else if (tagLower === "/style") {
+        inStyle = false;
+      }
+
+      // Add space for block-level tags
+      if (tagLower.startsWith("/") || tagLower.startsWith("br") || tagLower.startsWith("p") || tagLower.startsWith("div")) {
+        result.push(" ");
+      }
+
+      tagBuffer = "";
+    } else if (inTag) {
+      tagBuffer += char;
+    } else if (!inScript && !inStyle) {
+      // Only add text content outside of script/style tags
+      result.push(char);
+    }
   }
 
-  // Clean up whitespace
-  return result.replace(/\s+/g, " ").trim();
+  // Clean up whitespace and decode common HTML entities
+  return result
+    .join("")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
 }
