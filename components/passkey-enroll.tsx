@@ -48,7 +48,9 @@ export function PasskeyEnroll() {
 
       const options = await optionsRes.json();
 
-      // Step 2: Force cross-platform authenticator (QR code/phone only)
+      // Step 2: Configure authenticator options
+      // Let the browser/OS decide the best authenticator - don't force cross-platform
+      // This allows mobile users to store passkeys on their device
       const publicKeyOptions: PublicKeyCredentialCreationOptions = {
         challenge: base64UrlToUint8Array(options.challenge) as BufferSource,
         rp: options.rp,
@@ -59,9 +61,8 @@ export function PasskeyEnroll() {
         },
         pubKeyCredParams: options.pubKeyCredParams,
         timeout: options.timeout,
-        // FORCE cross-platform authenticators only (no Windows Hello/Touch ID)
+        // Allow any authenticator type - the OS will prompt the user to choose
         authenticatorSelection: {
-          authenticatorAttachment: "cross-platform",
           requireResidentKey: true,
           residentKey: "required",
           userVerification: "required",
