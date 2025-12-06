@@ -7,37 +7,50 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Fingerprint, Mail, Loader2 } from "lucide-react";
 
-type AuthStep = "email" | "options" | "magic-link-sent" | "verify-email";
-
-interface UserStatus {
-  exists: boolean;
-  hasPasskey: boolean;
-  emailVerified: boolean;
-}
-
 export default function SignInPage() {
-  const [step, setStep] = useState<AuthStep>("email");
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
-  const [userStatus, setUserStatus] = useState<UserStatus | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
 
-  async function checkUser(emailToCheck: string): Promise<UserStatus | null> {
+  async function handlePasskeySignIn() {
     try {
-      const res = await fetch("/api/auth/check-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailToCheck }),
+      setLoading("passkey");
+      setError("");
+
+      const { error } = await signIn.passkey({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.href = "/account";
+          },
+          onError: (context) => {
+            // User-friendly error messages
+            const message = context.error.message || "";
+            if (message.includes("No credential") || message.includes("not found")) {
+              setError("No passkey found. Sign in with email first, then set up a passkey in your account.");
+            } else if (message.includes("cancelled") || message.includes("NotAllowedError")) {
+              // User cancelled - don't show error
+              setError("");
+            } else {
+              setError(message || "Failed to sign in with passkey");
+            }
+            setLoading(null);
+          },
+        },
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to check user");
+      if (error) {
+        setError(error.message || "Failed to sign in with passkey");
+        setLoading(null);
       }
-
-      return await res.json();
-    } catch (err) {
-      console.error("Check user error:", err);
-      return null;
+    } catch (err: any) {
+      // User cancelled the passkey prompt
+      if (err.name === "NotAllowedError" || err.message?.includes("cancelled")) {
+        setLoading(null);
+        return;
+      }
+      setError(err.message || "Failed to sign in with passkey");
+      setLoading(null);
     }
   }
 
@@ -53,37 +66,12 @@ export default function SignInPage() {
       setLoading("email");
       setError("");
 
-      const status = await checkUser(email);
-      setUserStatus(status);
-
-      if (status?.exists && status?.hasPasskey) {
-        // User exists with passkey - show options
-        setStep("options");
-      } else if (status?.exists) {
-        // User exists but no passkey - send magic link
-        await sendMagicLink();
-      } else {
-        // New user - send verification email to create account
-        await sendMagicLink();
-      }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function sendMagicLink() {
-    try {
-      setLoading("magic-link");
-      setError("");
-
       await signIn.magicLink({
         email,
         callbackURL: "/account",
       });
 
-      setStep("magic-link-sent");
+      setEmailSent(true);
     } catch (err: any) {
       setError(err.message || "Failed to send magic link");
     } finally {
@@ -91,46 +79,7 @@ export default function SignInPage() {
     }
   }
 
-  async function handlePasskeySignIn() {
-    if (!email || !email.includes("@")) {
-      setError("Please enter your email first");
-      setStep("email");
-      return;
-    }
-
-    try {
-      setLoading("passkey");
-      setError("");
-
-      // Better Auth passkey sign-in
-      const { error } = await signIn.passkey({
-        fetchOptions: {
-          onSuccess: () => {
-            window.location.href = "/account";
-          },
-          onError: (context) => {
-            setError(context.error.message || "Failed to sign in with passkey");
-            setLoading(null);
-          },
-        },
-      });
-
-      if (error) {
-        setError(error.message || "Failed to sign in with passkey");
-        setLoading(null);
-      }
-    } catch (err: any) {
-      // User cancelled
-      if (err.name === "NotAllowedError") {
-        setLoading(null);
-        return;
-      }
-      setError(err.message || "Failed to sign in with passkey");
-      setLoading(null);
-    }
-  }
-
-  async function handleSocialSignIn(provider: "google" | "apple" | "facebook" | "microsoft") {
+  async function handleSocialSignIn(provider: "google") {
     try {
       setLoading(provider);
       setError("");
@@ -145,35 +94,19 @@ export default function SignInPage() {
     }
   }
 
-  function handleBack() {
-    setStep("email");
-    setError("");
-    setUserStatus(null);
-  }
-
   return (
     <div className="container mx-auto px-6 py-24">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Welcome</h1>
-          <p className="text-neutral-600">
-            {step === "email" && "Sign in or create an account"}
-            {step === "options" && "Choose how to sign in"}
-            {step === "magic-link-sent" && "Check your email"}
-          </p>
+          <p className="text-neutral-600">Sign in or create an account</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>
-              {step === "email" && "Enter your email"}
-              {step === "options" && "Sign in options"}
-              {step === "magic-link-sent" && "Email sent!"}
-            </CardTitle>
+            <CardTitle>Sign In</CardTitle>
             <CardDescription>
-              {step === "email" && "We'll check if you have an account"}
-              {step === "options" && `Signing in as ${email}`}
-              {step === "magic-link-sent" && `We sent a link to ${email}`}
+              Choose your preferred sign-in method
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -183,9 +116,65 @@ export default function SignInPage() {
               </div>
             )}
 
-            {/* Step 1: Email Input */}
-            {step === "email" && (
+            {emailSent ? (
               <>
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="h-8 w-8 text-green-600" />
+                  </div>
+                  <p className="font-medium mb-2">Check your email!</p>
+                  <p className="text-neutral-600 text-sm mb-4">
+                    We sent a sign-in link to <strong>{email}</strong>
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Didn't receive it? Check your spam folder.
+                  </p>
+                </div>
+
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setEmailSent(false);
+                    setEmail("");
+                  }}
+                  disabled={loading !== null}
+                >
+                  Use a different email
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Primary: Passkey Sign-In */}
+                <Button
+                  className="w-full h-12"
+                  onClick={handlePasskeySignIn}
+                  disabled={loading !== null}
+                >
+                  <Fingerprint className="h-5 w-5 mr-2" />
+                  {loading === "passkey" ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Authenticating...
+                    </>
+                  ) : (
+                    "Sign in with Passkey"
+                  )}
+                </Button>
+                <p className="text-xs text-center text-neutral-500 -mt-2">
+                  Use your fingerprint, face, or device PIN
+                </p>
+
+                <div className="relative my-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-neutral-200" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-neutral-500">or</span>
+                  </div>
+                </div>
+
+                {/* Email Sign-In */}
                 <form onSubmit={handleEmailSubmit} className="space-y-3">
                   <Input
                     type="email"
@@ -193,33 +182,35 @@ export default function SignInPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading !== null}
-                    autoFocus
                   />
                   <Button
                     type="submit"
+                    variant="outline"
                     className="w-full"
                     disabled={loading !== null}
                   >
+                    <Mail className="h-4 w-4 mr-2" />
                     {loading === "email" ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Checking...
+                        Sending...
                       </>
                     ) : (
-                      "Continue"
+                      "Continue with Email"
                     )}
                   </Button>
                 </form>
 
-                <div className="relative">
+                <div className="relative my-2">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-neutral-200" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-neutral-500">Or continue with</span>
+                    <span className="bg-white px-2 text-neutral-500">or</span>
                   </div>
                 </div>
 
+                {/* Google Sign-In */}
                 <Button
                   variant="outline"
                   className="w-full"
@@ -244,96 +235,7 @@ export default function SignInPage() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  {loading === "google" ? "Signing in..." : "Google"}
-                </Button>
-              </>
-            )}
-
-            {/* Step 2: Sign-in Options (for users with passkeys) */}
-            {step === "options" && (
-              <>
-                <Button
-                  className="w-full"
-                  onClick={handlePasskeySignIn}
-                  disabled={loading !== null}
-                >
-                  <Fingerprint className="h-4 w-4 mr-2" />
-                  {loading === "passkey" ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Authenticating...
-                    </>
-                  ) : (
-                    "Sign in with Passkey"
-                  )}
-                </Button>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-neutral-200" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-neutral-500">Or</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={sendMagicLink}
-                  disabled={loading !== null}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  {loading === "magic-link" ? "Sending..." : "Send magic link instead"}
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  className="w-full text-neutral-500"
-                  onClick={handleBack}
-                  disabled={loading !== null}
-                >
-                  Use a different email
-                </Button>
-              </>
-            )}
-
-            {/* Step 3: Magic Link Sent */}
-            {step === "magic-link-sent" && (
-              <>
-                <div className="text-center py-4">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mail className="h-8 w-8 text-green-600" />
-                  </div>
-                  <p className="text-neutral-600 mb-4">
-                    Click the link in your email to sign in.
-                    {!userStatus?.exists && (
-                      <span className="block mt-2 text-sm">
-                        This will also create your account.
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-sm text-neutral-500">
-                    Didn't receive it? Check your spam folder.
-                  </p>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={sendMagicLink}
-                  disabled={loading !== null}
-                >
-                  {loading === "magic-link" ? "Sending..." : "Resend email"}
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  className="w-full text-neutral-500"
-                  onClick={handleBack}
-                  disabled={loading !== null}
-                >
-                  Use a different email
+                  {loading === "google" ? "Signing in..." : "Continue with Google"}
                 </Button>
               </>
             )}
@@ -343,6 +245,10 @@ export default function SignInPage() {
             </p>
           </CardContent>
         </Card>
+
+        <p className="text-center text-sm text-neutral-600 mt-6">
+          New here? Just sign in - we'll create your account automatically.
+        </p>
       </div>
     </div>
   );
