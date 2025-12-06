@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { runCartAbandonmentJob } from "@/src/jobs/cart-abandonment";
 
-// Verify cron secret to prevent unauthorized access
+// Verify cron secret using timing-safe comparison to prevent timing attacks
 function verifyCronSecret(request: Request): boolean {
   const cronSecret = process.env.CRON_SHARED_SECRET;
   if (!cronSecret) {
@@ -10,7 +11,19 @@ function verifyCronSecret(request: Request): boolean {
   }
 
   const providedSecret = request.headers.get("X-CRON-KEY");
-  return providedSecret === cronSecret;
+  if (!providedSecret) {
+    return false;
+  }
+
+  // Use timing-safe comparison to prevent timing attacks
+  const secretBuffer = Buffer.from(cronSecret);
+  const providedBuffer = Buffer.from(providedSecret);
+
+  if (secretBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(secretBuffer, providedBuffer);
 }
 
 export async function POST(request: Request) {
@@ -76,6 +89,15 @@ export async function POST(request: Request) {
   }
 }
 
+// Helper for timing-safe token comparison
+function timingSafeCompare(a: string | null, b: string): boolean {
+  if (!a) return false;
+  const bufferA = Buffer.from(a);
+  const bufferB = Buffer.from(b);
+  if (bufferA.length !== bufferB.length) return false;
+  return timingSafeEqual(bufferA, bufferB);
+}
+
 // Also support GET for Vercel Cron (which uses GET by default)
 export async function GET(request: Request) {
   // For GET requests, check Authorization header (Vercel Cron format)
@@ -90,7 +112,8 @@ export async function GET(request: Request) {
   const xCronKey = request.headers.get("X-CRON-KEY");
   const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
-  if (xCronKey !== cronSecret && bearerToken !== cronSecret) {
+  // Use timing-safe comparison for both checks
+  if (!timingSafeCompare(xCronKey, cronSecret) && !timingSafeCompare(bearerToken, cronSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

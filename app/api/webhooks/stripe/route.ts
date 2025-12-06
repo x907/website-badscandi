@@ -74,8 +74,16 @@ export async function POST(request: NextRequest) {
       }> = [];
 
       if (itemsJson) {
-        // New multi-item format
-        orderItems = JSON.parse(itemsJson);
+        // New multi-item format - wrap in try-catch for safety
+        try {
+          orderItems = JSON.parse(itemsJson);
+        } catch (parseError) {
+          console.error("Failed to parse items from metadata:", parseError);
+          return NextResponse.json(
+            { error: "Invalid items metadata" },
+            { status: 400 }
+          );
+        }
       } else if (metadata?.productId) {
         // Legacy single-item format (backward compatibility)
         const product = await db.product.findUnique({
@@ -98,6 +106,16 @@ export async function POST(request: NextRequest) {
           { error: "No items in order" },
           { status: 400 }
         );
+      }
+
+      // Idempotency check: See if order already exists for this Stripe session
+      const existingOrder = await db.order.findUnique({
+        where: { stripeId: session.id },
+      });
+
+      if (existingOrder) {
+        console.log(`Order already exists for session ${session.id}, skipping duplicate`);
+        return NextResponse.json({ received: true, orderId: existingOrder.id, duplicate: true });
       }
 
       // Calculate total and shipping

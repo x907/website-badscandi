@@ -77,15 +77,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse order items and check if this product is in any of their orders
-    const items = JSON.parse(purchasedOrder.items as string) as Array<{
-      id: string;
-      name: string;
-      priceCents: number;
-      quantity: number;
-      imageUrl: string;
-    }>;
+    // Note: Prisma Json type returns parsed objects, but we wrap in try-catch for safety
+    let items: Array<{ id?: string; productId?: string }>;
+    try {
+      // Handle both already-parsed objects and string JSON
+      items = typeof purchasedOrder.items === "string"
+        ? JSON.parse(purchasedOrder.items)
+        : (purchasedOrder.items as Array<{ id?: string; productId?: string }>);
+    } catch {
+      console.error("Failed to parse order items for order:", purchasedOrder.id);
+      items = [];
+    }
 
-    const hasPurchased = items.some((item) => item.id === productId);
+    // Check for both 'id' and 'productId' fields for compatibility
+    const hasPurchased = items.some((item) => item.id === productId || item.productId === productId);
 
     if (!hasPurchased) {
       // Check other orders
@@ -98,10 +103,16 @@ export async function POST(request: NextRequest) {
 
       let foundProduct = false;
       for (const order of allOrders) {
-        const orderItems = JSON.parse(order.items as string) as Array<{
-          id: string;
-        }>;
-        if (orderItems.some((item) => item.id === productId)) {
+        let orderItems: Array<{ id?: string; productId?: string }>;
+        try {
+          orderItems = typeof order.items === "string"
+            ? JSON.parse(order.items)
+            : (order.items as Array<{ id?: string; productId?: string }>);
+        } catch {
+          console.error("Failed to parse order items for order:", order.id);
+          continue;
+        }
+        if (orderItems.some((item) => item.id === productId || item.productId === productId)) {
           foundProduct = true;
           break;
         }
