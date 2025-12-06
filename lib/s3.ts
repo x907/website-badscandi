@@ -27,7 +27,7 @@ export async function uploadToS3(
     Key: key,
     Body: file,
     ContentType: contentType,
-    ACL: "public-read", // Make files publicly accessible
+    // Note: ACL not used - bucket policy handles public read access
   });
 
   await s3Client.send(command);
