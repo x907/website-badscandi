@@ -21,7 +21,7 @@ export default function SignInPage() {
       const { error } = await signIn.passkey({
         fetchOptions: {
           onSuccess: () => {
-            window.location.href = "/account";
+            window.location.href = "/";
           },
           onError: (context) => {
             // User-friendly error messages
@@ -73,7 +73,7 @@ export default function SignInPage() {
 
       await signIn.magicLink({
         email,
-        callbackURL: "/account",
+        callbackURL: "/",
       });
 
       setEmailSent(true);
@@ -91,7 +91,7 @@ export default function SignInPage() {
 
       await signIn.social({
         provider,
-        callbackURL: "/account",
+        callbackURL: "/",
       });
     } catch (err: any) {
       setError(err.message || "Failed to sign in");
