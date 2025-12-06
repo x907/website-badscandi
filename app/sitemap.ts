@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://badscandi.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://badscandi.com'
 
   // Get all products for dynamic URLs
   const products = await db.product.findMany({

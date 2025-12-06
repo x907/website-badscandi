@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Fingerprint } from "lucide-react";
@@ -30,6 +30,16 @@ export function PasskeyEnroll() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [passkeyName, setPasskeyName] = useState("");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   async function handleEnroll() {
     try {
@@ -114,7 +124,8 @@ export function PasskeyEnroll() {
       }
 
       setSuccess(true);
-      setTimeout(() => {
+      // Store timeout ref for cleanup on unmount
+      timeoutRef.current = setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (err: any) {

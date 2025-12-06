@@ -1,12 +1,14 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://badscandi.com'
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
       disallow: ['/account/', '/api/'],
     },
-    sitemap: 'https://badscandi.com/sitemap.xml',
+    sitemap: `${siteUrl}/sitemap.xml`,
   }
 }

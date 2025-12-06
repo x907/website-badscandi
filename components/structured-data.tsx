@@ -1,5 +1,7 @@
 import Script from "next/script";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
+
 interface ProductStructuredDataProps {
   product: {
     name: string;
@@ -19,7 +21,7 @@ export function ProductStructuredData({ product }: ProductStructuredDataProps) {
     description: product.description,
     offers: {
       "@type": "Offer",
-      url: `https://badscandi.com/product/${product.slug}`,
+      url: `${siteUrl}/product/${product.slug}`,
       priceCurrency: "USD",
       price: (product.priceCents / 100).toFixed(2),
       availability: "https://schema.org/InStock",
@@ -65,8 +67,8 @@ export function OrganizationStructuredData() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Bad Scandi",
-    url: "https://badscandi.com",
-    logo: "https://badscandi.com/logo.png",
+    url: siteUrl,
+    logo: `${siteUrl}/logo.png`,
     description: "Hand-dyed fiber art, boho wall hangings, and Scandinavian minimalist tapestries.",
     sameAs: [
       // Add your social media URLs here

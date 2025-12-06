@@ -62,7 +62,9 @@ export default function SignInPage() {
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email || !email.includes("@")) {
+    // Validate email format with regex (local@domain.tld)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
       setError("Please enter a valid email address");
       return;
     }

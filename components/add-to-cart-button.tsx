@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ShoppingBag, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
@@ -25,6 +25,14 @@ export function AddToCartButton({
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
+  const isMounted = useRef(true);
+
+  // Track mounted state to prevent state updates after unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleAddToCart = () => {
     setIsAdding(true);
@@ -54,8 +62,12 @@ export function AddToCartButton({
     // Reset quantity after adding
     setQuantity(1);
 
-    // Brief visual feedback
-    setTimeout(() => setIsAdding(false), 500);
+    // Brief visual feedback - only update state if still mounted
+    setTimeout(() => {
+      if (isMounted.current) {
+        setIsAdding(false);
+      }
+    }, 500);
   };
 
   if (product.stock <= 0) {

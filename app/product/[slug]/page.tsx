@@ -8,6 +8,8 @@ import { ProductViewTracker } from "@/components/product-view-tracker";
 import { getProductMetadata } from "@/lib/metadata";
 import { ProductStructuredData, BreadcrumbStructuredData } from "@/components/structured-data";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
+
 interface ProductPageProps {
   params: Promise<{
     slug: string;
@@ -41,9 +43,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <ProductStructuredData product={product} />
       <BreadcrumbStructuredData
         items={[
-          { name: "Home", url: "https://badscandi.com" },
-          { name: "Shop", url: "https://badscandi.com/shop" },
-          { name: product.name, url: `https://badscandi.com/product/${product.slug}` },
+          { name: "Home", url: siteUrl },
+          { name: "Shop", url: `${siteUrl}/shop` },
+          { name: product.name, url: `${siteUrl}/product/${product.slug}` },
         ]}
       />
       <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">

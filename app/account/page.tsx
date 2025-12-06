@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { PasskeyEnroll } from "@/components/passkey-enroll";
 import { PasskeyManager } from "@/components/passkey-manager";
 import { MarketingPreferences } from "@/components/marketing-preferences";
+import { SignOutButton } from "@/components/sign-out-button";
 import { formatPrice, formatDate } from "@/lib/utils";
-import { LogOut, Package, Fingerprint, Star, ChevronRight } from "lucide-react";
+import { Package, Fingerprint, Star, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default async function AccountPage() {
@@ -20,7 +21,8 @@ export default async function AccountPage() {
     redirect("/auth/signin");
   }
 
-  const [orders, passkeys, user] = await Promise.all([
+  // Use Promise.allSettled to handle partial failures gracefully
+  const results = await Promise.allSettled([
     db.order.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
@@ -35,13 +37,10 @@ export default async function AccountPage() {
     }),
   ]);
 
-  async function handleSignOut() {
-    "use server";
-    await auth.api.signOut({
-      headers: await headers(),
-    });
-    redirect("/");
-  }
+  // Extract values with fallbacks if queries failed
+  const orders = results[0].status === "fulfilled" ? results[0].value : [];
+  const passkeys = results[1].status === "fulfilled" ? results[1].value : [];
+  const user = results[2].status === "fulfilled" ? results[2].value : null;
 
   return (
     <div className="container mx-auto px-6 py-12">
@@ -51,12 +50,7 @@ export default async function AccountPage() {
             <h1 className="text-3xl font-bold">My Account</h1>
             <p className="text-neutral-600 mt-1">{session.user.email}</p>
           </div>
-          <form action={handleSignOut}>
-            <Button variant="outline" type="submit" className="gap-2">
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
-          </form>
+          <SignOutButton />
         </div>
 
         {passkeys.length === 0 && (
