@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/contexts/cart-context";
@@ -58,33 +59,40 @@ export function CartSummary() {
   return (
     <div className="border-t border-neutral-200 pt-4 mt-4">
       <div className="flex justify-between items-center mb-4">
-        <span className="text-sm text-neutral-600">Subtotal</span>
-        <span className="text-lg font-medium text-neutral-900">
+        <span className="text-sm sm:text-base text-neutral-600">Subtotal</span>
+        <span className="text-lg sm:text-xl font-medium text-neutral-900">
           {formatPrice(subtotalCents)}
         </span>
       </div>
 
-      <p className="text-xs text-neutral-500 mb-4">
+      <p className="text-xs sm:text-sm text-neutral-500 mb-4">
         Shipping calculated at checkout
       </p>
 
       {session?.user ? (
         <Button
-          className="w-full"
+          className="w-full h-12"
           onClick={handleCheckout}
           disabled={isLoading || items.length === 0}
         >
-          {isLoading ? "Processing..." : "Checkout"}
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+              Processing...
+            </>
+          ) : (
+            "Checkout"
+          )}
         </Button>
       ) : (
-        <Button asChild className="w-full" onClick={closeCart}>
+        <Button asChild className="w-full h-12" onClick={closeCart}>
           <Link href="/auth/signin">Sign in to Checkout</Link>
         </Button>
       )}
 
       <button
         onClick={clearCart}
-        className="w-full mt-3 text-sm text-neutral-500 hover:text-neutral-700"
+        className="w-full mt-3 py-2 text-sm text-neutral-500 hover:text-neutral-700 min-h-[44px]"
       >
         Clear cart
       </button>

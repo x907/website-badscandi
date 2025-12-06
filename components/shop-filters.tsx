@@ -115,15 +115,12 @@ export function ShopFilters({ products }: ShopFiltersProps) {
 
         {/* Filter Toggle (Mobile) */}
         <Button
-          variant="outline"
-          className="sm:hidden"
+          variant={hasActiveFilters ? "default" : "outline"}
+          className="sm:hidden h-11"
           onClick={() => setShowFilters(!showFilters)}
         >
-          <SlidersHorizontal className="h-4 w-4 mr-2" />
-          Filters
-          {hasActiveFilters && (
-            <span className="ml-2 h-2 w-2 rounded-full bg-amber-500" />
-          )}
+          <SlidersHorizontal className="h-4 w-4 mr-2" aria-hidden="true" />
+          {hasActiveFilters ? `Filters (${filteredAndSortedProducts.length})` : "Filters"}
         </Button>
 
         {/* Desktop Filters */}
@@ -158,32 +155,44 @@ export function ShopFilters({ products }: ShopFiltersProps) {
 
       {/* Mobile Filters (Collapsible) */}
       {showFilters && (
-        <div className="sm:hidden flex flex-col gap-3 mb-6 p-4 bg-neutral-50 rounded-lg">
-          <Select
-            value={availability}
-            onValueChange={(value) => setAvailability(value as AvailabilityFilter)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Availability" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All ({products.length})</SelectItem>
-              <SelectItem value="in-stock">In Stock ({inStockCount})</SelectItem>
-              <SelectItem value="sold">Sold ({soldCount})</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="sm:hidden flex flex-col gap-4 mb-6 p-4 bg-neutral-50 rounded-lg">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-neutral-700">Availability</label>
+            <Select
+              value={availability}
+              onValueChange={(value) => setAvailability(value as AvailabilityFilter)}
+            >
+              <SelectTrigger className="h-11">
+                <SelectValue placeholder="Availability" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All ({products.length})</SelectItem>
+                <SelectItem value="in-stock">In Stock ({inStockCount})</SelectItem>
+                <SelectItem value="sold">Sold ({soldCount})</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-neutral-700">Sort by</label>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+              <SelectTrigger className="h-11">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="w-full">
+              Clear all filters
+            </Button>
+          )}
         </div>
       )}
 
@@ -208,7 +217,7 @@ export function ShopFilters({ products }: ShopFiltersProps) {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {filteredAndSortedProducts.map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}

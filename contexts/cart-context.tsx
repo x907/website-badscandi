@@ -25,6 +25,7 @@ interface CartContextType {
   items: CartItem[];
   isOpen: boolean;
   isLoading: boolean;
+  updatingItemId: string | null;
   totalItems: number;
   subtotalCents: number;
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
@@ -45,6 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const { data: session } = useSession();
   const hasSynced = useRef(false);
 
@@ -192,12 +194,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const updateQuantity = useCallback(
-    (productId: string, quantity: number) => {
+    async (productId: string, quantity: number) => {
       if (quantity < 1) {
         removeItem(productId);
         return;
       }
 
+      setUpdatingItemId(productId);
       setItems((prev) => {
         const newItems = prev.map((i) =>
           i.productId === productId
@@ -207,6 +210,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         saveToServer(newItems);
         return newItems;
       });
+      // Brief delay for visual feedback
+      setTimeout(() => setUpdatingItemId(null), 200);
     },
     [removeItem, saveToServer]
   );
@@ -237,6 +242,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       isOpen,
       isLoading,
+      updatingItemId,
       totalItems,
       subtotalCents,
       addItem,
@@ -250,6 +256,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       isOpen,
       isLoading,
+      updatingItemId,
       totalItems,
       subtotalCents,
       addItem,

@@ -6,9 +6,9 @@ import { HeaderUserSection } from "@/components/layout/header-user-section";
 export function Header() {
   return (
     <header className="border-b border-neutral-100 bg-white">
-      <div className="container mx-auto px-6 py-6">
+      <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-6">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-2xl font-semibold tracking-tight">
+          <Link href="/" className="text-xl sm:text-2xl font-semibold tracking-tight">
             Bad Scandi
           </Link>
 

@@ -6,16 +6,16 @@ export const metadata = getContactMetadata();
 
 export default function ContactPage() {
   return (
-    <div className="container mx-auto px-6 py-12">
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">Get in Touch</h1>
-          <p className="text-xl text-neutral-600">
+        <div className="mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Get in Touch</h1>
+          <p className="text-base sm:text-lg md:text-xl text-neutral-600">
             Questions about our fiber art? Interested in custom orders or wholesale? We'd love to hear from you.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
+        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
           <div className="lg:col-span-2">
             <ContactForm />
           </div>
