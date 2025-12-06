@@ -39,7 +39,7 @@ export function ContactForm() {
       setSuccess(true);
       (e.target as HTMLFormElement).reset();
     } catch (err) {
-      setError("Failed to send message. Please try emailing hello@badscandi.com directly.");
+      setError("Failed to send message. Please try again later.");
     } finally {
       setLoading(false);
     }
