@@ -6,9 +6,10 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
 
 // Generate unsubscribe token for a user
 export function generateUnsubscribeToken(userId: string, email: string): string {
-  const secret = process.env.CRON_SHARED_SECRET;
+  // Use dedicated secret for email tokens, fall back to CRON_SHARED_SECRET for backwards compatibility
+  const secret = process.env.EMAIL_UNSUBSCRIBE_SECRET || process.env.CRON_SHARED_SECRET;
   if (!secret) {
-    throw new Error("CRON_SHARED_SECRET environment variable is required for email security");
+    throw new Error("EMAIL_UNSUBSCRIBE_SECRET environment variable is required for email security");
   }
   const data = `${userId}:${email}`;
   return createHmac("sha256", secret).update(data).digest("hex").slice(0, 32);

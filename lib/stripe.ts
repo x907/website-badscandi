@@ -1,14 +1,28 @@
 import Stripe from "stripe";
 
-// Use a placeholder during build time when env var is not set
-// At runtime, the actual API routes will have the env var configured
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "sk_test_placeholder_for_build";
+// Stripe client initialization - requires STRIPE_SECRET_KEY in runtime
+// Build-time: Returns a minimal client that will fail gracefully if used
+// Runtime: Uses the actual secret key from environment
+function createStripeClient(): Stripe {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
 
-if (!process.env.STRIPE_SECRET_KEY && process.env.NODE_ENV !== "production") {
-  console.warn("Warning: STRIPE_SECRET_KEY is not set. Using placeholder for build.");
+  if (!secretKey) {
+    // During build, Next.js imports this module but we don't need a real client
+    // Return a client with empty key - it will fail on actual API calls which is correct
+    if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+      console.error("CRITICAL: STRIPE_SECRET_KEY is not configured in production");
+    }
+    // Use empty string - Stripe constructor requires a string but API calls will fail
+    return new Stripe("", {
+      apiVersion: "2025-02-24.acacia",
+      typescript: true,
+    });
+  }
+
+  return new Stripe(secretKey, {
+    apiVersion: "2025-02-24.acacia",
+    typescript: true,
+  });
 }
 
-export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2025-02-24.acacia",
-  typescript: true,
-});
+export const stripe = createStripeClient();

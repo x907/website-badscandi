@@ -109,8 +109,16 @@ export async function checkRateLimit(
 
     return null;
   } catch (error) {
-    // If Redis fails, allow the request (fail open)
+    // For security-sensitive endpoints (auth, checkout), fail closed
+    // For other endpoints, fail open to avoid blocking legitimate traffic
     console.error("Rate limit check failed:", error);
+    const securityEndpoints: RateLimitType[] = ["auth", "checkout"];
+    if (securityEndpoints.includes(identifier)) {
+      return NextResponse.json(
+        { error: "Service temporarily unavailable. Please try again." },
+        { status: 503 }
+      );
+    }
     return null;
   }
 }

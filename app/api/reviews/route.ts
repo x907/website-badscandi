@@ -54,6 +54,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate email format if provided
+    if (email && email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        return NextResponse.json(
+          { error: "Invalid email format" },
+          { status: 400 }
+        );
+      }
+    }
+
     if (!productId) {
       return NextResponse.json(
         { error: "Product ID is required" },
@@ -109,10 +120,38 @@ export async function POST(request: NextRequest) {
     const photoFiles = formData.getAll("photos") as File[];
     const imageUrls: string[] = [];
 
+    // File upload limits
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
+    const MAX_FILES = 5;
+    const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+    // Validate file count
+    if (photoFiles.length > MAX_FILES) {
+      return NextResponse.json(
+        { error: `Maximum ${MAX_FILES} photos allowed` },
+        { status: 400 }
+      );
+    }
+
     // Upload photos to S3
     if (photoFiles.length > 0) {
       for (const file of photoFiles) {
         if (file.size > 0) {
+          // Validate file size
+          if (file.size > MAX_FILE_SIZE) {
+            return NextResponse.json(
+              { error: `File "${file.name}" exceeds maximum size of 5MB` },
+              { status: 400 }
+            );
+          }
+
+          // Validate file type
+          if (!ALLOWED_TYPES.includes(file.type)) {
+            return NextResponse.json(
+              { error: `File "${file.name}" has invalid type. Allowed: JPEG, PNG, WebP, GIF` },
+              { status: 400 }
+            );
+          }
           try {
             // Convert File to Buffer
             const bytes = await file.arrayBuffer();
