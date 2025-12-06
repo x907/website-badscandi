@@ -7,6 +7,7 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
   ReactNode,
 } from "react";
 import { useSession } from "@/lib/auth-client";
@@ -38,12 +39,14 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "badscandi-cart";
 const CART_CLEARED_KEY = "badscandi-cart-cleared";
+const CART_CLEARED_TIMEOUT = 30000; // 30 seconds to allow server cleanup
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { data: session } = useSession();
+  const hasSynced = useRef(false);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -65,60 +68,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isLoading]);
 
-  // Sync with database when user logs in
-  useEffect(() => {
-    if (session?.user?.id && !isLoading) {
-      // Check if cart was recently cleared (e.g., after checkout)
-      const cartCleared = localStorage.getItem(CART_CLEARED_KEY);
-      if (cartCleared) {
-        // Don't sync from server - cart was intentionally cleared
-        // Clear the flag after a short delay to allow server cart to be deleted
-        setTimeout(() => {
-          localStorage.removeItem(CART_CLEARED_KEY);
-        }, 5000);
-        return;
-      }
-      syncCartWithDatabase();
-    }
-  }, [session?.user?.id, isLoading]);
-
-  const syncCartWithDatabase = async () => {
-    try {
-      // Fetch server cart
-      const response = await fetch("/api/cart");
-      if (response.ok) {
-        const serverCart = await response.json();
-
-        // Merge local and server carts (local takes precedence for quantities)
-        if (serverCart.items && serverCart.items.length > 0) {
-          setItems((localItems) => {
-            const merged = [...localItems];
-            for (const serverItem of serverCart.items) {
-              const existing = merged.find(
-                (item) => item.productId === serverItem.productId
-              );
-              if (!existing) {
-                merged.push(serverItem);
-              }
-            }
-            return merged;
-          });
-        }
-      }
-
-      // Save merged cart back to server
-      if (items.length > 0) {
-        await fetch("/api/cart", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items }),
-        });
-      }
-    } catch (error) {
-      console.error("Failed to sync cart:", error);
-    }
-  };
-
+  // Save to server helper - uses ref to avoid stale closures
   const saveToServer = useCallback(
     async (newItems: CartItem[]) => {
       if (session?.user?.id) {
@@ -135,6 +85,76 @@ export function CartProvider({ children }: { children: ReactNode }) {
     },
     [session?.user?.id]
   );
+
+  // Sync with database when user logs in
+  useEffect(() => {
+    if (session?.user?.id && !isLoading && !hasSynced.current) {
+      // Check if cart was recently cleared (e.g., after checkout)
+      const cartCleared = localStorage.getItem(CART_CLEARED_KEY);
+      if (cartCleared) {
+        const clearedTime = parseInt(cartCleared, 10);
+        // Only respect the flag for 30 seconds
+        if (Date.now() - clearedTime < CART_CLEARED_TIMEOUT) {
+          return;
+        }
+        // Flag expired, remove it
+        localStorage.removeItem(CART_CLEARED_KEY);
+      }
+
+      hasSynced.current = true;
+      syncCartWithDatabase();
+    }
+  }, [session?.user?.id, isLoading]);
+
+  // Reset sync flag when user logs out
+  useEffect(() => {
+    if (!session?.user?.id) {
+      hasSynced.current = false;
+    }
+  }, [session?.user?.id]);
+
+  const syncCartWithDatabase = async () => {
+    try {
+      // Fetch server cart
+      const response = await fetch("/api/cart");
+      if (!response.ok) return;
+
+      const serverCart = await response.json();
+      const serverItems: CartItem[] = serverCart.items || [];
+
+      // Use functional update to get current local items and merge properly
+      setItems((localItems) => {
+        // If both are empty, nothing to do
+        if (localItems.length === 0 && serverItems.length === 0) {
+          return localItems;
+        }
+
+        // Merge: local items take precedence, add server items that don't exist locally
+        const merged = [...localItems];
+        for (const serverItem of serverItems) {
+          const existsLocally = merged.find(
+            (item) => item.productId === serverItem.productId
+          );
+          if (!existsLocally) {
+            merged.push(serverItem);
+          }
+        }
+
+        // Save merged cart back to server (only if there was a change)
+        if (merged.length > 0 && merged.length !== localItems.length) {
+          fetch("/api/cart", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: merged }),
+          }).catch((err) => console.error("Failed to save merged cart:", err));
+        }
+
+        return merged;
+      });
+    } catch (error) {
+      console.error("Failed to sync cart:", error);
+    }
+  };
 
   const addItem = useCallback(
     (item: Omit<CartItem, "quantity">, quantity = 1) => {
