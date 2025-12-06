@@ -38,7 +38,13 @@ export default function SignInPage() {
       });
 
       if (error) {
-        setError(error.message || "Failed to sign in with passkey");
+        const message = error.message || "";
+        // Handle "auth cancelled" or similar - means no passkey found
+        if (message.includes("cancelled") || message.includes("No credential") || message.includes("not found")) {
+          setError("No passkey found for this site.");
+        } else {
+          setError(message || "Failed to sign in with passkey");
+        }
         setLoading(null);
       }
     } catch (err: any) {
