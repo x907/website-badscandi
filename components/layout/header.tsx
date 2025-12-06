@@ -1,16 +1,9 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
 import { CartButton } from "@/components/cart/cart-button";
 import { MobileMenu } from "@/components/layout/mobile-menu";
+import { HeaderUserSection } from "@/components/layout/header-user-section";
 
-export async function Header() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+export function Header() {
   return (
     <header className="border-b border-neutral-100 bg-white">
       <div className="container mx-auto px-6 py-6">
@@ -34,24 +27,10 @@ export async function Header() {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <MobileMenu />
             <CartButton />
-            {session?.user ? (
-              <Link href="/account">
-                <Button variant="ghost" size="icon" className="relative">
-                  <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
-                    <User className="h-4 w-4 text-amber-900" />
-                  </div>
-                </Button>
-              </Link>
-            ) : (
-              <Link href="/auth/signin">
-                <Button variant="outline" size="sm">
-                  Sign In
-                </Button>
-              </Link>
-            )}
+            <HeaderUserSection />
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Menu, X, User, ShoppingBag, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth-client";
+import { UserAvatar, getFirstName } from "@/components/user-avatar";
 
 const primaryLinks = [
   { href: "/about", label: "About" },
@@ -56,12 +57,17 @@ export function MobileMenu() {
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors"
               >
-                <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <User className="h-5 w-5 text-amber-900" />
+                <div className="flex-shrink-0">
+                  <UserAvatar
+                    name={session.user.name}
+                    email={session.user.email}
+                    image={session.user.image}
+                    size="lg"
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-neutral-900 truncate">
-                    {session.user.name || session.user.email}
+                    {getFirstName(session.user.name, session.user.email)}
                   </p>
                   <p className="text-xs text-neutral-500">View account</p>
                 </div>
