@@ -90,11 +90,14 @@ export function AddToCartButton({
               className="h-11 w-11"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={quantity <= 1}
+              aria-label="Decrease quantity"
             >
-              <Minus className="w-4 h-4" />
+              <Minus className="w-4 h-4" aria-hidden="true" />
             </Button>
 
-            <span className="w-10 text-center font-medium">{quantity}</span>
+            <span className="w-10 text-center font-medium" aria-live="polite">
+              {quantity}
+            </span>
 
             <Button
               variant="outline"
@@ -102,8 +105,9 @@ export function AddToCartButton({
               className="h-11 w-11"
               onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
               disabled={quantity >= product.stock}
+              aria-label="Increase quantity"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

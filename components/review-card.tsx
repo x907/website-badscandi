@@ -1,6 +1,9 @@
 import Image from "next/image";
 import { Star, BadgeCheck } from "lucide-react";
 
+// Constant array to avoid re-creating on every render
+const STAR_INDICES = [0, 1, 2, 3, 4];
+
 interface ReviewCardProps {
   author: string;
   text: string;
@@ -30,11 +33,12 @@ export function ReviewCard({ author, text, photos, verified = false }: ReviewCar
       {/* Content */}
       <div className="p-6 space-y-3">
         {/* Stars */}
-        <div className="flex gap-0.5">
-          {[...Array(5)].map((_, i) => (
+        <div className="flex gap-0.5" aria-label="5 out of 5 stars">
+          {STAR_INDICES.map((i) => (
             <Star
               key={i}
               className="h-4 w-4 fill-amber-900 text-amber-900"
+              aria-hidden="true"
             />
           ))}
         </div>
