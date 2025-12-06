@@ -4,17 +4,17 @@ export const metadata = getAboutMetadata();
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto px-6 py-12">
-      <div className="max-w-3xl mx-auto space-y-12">
-        <div className="space-y-4">
-          <h1 className="text-4xl font-bold">About Bad Scandi</h1>
-          <p className="text-xl text-neutral-600">
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="max-w-3xl mx-auto space-y-8 sm:space-y-12">
+        <div className="space-y-3 sm:space-y-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">About Bad Scandi</h1>
+          <p className="text-base sm:text-lg md:text-xl text-neutral-600">
             Hand-dyed fiber art wall hangings inspired by Scandinavian design
           </p>
         </div>
 
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Meet Ashley</h2>
+        <div className="space-y-4 sm:space-y-6">
+          <h2 className="text-xl sm:text-2xl font-semibold">Meet Ashley</h2>
           <p className="text-neutral-600 leading-relaxed">
             Bad Scandi was founded by Ashley Dias, a self-taught fiber artist who discovered her passion for creating handcrafted wool tapestries during the COVID-19 pandemic. What began as an exploration during uncertain times transformed into a thriving fiber art business rooted in Scandinavian heritage and minimalist design principles.
           </p>
@@ -39,8 +39,8 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">The Creative Process</h2>
+        <div className="space-y-4 sm:space-y-6">
+          <h2 className="text-xl sm:text-2xl font-semibold">The Creative Process</h2>
           <p className="text-neutral-600 leading-relaxed">
             Each piece begins with a client consultation for custom commissions. Ashley creates design sketches on her iPad for approval before moving into production. The wood panels are carefully prepared, then hundreds of wool strands are measured, cut, and adhered to the panel.
           </p>
@@ -52,8 +52,8 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Materials</h2>
+        <div className="space-y-4 sm:space-y-6">
+          <h2 className="text-xl sm:text-2xl font-semibold">Materials</h2>
           <p className="text-neutral-600 leading-relaxed">
             We use only the highest quality natural materials:
           </p>
@@ -65,8 +65,8 @@ export default function AboutPage() {
           </ul>
         </div>
 
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Custom Commissions</h2>
+        <div className="space-y-4 sm:space-y-6">
+          <h2 className="text-xl sm:text-2xl font-semibold">Custom Commissions</h2>
           <p className="text-neutral-600 leading-relaxed">
             While our current collection features sold pieces from our portfolio, we're always excited to create custom fiber art for your space. Each commission is tailored to your vision, size requirements, and color preferences.
           </p>

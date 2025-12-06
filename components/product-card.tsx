@@ -38,18 +38,18 @@ export function ProductCard({ slug, name, description, priceCents, imageUrl, sto
             </div>
           )}
         </div>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-2">
-            <p className="text-lg font-semibold text-amber-900">{formatPrice(priceCents)}</p>
+            <p className="text-base sm:text-lg font-semibold text-amber-900">{formatPrice(priceCents)}</p>
             {stock === 0 && (
               <span className="px-2 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-600 rounded-full">
                 SOLD
               </span>
             )}
           </div>
-          <h3 className="font-medium text-base mb-2 text-neutral-700">{name}</h3>
+          <h3 className="font-medium text-sm sm:text-base mb-2 text-neutral-700">{name}</h3>
           {showDescription && (
-            <p className="text-sm text-neutral-500 line-clamp-2">{cleanDescription}</p>
+            <p className="text-xs sm:text-sm text-neutral-500 line-clamp-2">{cleanDescription}</p>
           )}
         </CardContent>
       </Card>

@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const altText = product.altText || product.name;
 
   return (
-    <div className="container mx-auto px-6 py-12">
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <ProductViewTracker product={product} />
       <ProductStructuredData product={product} />
       <BreadcrumbStructuredData
@@ -46,21 +46,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
           { name: product.name, url: `https://badscandi.com/product/${product.slug}` },
         ]}
       />
-      <div className="grid lg:grid-cols-2 gap-12">
-        <div className="aspect-square relative rounded-2xl overflow-hidden bg-neutral-100">
+      <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+        <div className="aspect-square relative rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-100">
           <Image
             src={product.imageUrl}
             alt={altText}
             fill
             className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 50vw"
             priority
           />
         </div>
 
-        <div className="space-y-8">
-          <div className="space-y-4">
+        <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-3">
-              <p className="text-3xl font-semibold text-amber-900">
+              <p className="text-2xl sm:text-3xl font-semibold text-amber-900">
                 {formatPrice(product.priceCents)}
               </p>
               {product.stock === 0 && (
@@ -69,7 +70,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </span>
               )}
             </div>
-            <h1 className="text-lg font-normal text-neutral-600">{product.name}</h1>
+            <h1 className="text-base sm:text-lg font-normal text-neutral-600">{product.name}</h1>
           </div>
 
           <div className="prose prose-neutral max-w-none">
@@ -102,29 +103,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
             )}
           </div>
 
-          <div className="border-t border-neutral-100 pt-8">
+          <div className="border-t border-neutral-100 pt-6 sm:pt-8">
             <h3 className="font-semibold mb-4">Product Details</h3>
             <dl className="space-y-3 text-sm">
               {product.materials && (
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
                   <dt className="text-neutral-600">Materials</dt>
                   <dd className="font-medium">{product.materials}</dd>
                 </div>
               )}
               {product.dimensions && (
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
                   <dt className="text-neutral-600">Dimensions</dt>
                   <dd className="font-medium">{product.dimensions}</dd>
                 </div>
               )}
               {product.colors && (
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
                   <dt className="text-neutral-600">Colors</dt>
                   <dd className="font-medium capitalize">{product.colors.split(',').join(', ')}</dd>
                 </div>
               )}
               {product.category && (
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
                   <dt className="text-neutral-600">Category</dt>
                   <dd className="font-medium capitalize">{product.category.replace('-', ' ')}</dd>
                 </div>
