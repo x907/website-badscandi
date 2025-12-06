@@ -15,10 +15,6 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "avatars.githubusercontent.com", // GitHub avatars
       },
-      {
-        protocol: "https",
-        hostname: "i.etsystatic.com", // Etsy review images
-      },
     ],
   },
 };
