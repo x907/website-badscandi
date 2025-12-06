@@ -70,7 +70,7 @@ export default function AboutPage() {
           </p>
           <ul className="list-disc list-inside space-y-2 text-neutral-600">
             <li>100% wool fibers for rich texture and durability</li>
-            <li>Handcrafted wood panels including maple, walnut, and exotic hardwoods</li>
+            <li>Responsibly sourced wood panels including maple, walnut, and occasional specialty hardwoods</li>
           </ul>
         </div>
 
