@@ -32,7 +32,7 @@ export function CartItem({ item }: CartItemProps) {
           </h3>
           <button
             onClick={() => removeItem(item.productId)}
-            className="text-neutral-400 hover:text-neutral-600 p-1"
+            className="text-neutral-400 hover:text-neutral-600 p-2 -m-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Remove item"
           >
             <X className="w-4 h-4" />
@@ -47,11 +47,11 @@ export function CartItem({ item }: CartItemProps) {
           <Button
             variant="outline"
             size="icon"
-            className="h-7 w-7"
+            className="h-10 w-10"
             onClick={() => updateQuantity(item.productId, item.quantity - 1)}
             disabled={item.quantity <= 1}
           >
-            <Minus className="w-3 h-3" />
+            <Minus className="w-4 h-4" />
           </Button>
 
           <span className="text-sm w-8 text-center">{item.quantity}</span>
@@ -59,11 +59,11 @@ export function CartItem({ item }: CartItemProps) {
           <Button
             variant="outline"
             size="icon"
-            className="h-7 w-7"
+            className="h-10 w-10"
             onClick={() => updateQuantity(item.productId, item.quantity + 1)}
             disabled={item.quantity >= item.stock}
           >
-            <Plus className="w-3 h-3" />
+            <Plus className="w-4 h-4" />
           </Button>
 
           {item.quantity >= item.stock && (

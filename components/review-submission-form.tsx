@@ -37,7 +37,7 @@ function FilePreviewImage({ file, onRemove }: { file: File; onRemove: () => void
       <button
         type="button"
         onClick={onRemove}
-        className="absolute top-1 right-1 p-1 bg-white rounded-full shadow-lg hover:bg-neutral-100 transition-colors"
+        className="absolute top-1 right-1 p-2 min-w-[44px] min-h-[44px] bg-white rounded-full shadow-lg hover:bg-neutral-100 transition-colors flex items-center justify-center"
       >
         <X className="h-4 w-4 text-neutral-600" />
       </button>
@@ -202,6 +202,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           value={formData.customerName}
           onChange={handleInputChange}
           required
+          autoComplete="name"
           className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-900 focus:border-transparent outline-none"
           placeholder="Enter your name"
         />
@@ -221,6 +222,8 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           name="email"
           value={formData.email}
           onChange={handleInputChange}
+          autoComplete="email"
+          inputMode="email"
           className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-900 focus:border-transparent outline-none"
           placeholder="your@email.com"
         />
@@ -234,13 +237,13 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
         <label className="block text-sm font-medium text-neutral-700 mb-2">
           Rating <span className="text-red-500">*</span>
         </label>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
               type="button"
               onClick={() => handleRatingClick(star)}
-              className="transition-transform hover:scale-110"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center transition-transform hover:scale-110"
             >
               <Star
                 className={`h-8 w-8 ${

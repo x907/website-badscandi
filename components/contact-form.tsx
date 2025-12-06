@@ -78,6 +78,7 @@ export function ContactForm() {
                   name="name"
                   required
                   placeholder="Your name"
+                  autoComplete="name"
                 />
               </div>
 
@@ -89,6 +90,8 @@ export function ContactForm() {
                   type="email"
                   required
                   placeholder="your@email.com"
+                  autoComplete="email"
+                  inputMode="email"
                 />
               </div>
             </div>

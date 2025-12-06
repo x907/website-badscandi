@@ -33,7 +33,7 @@ export function MobileMenu() {
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
-                className="p-2 text-neutral-400 hover:text-neutral-600 rounded-full hover:bg-neutral-100"
+                className="p-2 text-neutral-400 hover:text-neutral-600 rounded-full hover:bg-neutral-100 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5" />

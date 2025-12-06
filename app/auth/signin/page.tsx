@@ -194,6 +194,8 @@ export default function SignInPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading !== null}
+                    autoComplete="email"
+                    inputMode="email"
                   />
                   <Button
                     type="submit"
