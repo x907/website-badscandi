@@ -42,7 +42,7 @@ const eventSchema = z.object({
 
 export async function POST(request: Request) {
   // Rate limiting - 60 events per minute
-  const rateLimitResponse = checkRateLimit(request, "events", rateLimits.events);
+  const rateLimitResponse = await checkRateLimit(request, "events");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

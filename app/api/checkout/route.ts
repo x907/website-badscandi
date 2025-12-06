@@ -13,7 +13,7 @@ interface CartItemInput {
 
 export async function POST(request: Request) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "checkout", rateLimits.checkout);
+  const rateLimitResponse = await checkRateLimit(request, "checkout");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

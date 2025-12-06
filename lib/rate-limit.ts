@@ -1,45 +1,54 @@
 import { NextResponse } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
-}
+// Initialize Redis client - works across all serverless instances
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
-// In-memory store for rate limiting (per serverless instance)
-// NOTE: This is NOT distributed - each Vercel serverless instance has its own Map.
-// For true rate limiting at scale, use Redis/Upstash with @upstash/ratelimit.
-// Current implementation provides basic protection but can be bypassed by hitting
-// different serverless instances. Suitable for low-traffic sites.
-const rateLimitStore = new Map<string, RateLimitEntry>();
-
-// Track last cleanup time to avoid cleaning on every request
-let lastCleanup = Date.now();
-const CLEANUP_INTERVAL = 60000; // 1 minute
-
-// Lazy cleanup - only runs when checking rate limits, not via setInterval
-// This avoids memory leaks in serverless environments
-function cleanupExpiredEntries(): void {
-  const now = Date.now();
-  if (now - lastCleanup < CLEANUP_INTERVAL) {
-    return; // Don't clean up too frequently
-  }
-  lastCleanup = now;
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (entry.resetAt < now) {
-      rateLimitStore.delete(key);
-    }
-  }
-}
-
-interface RateLimitConfig {
-  limit: number; // Max requests
-  windowMs: number; // Time window in milliseconds
-}
-
-const defaultConfig: RateLimitConfig = {
-  limit: 10,
-  windowMs: 60000, // 1 minute
+// Create rate limiters for different endpoints using sliding window algorithm
+const rateLimiters = {
+  // Contact form: 5 requests per minute
+  contact: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, "1 m"),
+    prefix: "ratelimit:contact",
+  }),
+  // Checkout: 10 requests per minute
+  checkout: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, "1 m"),
+    prefix: "ratelimit:checkout",
+  }),
+  // Reviews: 3 submissions per hour
+  reviewSubmit: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(3, "1 h"),
+    prefix: "ratelimit:review",
+  }),
+  // Events tracking: 60 requests per minute
+  events: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(60, "1 m"),
+    prefix: "ratelimit:events",
+  }),
+  // Auth attempts: 10 per minute
+  auth: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, "1 m"),
+    prefix: "ratelimit:auth",
+  }),
+  // General API: 30 requests per minute
+  general: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, "1 m"),
+    prefix: "ratelimit:general",
+  }),
 };
+
+type RateLimitType = keyof typeof rateLimiters;
 
 /**
  * Get client IP from request headers
@@ -61,72 +70,57 @@ function getClientIp(request: Request): string {
 }
 
 /**
- * Check rate limit for a request
+ * Check rate limit for a request using Upstash Redis
  * Returns null if allowed, or a NextResponse if rate limited
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   request: Request,
-  identifier?: string,
-  config: Partial<RateLimitConfig> = {}
-): NextResponse | null {
-  // Lazy cleanup of expired entries
-  cleanupExpiredEntries();
-
-  const { limit, windowMs } = { ...defaultConfig, ...config };
-  const ip = getClientIp(request);
-  const key = identifier ? `${identifier}:${ip}` : ip;
-  const now = Date.now();
-
-  const entry = rateLimitStore.get(key);
-
-  if (!entry || entry.resetAt < now) {
-    // First request or window expired
-    rateLimitStore.set(key, {
-      count: 1,
-      resetAt: now + windowMs,
-    });
+  identifier: RateLimitType = "general"
+): Promise<NextResponse | null> {
+  // Skip rate limiting if Redis is not configured (local dev without env vars)
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
     return null;
   }
 
-  if (entry.count >= limit) {
-    // Rate limited
-    const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
-    return NextResponse.json(
-      {
-        error: "Too many requests. Please try again later.",
-        retryAfter,
-      },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": String(retryAfter),
-          "X-RateLimit-Limit": String(limit),
-          "X-RateLimit-Remaining": "0",
-          "X-RateLimit-Reset": String(Math.ceil(entry.resetAt / 1000)),
-        },
-      }
-    );
-  }
+  const ip = getClientIp(request);
+  const limiter = rateLimiters[identifier];
 
-  // Increment counter
-  entry.count++;
-  return null;
+  try {
+    const { success, limit, remaining, reset } = await limiter.limit(ip);
+
+    if (!success) {
+      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          error: "Too many requests. Please try again later.",
+          retryAfter,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(retryAfter),
+            "X-RateLimit-Limit": String(limit),
+            "X-RateLimit-Remaining": String(remaining),
+            "X-RateLimit-Reset": String(Math.ceil(reset / 1000)),
+          },
+        }
+      );
+    }
+
+    return null;
+  } catch (error) {
+    // If Redis fails, allow the request (fail open)
+    console.error("Rate limit check failed:", error);
+    return null;
+  }
 }
 
-/**
- * Rate limit configurations for different endpoints
- */
+// Export rate limit types for backwards compatibility
 export const rateLimits = {
-  // Contact form: 5 requests per minute
-  contact: { limit: 5, windowMs: 60000 },
-  // Checkout: 10 requests per minute
-  checkout: { limit: 10, windowMs: 60000 },
-  // Reviews: 3 submissions per hour
-  reviewSubmit: { limit: 3, windowMs: 3600000 },
-  // Events tracking: 60 requests per minute
-  events: { limit: 60, windowMs: 60000 },
-  // Auth attempts: 10 per minute
-  auth: { limit: 10, windowMs: 60000 },
-  // General API: 30 requests per minute
-  general: { limit: 30, windowMs: 60000 },
+  contact: "contact" as const,
+  checkout: "checkout" as const,
+  reviewSubmit: "reviewSubmit" as const,
+  events: "events" as const,
+  auth: "auth" as const,
+  general: "general" as const,
 };

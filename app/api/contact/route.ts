@@ -12,7 +12,7 @@ const sesClient = new SESClient({
 
 export async function POST(request: Request) {
   // Rate limiting
-  const rateLimitResponse = checkRateLimit(request, "contact", rateLimits.contact);
+  const rateLimitResponse = await checkRateLimit(request, "contact");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

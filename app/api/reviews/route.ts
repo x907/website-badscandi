@@ -7,7 +7,7 @@ import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   // Rate limiting - 3 review submissions per hour
-  const rateLimitResponse = checkRateLimit(request, "review-submit", rateLimits.reviewSubmit);
+  const rateLimitResponse = await checkRateLimit(request, "reviewSubmit");
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
