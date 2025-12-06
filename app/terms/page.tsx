@@ -88,7 +88,7 @@ export default function TermsPage() {
             when creating an account.
           </p>
           <p>
-            Our sign-in options include passkeys, email magic links, and social login (Google). Because
+            Our sign-in options include passkeys, email magic links, and social login providers. Because
             these methods rely on access to your email account or linked social accounts, you are
             responsible for keeping those accounts secure. If a third party gains access to your email
             or social accounts, they may be able to access your Bad Scandi account. We are not liable
