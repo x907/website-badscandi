@@ -45,7 +45,7 @@ export function HeroCarousel() {
             alt={image.alt}
             fill
             priority={index === 0}
-            className="object-cover"
+            className="object-cover scale-[1.01]"
             sizes="(max-width: 1024px) 100vw, 50vw"
           />
         </div>
