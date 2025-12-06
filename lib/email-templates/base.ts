@@ -112,14 +112,16 @@ export function stripHtml(html: string): string {
   }
 
   // Clean up whitespace and decode common HTML entities
+  // IMPORTANT: Decode &amp; LAST to prevent double-unescaping
+  // (e.g., &amp;nbsp; -> &nbsp; -> space would be wrong)
   return result
     .join("")
     .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">")
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
+    .replace(/&amp;/gi, "&")
     .replace(/\s+/g, " ")
     .trim();
 }
