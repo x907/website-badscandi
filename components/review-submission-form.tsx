@@ -332,7 +332,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
 
           {/* Selected Files Preview */}
           {selectedFiles.length > 0 && (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {selectedFiles.map((file, index) => (
                 <FilePreviewImage
                   key={`${file.name}-${file.size}-${index}`}

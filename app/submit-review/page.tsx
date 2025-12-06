@@ -27,21 +27,21 @@ export default async function SubmitReviewPage({ searchParams }: SubmitReviewPag
   if (!session?.user?.id) {
     return (
       <div className="min-h-screen bg-neutral-50">
-        <div className="container mx-auto px-6 py-24">
+        <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-24">
           <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold mb-4">Submit a Review</h1>
+            <div className="text-center mb-8 sm:mb-12">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Submit a Review</h1>
               <p className="text-neutral-600 text-lg">
                 Only verified customers can submit reviews
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 md:p-12 text-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 sm:p-8 md:p-12 text-center">
               <p className="text-neutral-600 mb-6">
                 You must be signed in and have purchased a product to submit a review.
                 This helps us ensure all reviews are from real customers.
               </p>
-              <div className="flex gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Link href="/auth/signin">
                   <Button size="lg">
                     Sign In
@@ -62,17 +62,17 @@ export default async function SubmitReviewPage({ searchParams }: SubmitReviewPag
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="container mx-auto px-6 py-24">
+      <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-24">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Share Your Experience</h1>
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Share Your Experience</h1>
             <p className="text-neutral-600 text-lg">
               We'd love to hear about your Bad Scandi wall hanging!
               Your review helps other customers and supports our small business.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 md:p-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 sm:p-8 md:p-12">
             <ReviewSubmissionForm preSelectedProductId={product} />
           </div>
 

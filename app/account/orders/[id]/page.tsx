@@ -50,8 +50,8 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
   }>;
 
   return (
-    <div className="container mx-auto px-6 py-12">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         <Link href="/account">
           <Button variant="ghost" className="gap-2 -ml-2">
             <ArrowLeft className="h-4 w-4" />
@@ -59,13 +59,13 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
           </Button>
         </Link>
 
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Order Details</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Order Details</h1>
             <p className="text-neutral-600 mt-1">Order #{order.id.slice(0, 8)}</p>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-amber-900">
+          <div className="sm:text-right">
+            <p className="text-xl sm:text-2xl font-bold text-amber-900">
               {formatPrice(order.totalCents)}
             </p>
             <p className="text-sm text-neutral-600 capitalize mt-1">{order.status}</p>
@@ -109,7 +109,7 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                   key={index}
                   className="border border-neutral-200 rounded-lg overflow-hidden"
                 >
-                  <div className="grid md:grid-cols-[200px_1fr] gap-6 p-4">
+                  <div className="grid sm:grid-cols-[150px_1fr] md:grid-cols-[200px_1fr] gap-4 sm:gap-6 p-4">
                     <Link href={`/product/${item.id}`} className="group">
                       <img
                         src={item.imageUrl}

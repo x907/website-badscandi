@@ -12,10 +12,10 @@ export default function CheckoutSuccessPage() {
   return (
     <>
       <ClearCart />
-    <div className="container mx-auto px-6 py-16">
+    <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16">
       <div className="max-w-md mx-auto text-center">
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-green-600" />
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 sm:mb-6">
+          <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
         </div>
 
         <h1 className="text-2xl font-semibold text-neutral-900 mb-3">

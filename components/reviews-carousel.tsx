@@ -32,8 +32,8 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
   const currentReview = reviews[currentIndex];
 
   return (
-    <div className="relative bg-neutral-50 rounded-2xl p-8 md:p-12 max-w-4xl mx-auto">
-      <div className="flex flex-col items-center text-center space-y-6">
+    <div className="relative bg-neutral-50 rounded-2xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto">
+      <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6">
         {/* Stars - Always 5 stars */}
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -46,7 +46,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
 
         {/* Review Images (if exists) */}
         {currentReview.photos.length > 0 && (
-          <div className="w-full max-w-2xl grid grid-cols-2 gap-3">
+          <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
             {currentReview.photos.slice(0, 2).map((photo, index) => (
               <div key={index} className="aspect-square rounded-xl overflow-hidden bg-neutral-100 relative">
                 <Image
@@ -61,7 +61,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
         )}
 
         {/* Comment */}
-        <p className="text-lg md:text-xl text-neutral-700 leading-relaxed italic max-w-2xl">
+        <p className="text-base sm:text-lg md:text-xl text-neutral-700 leading-relaxed italic max-w-2xl">
           "{currentReview.text}"
         </p>
 

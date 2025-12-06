@@ -20,8 +20,8 @@ export default async function HomePage() {
   return (
     <div>
       <OrganizationStructuredData />
-      <section className="container mx-auto px-6 py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-24">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight">
               Hand-Dyed
@@ -123,8 +123,8 @@ export default async function HomePage() {
       </section>
 
       {/* As Featured In Section */}
-      <section className="bg-white py-12 border-y border-neutral-200">
-        <div className="container mx-auto px-6">
+      <section className="bg-white py-8 sm:py-12 border-y border-neutral-200">
+        <div className="container mx-auto px-4 sm:px-6">
           <p className="text-center text-sm text-neutral-500 mb-6">As Featured In</p>
           <div className="flex justify-center items-center">
             <a
@@ -140,11 +140,11 @@ export default async function HomePage() {
       </section>
 
       {featuredProducts.length > 0 && (
-        <section className="bg-white py-24">
-          <div className="container mx-auto px-6">
-            <div className="flex items-end justify-between mb-12">
+        <section className="bg-white py-12 sm:py-24">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-12">
               <div>
-                <h2 className="text-3xl font-bold mb-2">Featured Wall Hangings</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2">Featured Wall Hangings</h2>
                 <p className="text-neutral-600">Hand-dyed fiber art for your walls</p>
               </div>
               <Link href="/shop">
@@ -161,9 +161,9 @@ export default async function HomePage() {
       )}
 
       {/* The Dip-Dyeing Process Section */}
-      <section className="container mx-auto px-6 py-24">
-        <div className="max-w-3xl mx-auto text-center space-y-8 mb-16">
-          <h2 className="text-3xl font-bold">The Dip-Dyeing Process</h2>
+      <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-24">
+        <div className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8 mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold">The Dip-Dyeing Process</h2>
           <p className="text-neutral-600 leading-relaxed text-lg">
             Each tapestry is handcrafted using a unique dip-dyeing technique that
             incorporates traditional painting methods. Hundreds of wool strands are
@@ -172,21 +172,21 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-12">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
           <div className="space-y-3">
-            <h3 className="text-xl font-semibold">Hand-Dyed Artistry</h3>
+            <h3 className="text-lg sm:text-xl font-semibold">Hand-Dyed Artistry</h3>
             <p className="text-neutral-600 leading-relaxed">
               Each wall hanging is uniquely hand-dyed using traditional dip dye techniques. No two pieces are exactly alike.
             </p>
           </div>
           <div className="space-y-3">
-            <h3 className="text-xl font-semibold">Natural Materials</h3>
+            <h3 className="text-lg sm:text-xl font-semibold">Natural Materials</h3>
             <p className="text-neutral-600 leading-relaxed">
               Premium wool yarns in neutral, earthy tones that complement any boho or minimalist space.
             </p>
           </div>
-          <div className="space-y-3">
-            <h3 className="text-xl font-semibold">Handcrafted with Care</h3>
+          <div className="space-y-3 sm:col-span-2 md:col-span-1">
+            <h3 className="text-lg sm:text-xl font-semibold">Handcrafted with Care</h3>
             <p className="text-neutral-600 leading-relaxed">
               Every fiber art piece is lovingly created and finished by hand, bringing texture and warmth to your walls.
             </p>
@@ -195,10 +195,10 @@ export default async function HomePage() {
       </section>
 
       {featuredReviews.length > 0 && (
-        <section className="bg-neutral-50 py-24">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-2">What Our Customers Say</h2>
+        <section className="bg-neutral-50 py-12 sm:py-24">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">What Our Customers Say</h2>
               <p className="text-neutral-600">Real reviews from real customers</p>
             </div>
             <ReviewsGrid reviews={featuredReviews} initialLimit={6} />
