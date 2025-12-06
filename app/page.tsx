@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ProductGrid } from "@/components/product-grid";
 import { getFeaturedProducts } from "@/lib/products";
@@ -8,6 +7,7 @@ import { ReviewsGrid } from "@/components/reviews-grid";
 import { ArrowRight, Instagram, Facebook, Youtube } from "lucide-react";
 import { getBaseMetadata } from "@/lib/metadata";
 import { OrganizationStructuredData } from "@/components/structured-data";
+import { HeroCarousel } from "@/components/hero-carousel";
 
 export const metadata = getBaseMetadata();
 
@@ -109,16 +109,7 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="aspect-square rounded-2xl bg-neutral-100 relative overflow-hidden">
-            <Image
-              src="/images/hero-1.jpg"
-              alt="Bad Scandi hand-dyed fiber art tapestry featuring neutral tones and organic patterns"
-              fill
-              priority
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          </div>
+          <HeroCarousel />
         </div>
       </section>
 

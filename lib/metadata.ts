@@ -3,7 +3,7 @@ import { Metadata } from "next";
 const SITE_NAME = "Bad Scandi";
 const SITE_DESCRIPTION = "Hand-dyed fiber art, boho wall hangings, and Scandinavian minimalist tapestries. Unique textile wall art for modern homes.";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/images/hero-1.jpg`;
+const DEFAULT_OG_IMAGE = "https://badscandi-assets.s3.us-east-1.amazonaws.com/images/hero-1.jpg";
 
 export function getBaseMetadata(overrides?: {
   title?: string;
