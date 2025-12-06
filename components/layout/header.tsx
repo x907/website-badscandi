@@ -37,8 +37,10 @@ export async function Header() {
             <CartButton />
             {session?.user ? (
               <Link href="/account">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="relative">
+                  <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-amber-900" />
+                  </div>
                 </Button>
               </Link>
             ) : (
