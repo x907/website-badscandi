@@ -291,9 +291,13 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           onChange={handleInputChange}
           required
           rows={5}
+          maxLength={1000}
           className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-900 focus:border-transparent outline-none resize-none"
           placeholder="Tell us about your experience with your Bad Scandi piece..."
         />
+        <p className="mt-1 text-sm text-neutral-500 text-right">
+          {formData.comment.length}/1000 characters
+        </p>
       </div>
 
       {/* Photo Upload */}

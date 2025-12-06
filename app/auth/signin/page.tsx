@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Fingerprint, Mail, Loader2 } from "lucide-react";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
@@ -21,7 +23,7 @@ export default function SignInPage() {
       const { error } = await signIn.passkey({
         fetchOptions: {
           onSuccess: () => {
-            window.location.href = "/";
+            router.push("/");
           },
           onError: (context) => {
             // User-friendly error messages
