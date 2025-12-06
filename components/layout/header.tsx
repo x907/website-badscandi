@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { CartButton } from "@/components/cart/cart-button";
+import { MobileMenu } from "@/components/layout/mobile-menu";
 
 export async function Header() {
   const session = await auth.api.getSession({
@@ -34,6 +35,7 @@ export async function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <MobileMenu />
             <CartButton />
             {session?.user ? (
               <Link href="/account">
