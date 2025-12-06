@@ -10,6 +10,13 @@ export const sesClient = new SESClient({
   },
 });
 
+/**
+ * Helper to delay execution (for retry backoff)
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export interface SendEmailOptions {
   to: string;
   subject: string;
@@ -59,23 +66,34 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
     }),
   };
 
-  try {
-    const command = new SendEmailCommand(params);
-    const response = await sesClient.send(command);
+  const command = new SendEmailCommand(params);
+  const maxRetries = 3;
+  let lastError: string = "Unknown error";
 
-    console.log(`Email sent to ${to}, MessageId: ${response.MessageId}`);
+  // Retry with exponential backoff: 1s, 2s, 4s
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await sesClient.send(command);
+      console.log(`Email sent to ${to}, MessageId: ${response.MessageId}`);
+      return {
+        success: true,
+        messageId: response.MessageId,
+      };
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "Unknown error";
+      console.error(`Email send attempt ${attempt + 1}/${maxRetries} to ${to} failed:`, lastError);
 
-    return {
-      success: true,
-      messageId: response.MessageId,
-    };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`Failed to send email to ${to}:`, errorMessage);
-
-    return {
-      success: false,
-      error: errorMessage,
-    };
+      if (attempt < maxRetries - 1) {
+        const backoffMs = Math.pow(2, attempt) * 1000;
+        await delay(backoffMs);
+      }
+    }
   }
+
+  // All retries exhausted
+  console.error(`Failed to send email to ${to} after ${maxRetries} attempts`);
+  return {
+    success: false,
+    error: lastError,
+  };
 }

@@ -21,7 +21,14 @@ export async function POST(request: Request) {
     });
 
     if (!session?.user?.id || !session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: "Session expired",
+          code: "SESSION_EXPIRED",
+          message: "Your session has expired. Please sign in again to complete your purchase."
+        },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();

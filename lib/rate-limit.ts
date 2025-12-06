@@ -6,7 +6,10 @@ interface RateLimitEntry {
 }
 
 // In-memory store for rate limiting (per serverless instance)
-// For production at scale, consider using Redis/Upstash
+// NOTE: This is NOT distributed - each Vercel serverless instance has its own Map.
+// For true rate limiting at scale, use Redis/Upstash with @upstash/ratelimit.
+// Current implementation provides basic protection but can be bypassed by hitting
+// different serverless instances. Suitable for low-traffic sites.
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Track last cleanup time to avoid cleaning on every request

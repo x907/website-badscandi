@@ -61,69 +61,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify the user has purchased this product
-    const purchasedOrder = await prisma.order.findFirst({
+    // Verify the user has purchased this product - single query to fetch all completed orders
+    const completedOrders = await prisma.order.findMany({
       where: {
         userId: session.user.id,
         status: "completed",
       },
+      select: {
+        id: true,
+        items: true,
+      },
     });
 
-    if (!purchasedOrder) {
+    if (completedOrders.length === 0) {
       return NextResponse.json(
         { error: "You can only review products you have purchased" },
         { status: 403 }
       );
     }
 
-    // Parse order items and check if this product is in any of their orders
-    // Note: Prisma Json type returns parsed objects, but we wrap in try-catch for safety
-    let items: Array<{ id?: string; productId?: string }>;
-    try {
-      // Handle both already-parsed objects and string JSON
-      items = typeof purchasedOrder.items === "string"
-        ? JSON.parse(purchasedOrder.items)
-        : (purchasedOrder.items as Array<{ id?: string; productId?: string }>);
-    } catch {
-      console.error("Failed to parse order items for order:", purchasedOrder.id);
-      items = [];
+    // Check if product is in any order - single loop through all orders
+    let hasPurchased = false;
+    for (const order of completedOrders) {
+      let orderItems: Array<{ id?: string; productId?: string }>;
+      try {
+        orderItems = typeof order.items === "string"
+          ? JSON.parse(order.items)
+          : (order.items as Array<{ id?: string; productId?: string }>);
+      } catch {
+        console.error("Failed to parse order items for order:", order.id);
+        continue;
+      }
+      if (orderItems.some((item) => item.id === productId || item.productId === productId)) {
+        hasPurchased = true;
+        break;
+      }
     }
 
-    // Check for both 'id' and 'productId' fields for compatibility
-    const hasPurchased = items.some((item) => item.id === productId || item.productId === productId);
-
     if (!hasPurchased) {
-      // Check other orders
-      const allOrders = await prisma.order.findMany({
-        where: {
-          userId: session.user.id,
-          status: "completed",
-        },
-      });
-
-      let foundProduct = false;
-      for (const order of allOrders) {
-        let orderItems: Array<{ id?: string; productId?: string }>;
-        try {
-          orderItems = typeof order.items === "string"
-            ? JSON.parse(order.items)
-            : (order.items as Array<{ id?: string; productId?: string }>);
-        } catch {
-          console.error("Failed to parse order items for order:", order.id);
-          continue;
-        }
-        if (orderItems.some((item) => item.id === productId || item.productId === productId)) {
-          foundProduct = true;
-          break;
-        }
-      }
-
-      if (!foundProduct) {
-        return NextResponse.json(
-          { error: "You can only review products you have purchased" },
-          { status: 403 }
-        );
-      }
+      return NextResponse.json(
+        { error: "You can only review products you have purchased" },
+        { status: 403 }
+      );
     }
 
     // Get photo files (if any)
