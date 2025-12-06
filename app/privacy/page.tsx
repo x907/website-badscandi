@@ -144,10 +144,8 @@ export default function PrivacyPage() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">12. Contact Us</h2>
           <p>
-            If you have questions about this Privacy Policy or our data practices, please contact us at:
-          </p>
-          <p className="font-medium">
-            hello@badscandi.com
+            If you have questions about this Privacy Policy or our data practices, please visit our{" "}
+            <a href="/contact" className="text-amber-900 hover:underline">Contact page</a>.
           </p>
         </section>
       </div>
