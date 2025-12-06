@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { createHmac } from "crypto";
-
-// Generate unsubscribe token for a user
-export function generateUnsubscribeToken(userId: string, email: string): string {
-  const secret = process.env.CRON_SHARED_SECRET || "default-secret";
-  const data = `${userId}:${email}`;
-  return createHmac("sha256", secret).update(data).digest("hex").slice(0, 32);
-}
+import { generateUnsubscribeToken } from "@/lib/email-templates/base";
 
 // Verify unsubscribe token
 function verifyUnsubscribeToken(userId: string, email: string, token: string): boolean {
