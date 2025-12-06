@@ -26,11 +26,9 @@ export default function SignInPage() {
           onError: (context) => {
             // User-friendly error messages
             const message = context.error.message || "";
-            if (message.includes("No credential") || message.includes("not found")) {
-              setError("No passkey found. Sign in with email first, then set up a passkey in your account.");
-            } else if (message.includes("cancelled") || message.includes("NotAllowedError")) {
-              // User cancelled - don't show error
-              setError("");
+            if (message.includes("No credential") || message.includes("not found") || message.includes("cancelled")) {
+              // No passkey found or user cancelled - show helpful message
+              setError("No passkey found for this site.");
             } else {
               setError(message || "Failed to sign in with passkey");
             }
@@ -44,8 +42,9 @@ export default function SignInPage() {
         setLoading(null);
       }
     } catch (err: any) {
-      // User cancelled the passkey prompt
+      // User cancelled or no passkey found
       if (err.name === "NotAllowedError" || err.message?.includes("cancelled")) {
+        setError("No passkey found for this site.");
         setLoading(null);
         return;
       }
@@ -113,6 +112,14 @@ export default function SignInPage() {
             {error && (
               <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
                 {error}
+              </div>
+            )}
+
+            {/* Helpful hint when no passkey exists */}
+            {error?.includes("No passkey") && (
+              <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 p-4 rounded-lg -mt-2">
+                <p className="font-medium mb-1">New to Bad Scandi?</p>
+                <p>Sign in with email or Google first. You can create a passkey afterwards for one-tap sign-ins.</p>
               </div>
             )}
 
