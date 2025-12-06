@@ -9,15 +9,24 @@ interface RateLimitEntry {
 // For production at scale, consider using Redis/Upstash
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Clean up old entries periodically
-setInterval(() => {
+// Track last cleanup time to avoid cleaning on every request
+let lastCleanup = Date.now();
+const CLEANUP_INTERVAL = 60000; // 1 minute
+
+// Lazy cleanup - only runs when checking rate limits, not via setInterval
+// This avoids memory leaks in serverless environments
+function cleanupExpiredEntries(): void {
   const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL) {
+    return; // Don't clean up too frequently
+  }
+  lastCleanup = now;
   for (const [key, entry] of rateLimitStore.entries()) {
     if (entry.resetAt < now) {
       rateLimitStore.delete(key);
     }
   }
-}, 60000); // Clean up every minute
+}
 
 interface RateLimitConfig {
   limit: number; // Max requests
@@ -57,6 +66,9 @@ export function checkRateLimit(
   identifier?: string,
   config: Partial<RateLimitConfig> = {}
 ): NextResponse | null {
+  // Lazy cleanup of expired entries
+  cleanupExpiredEntries();
+
   const { limit, windowMs } = { ...defaultConfig, ...config };
   const ip = getClientIp(request);
   const key = identifier ? `${identifier}:${ip}` : ip;

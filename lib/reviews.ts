@@ -8,6 +8,7 @@ export interface Review {
   rating: number | null;
   text: string;
   photos: string[];
+  verified?: boolean;
 }
 
 export async function getFeaturedReviews(): Promise<Review[]> {
@@ -32,6 +33,7 @@ export async function getFeaturedReviews(): Promise<Review[]> {
       comment: true,
       imageUrls: true,
       createdAt: true,
+      verified: true,
     },
   });
 
@@ -43,6 +45,7 @@ export async function getFeaturedReviews(): Promise<Review[]> {
     rating: review.rating,
     text: review.comment,
     photos: review.imageUrls,
+    verified: review.verified,
   }));
 
   // Combine both sources, with database reviews first
@@ -70,6 +73,7 @@ export async function getAllReviews(): Promise<Review[]> {
       comment: true,
       imageUrls: true,
       createdAt: true,
+      verified: true,
     },
   });
 
@@ -81,6 +85,7 @@ export async function getAllReviews(): Promise<Review[]> {
     rating: review.rating,
     text: review.comment,
     photos: review.imageUrls,
+    verified: review.verified,
   }));
 
   // Combine both sources

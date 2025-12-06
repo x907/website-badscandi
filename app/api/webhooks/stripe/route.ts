@@ -123,17 +123,26 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Update stock for all products
+      // Update stock for all products atomically
+      // Use updateMany with a stock check to prevent negative stock
       for (const item of orderItems) {
-        await db.product.update({
-          where: { id: item.productId },
+        const result = await db.product.updateMany({
+          where: {
+            id: item.productId,
+            stock: { gte: item.quantity }, // Only decrement if enough stock
+          },
           data: {
             stock: {
               decrement: item.quantity,
             },
           },
         });
-        console.log(`Stock updated for product ${item.productId}: -${item.quantity}`);
+
+        if (result.count === 0) {
+          console.warn(`Insufficient stock for product ${item.productId} - stock may have already been decremented or is insufficient`);
+        } else {
+          console.log(`Stock updated for product ${item.productId}: -${item.quantity}`);
+        }
       }
 
       // Clear user's cart after successful order
