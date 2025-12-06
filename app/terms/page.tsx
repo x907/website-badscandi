@@ -87,6 +87,13 @@ export default function TermsPage() {
             and all activities that occur under it. You must provide accurate and complete information
             when creating an account.
           </p>
+          <p>
+            Our sign-in options include passkeys, email magic links, and social login (Google). Because
+            these methods rely on access to your email account or linked social accounts, you are
+            responsible for keeping those accounts secure. If a third party gains access to your email
+            or social accounts, they may be able to access your Bad Scandi account. We are not liable
+            for unauthorized access resulting from compromised email or social accounts.
+          </p>
         </section>
 
         <section className="space-y-4">
