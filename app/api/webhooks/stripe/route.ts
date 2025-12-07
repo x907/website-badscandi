@@ -152,10 +152,10 @@ export async function POST(request: NextRequest) {
             shippingCents,
             status: "completed",
             customerEmail: fullSession.customer_details?.email || null,
-            shippingAddress: fullSession.shipping_details
+            shippingAddress: fullSession.collected_information?.shipping_details
               ? {
-                  name: fullSession.shipping_details.name,
-                  address: fullSession.shipping_details.address as any,
+                  name: fullSession.collected_information.shipping_details.name,
+                  address: fullSession.collected_information.shipping_details.address as any,
                 }
               : undefined,
             items: orderItems,
@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
           select: { name: true },
         });
 
-        const shippingDetails = fullSession.shipping_details;
+        const shippingDetails = fullSession.collected_information?.shipping_details;
 
         try {
           await sendDripEmail(

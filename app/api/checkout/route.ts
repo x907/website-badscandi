@@ -201,8 +201,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     console.error("Error creating checkout session:", error);
+
+    // Provide more specific error messages for common Stripe errors
+    if (error instanceof Error) {
+      const message = error.message;
+
+      // Check for common Stripe errors
+      if (message.includes("Invalid API Key")) {
+        return NextResponse.json(
+          { error: "Payment system configuration error", code: "STRIPE_CONFIG_ERROR" },
+          { status: 500 }
+        );
+      }
+
+      if (message.includes("No such")) {
+        return NextResponse.json(
+          { error: "Payment configuration error", code: "STRIPE_NOT_FOUND" },
+          { status: 500 }
+        );
+      }
+    }
+
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
+      { error: "Failed to create checkout session", code: "CHECKOUT_ERROR" },
       { status: 500 }
     );
   }
