@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth-utils";
 
 // DELETE - Delete a review (admin only)
@@ -15,7 +15,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.review.delete({
+    await db.review.delete({
       where: { id },
     });
 

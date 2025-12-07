@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { uploadToS3 } from "@/lib/s3";
 import { auth } from "@/lib/auth";
 import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the user has purchased this product - single query to fetch all completed orders
-    const completedOrders = await prisma.order.findMany({
+    const completedOrders = await db.order.findMany({
       where: {
         userId: session.user.id,
         status: "completed",
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the review in the database
-    const review = await prisma.review.create({
+    const review = await db.review.create({
       data: {
         customerName: customerName.trim(),
         email: email?.trim() || null,
@@ -205,7 +205,7 @@ export async function GET(request: NextRequest) {
 
     const where = approved !== null ? { approved: approved === "true" } : {};
 
-    const reviews = await prisma.review.findMany({
+    const reviews = await db.review.findMany({
       where,
       orderBy: { createdAt: "desc" },
     });

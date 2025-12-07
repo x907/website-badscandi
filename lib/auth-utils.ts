@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { auth } from "./auth";
-import { prisma } from "./prisma";
+import { db } from "./db";
 
 /**
  * Get the current session and user from better-auth
@@ -28,7 +28,7 @@ export async function isAdmin(): Promise<boolean> {
   }
 
   // Check if user has admin role in database
-  const user = await prisma.user.findUnique({
+  const user = await db.user.findUnique({
     where: { id: session.user.id },
     select: { isAdmin: true },
   });

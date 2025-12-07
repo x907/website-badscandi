@@ -1,9 +1,7 @@
 // Script to enable RLS on all tables
 // Run with: npx tsx scripts/enable-rls.ts
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { db } from "@/lib/db";
 
 const tables = [
   "User",
@@ -26,13 +24,13 @@ async function enableRLS() {
   for (const table of tables) {
     try {
       // Enable RLS
-      await prisma.$executeRawUnsafe(
+      await db.$executeRawUnsafe(
         `ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY;`
       );
       console.log(`✓ Enabled RLS on ${table}`);
 
       // Check if policy already exists
-      const existingPolicy = await prisma.$queryRawUnsafe<{ count: bigint }[]>(`
+      const existingPolicy = await db.$queryRawUnsafe<{ count: bigint }[]>(`
         SELECT COUNT(*) as count FROM pg_policies
         WHERE tablename = '${table}'
         AND policyname = 'Allow all access to ${table}'
@@ -40,7 +38,7 @@ async function enableRLS() {
 
       if (Number(existingPolicy[0].count) === 0) {
         // Create permissive policy
-        await prisma.$executeRawUnsafe(`
+        await db.$executeRawUnsafe(`
           CREATE POLICY "Allow all access to ${table}" ON "${table}"
           FOR ALL
           USING (true)
@@ -64,4 +62,4 @@ async function enableRLS() {
 
 enableRLS()
   .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .finally(() => db.$disconnect());

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth-utils";
 
 // PATCH - Approve a review (admin only)
@@ -15,7 +15,7 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const review = await prisma.review.update({
+    const review = await db.review.update({
       where: { id },
       data: { approved: true },
     });

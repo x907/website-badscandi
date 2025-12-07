@@ -1,5 +1,5 @@
 import reviewsData from "@/data/reviews.json";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 
 export interface Review {
   id: string;
@@ -12,7 +12,7 @@ export interface Review {
 }
 
 export async function getFeaturedReviews(): Promise<Review[]> {
-  // Get reviews from JSON file (existing Etsy reviews)
+  // Get reviews from JSON file (imported reviews)
   const jsonReviews = reviewsData.map((review, index) => ({
     ...review,
     id: review.id || `review-${index}`,
@@ -20,7 +20,7 @@ export async function getFeaturedReviews(): Promise<Review[]> {
   })) as Review[];
 
   // Get featured reviews from database (customer-submitted reviews)
-  const dbReviews = await prisma.review.findMany({
+  const dbReviews = await db.review.findMany({
     where: {
       approved: true,
       featured: true,
@@ -61,7 +61,7 @@ export async function getAllReviews(): Promise<Review[]> {
   })) as Review[];
 
   // Get all approved reviews from database
-  const dbReviews = await prisma.review.findMany({
+  const dbReviews = await db.review.findMany({
     where: {
       approved: true,
     },

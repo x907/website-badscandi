@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth-utils";
 
 // PATCH - Toggle featured status (admin only)
@@ -18,7 +18,7 @@ export async function PATCH(
     const body = await request.json();
     const { featured } = body;
 
-    const review = await prisma.review.update({
+    const review = await db.review.update({
       where: { id },
       data: { featured },
     });
