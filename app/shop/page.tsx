@@ -3,6 +3,7 @@ import { getAllProducts } from "@/lib/products";
 import { getShopMetadata } from "@/lib/metadata";
 
 export const metadata = getShopMetadata();
+export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
   const products = await getAllProducts();
