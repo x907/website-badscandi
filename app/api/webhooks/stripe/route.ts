@@ -236,7 +236,7 @@ export async function POST(request: NextRequest) {
             // Email the label to store owner
             try {
               await sendEmail({
-                to: "badscandi@gmail.com",
+                to: "hello@badscandi.com",
                 subject: `New Order ${order.id} - Shipping Label Ready`,
                 html: `
                   <h2>New Order Received!</h2>
