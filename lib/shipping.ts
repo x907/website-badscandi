@@ -69,9 +69,6 @@ export function refreshEasyPostClient(): void {
   currentEasyPostMode = null;
 }
 
-// Backward compatibility - initial client using sync mode detection
-const easypost = getEasyPostClientSync();
-
 // Your store's shipping origin
 const ORIGIN_ADDRESS = {
   company: "Bad Scandi",
