@@ -71,10 +71,11 @@ export function OrganizationStructuredData() {
     logo: `${siteUrl}/logo.png`,
     description: "Hand-dyed fiber art, boho wall hangings, and Scandinavian minimalist tapestries.",
     sameAs: [
-      // Add your social media URLs here
-      // "https://www.instagram.com/badscandi",
-      // "https://www.pinterest.com/badscandi",
-      // "https://www.facebook.com/badscandi",
+      "https://www.instagram.com/badscandi",
+      "https://www.pinterest.com/badscandi",
+      "https://www.tiktok.com/@badscandi",
+      "https://www.facebook.com/badscandi",
+      "https://www.youtube.com/@badscandi",
     ],
   };
 

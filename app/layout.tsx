@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
@@ -8,6 +8,8 @@ import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { PinterestTag } from "@/components/analytics/pinterest-tag";
 import { CartProvider } from "@/contexts/cart-context";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import { CookieConsent } from "@/components/cookie-consent";
+import { getBaseMetadata } from "@/lib/metadata";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,10 +23,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export const metadata: Metadata = {
-  title: "Bad Scandi - Minimalist Scandinavian Design",
-  description: "Premium Scandinavian furniture and home decor",
-};
+export const metadata = getBaseMetadata();
 
 export default function RootLayout({
   children,
@@ -48,6 +47,7 @@ export default function RootLayout({
           <main id="main-content" className="flex-grow">{children}</main>
           <Footer />
           <CartDrawer />
+          <CookieConsent />
         </CartProvider>
       </body>
     </html>

@@ -5,10 +5,11 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 ## Features
 
 - **Modern Stack**: Next.js 15 App Router, TypeScript, Tailwind CSS
-- **Native Passkey Auth**: WebAuthn/Passkeys via SimpleWebAuthn (no third-party auth service)
-- **Social Login**: Google, Apple, Facebook, Microsoft OAuth via NextAuth
+- **Native Passkey Auth**: WebAuthn/Passkeys via Better Auth
+- **Social Login**: Google, Apple, Facebook, Microsoft OAuth
 - **Payments**: Stripe Checkout integration with automatic order creation
-- **Email Integration**: AWS SES for magic link authentication & contact form
+- **Email Integration**: AWS SES for transactional emails & drip campaigns
+- **Image Storage**: AWS S3 for product and review images
 - **Database**: Supabase PostgreSQL with Prisma ORM
 - **UI Components**: shadcn/ui with Scandinavian minimalist design
 - **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag (optional)
@@ -19,11 +20,12 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 - **Framework**: Next.js 15+ (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS + shadcn/ui
-- **Authentication**: NextAuth.js v5 + SimpleWebAuthn
+- **Authentication**: Better Auth v1.0 with Passkey plugin
 - **Database**: Supabase (PostgreSQL)
 - **ORM**: Prisma
 - **Payments**: Stripe
-- **Email**: AWS SES (via AWS SDK, not SMTP)
+- **Email**: AWS SES
+- **Storage**: AWS S3
 - **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag
 - **Hosting**: Vercel
 
@@ -34,7 +36,7 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 - Node.js 18+ and npm
 - Supabase account (PostgreSQL database)
 - Stripe account (payment processing)
-- AWS account (for SES email service - uses IAM credentials, not SMTP)
+- AWS account (for SES email and S3 storage)
 - OAuth credentials (Google, Apple, etc.)
 
 ### Installation
@@ -57,10 +59,9 @@ cp .env.example .env
 
 Edit `.env` and fill in your credentials:
 - `DATABASE_URL`: Your Supabase PostgreSQL connection string
-- `NEXTAUTH_SECRET`: Generate with `openssl rand -base64 32`
 - OAuth provider credentials (Google, etc.)
 - Stripe API keys
-- AWS SES credentials (IAM Access Keys - see `AWS_SES_SETUP.md`)
+- AWS credentials (IAM Access Keys)
 
 4. Set up the database:
 ```bash
@@ -90,10 +91,10 @@ app/
 ├── account/page.tsx           # User orders + passkey management
 ├── auth/signin/page.tsx       # Sign in page
 └── api/
-    ├── auth/[...nextauth]/    # NextAuth endpoints
-    ├── passkey/               # Passkey registration/authentication
+    ├── auth/[...all]/         # Better Auth endpoints
     ├── checkout/              # Stripe checkout session
     ├── webhooks/stripe/       # Payment confirmations
+    ├── reviews/               # Customer reviews
     └── contact/               # Contact form email handler
 
 components/
@@ -106,9 +107,9 @@ components/
 
 lib/
 ├── db.ts                      # Prisma client
-├── auth.ts                    # NextAuth configuration
-├── webauthn.ts                # SimpleWebAuthn helpers
-├── email.ts                   # AWS SES email helpers
+├── auth.ts                    # Better Auth configuration
+├── ses-client.ts              # AWS SES email client
+├── s3.ts                      # AWS S3 storage client
 ├── products.ts                # Product queries
 ├── stripe.ts                  # Stripe client
 └── utils.ts                   # Utility functions
@@ -122,20 +123,15 @@ prisma/
 
 ### New User (Social Login → Passkey)
 1. User signs in with Google/Apple/Facebook/Microsoft
-2. NextAuth creates account and links by email
+2. Better Auth creates account and links by email
 3. User is prompted to enroll a passkey (optional)
 4. Passkey created via WebAuthn API
 
 ### Passkey Login
 1. User clicks "Sign in with passkey"
 2. Browser prompts for biometric/PIN authentication
-3. Passkey verified via SimpleWebAuthn
+3. Passkey verified via Better Auth
 4. Session created
-
-### Passkey Reset
-1. User signs in with social login or email link
-2. Old passkey can be removed
-3. New passkey can be enrolled
 
 ## Database Schema
 
@@ -148,6 +144,7 @@ Key models:
 - **Session**: User sessions
 - **Product**: Store products
 - **Order**: Purchase orders
+- **Review**: Customer reviews
 
 ## Deployment
 
@@ -168,14 +165,13 @@ git push origin main
 
 3. Set up Stripe webhook:
    - Get your Vercel deployment URL
-   - Add webhook endpoint: `https://yourdomain.com/api/stripe-webhook`
+   - Add webhook endpoint: `https://yourdomain.com/api/webhooks/stripe`
    - Add webhook secret to environment variables
 
 ### Environment Variables for Production
 
 Add these in Vercel:
 - All variables from `.env.example`
-- Update `NEXTAUTH_URL` to your production URL
 - Update `RP_ID` to your domain (e.g., `yourdomain.com`)
 - Update `RP_ORIGIN` to your full URL
 
