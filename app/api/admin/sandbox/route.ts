@@ -102,9 +102,8 @@ export async function POST(request: NextRequest) {
 
     // Refresh API clients to use new keys
     refreshStripeClient();
-    // Dynamic import to avoid loading EasyPost library at build time
-    const { refreshEasyPostClient } = await import("@/lib/shipping");
-    refreshEasyPostClient();
+    // Note: EasyPost client refresh not needed - it auto-detects mode changes
+    // and recreates the client on the next request
 
     // Create audit log entry
     await db.auditLog.create({
