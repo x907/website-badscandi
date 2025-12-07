@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { getProductBySlug } from "@/lib/products";
@@ -8,6 +7,7 @@ import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ProductViewTracker } from "@/components/product-view-tracker";
 import { getProductMetadata } from "@/lib/metadata";
 import { ProductStructuredData, BreadcrumbStructuredData } from "@/components/structured-data";
+import { ProductImageGallery } from "@/components/product-image-gallery";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
 
@@ -37,6 +37,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const altText = product.altText || product.name;
+  // Use imageUrls if available, otherwise fall back to imageUrl
+  const images = product.imageUrls?.length > 0 ? product.imageUrls : [product.imageUrl];
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -76,16 +78,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </nav>
 
       <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
-        <div className="aspect-square relative rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-100">
-          <Image
-            src={product.imageUrl}
-            alt={altText}
-            fill
-            className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            priority
-          />
-        </div>
+        <ProductImageGallery
+          images={images}
+          altText={altText}
+          productName={product.name}
+        />
 
         <div className="space-y-6 sm:space-y-8">
           <div className="space-y-3 sm:space-y-4">

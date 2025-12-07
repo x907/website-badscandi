@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       description,
       priceCents,
       imageUrl,
+      imageUrls,
       stock,
       featured,
       metaTitle,
@@ -56,8 +57,14 @@ export async function POST(request: NextRequest) {
       room,
     } = body;
 
+    // Handle imageUrls - use imageUrls array if provided, otherwise use single imageUrl
+    const finalImageUrls: string[] = imageUrls?.length > 0
+      ? imageUrls
+      : (imageUrl ? [imageUrl] : []);
+    const primaryImageUrl = finalImageUrls[0] || "";
+
     // Validate required fields
-    if (!name || !slug || !description || !priceCents || !imageUrl) {
+    if (!name || !slug || !description || !priceCents || !primaryImageUrl) {
       return NextResponse.json(
         { error: "Missing required fields: name, slug, description, priceCents, imageUrl" },
         { status: 400 }
@@ -82,7 +89,8 @@ export async function POST(request: NextRequest) {
         slug,
         description,
         priceCents: parseInt(priceCents),
-        imageUrl,
+        imageUrl: primaryImageUrl,
+        imageUrls: finalImageUrls,
         stock: parseInt(stock) || 0,
         featured: featured || false,
         metaTitle: metaTitle || null,

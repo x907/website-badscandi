@@ -95,7 +95,8 @@ model Product {
   name            String
   description     String
   priceCents      Int
-  imageUrl        String
+  imageUrl        String   // Primary image (first image) - kept for backwards compatibility
+  imageUrls       String[] @default([]) // All images, first is primary
   stock           Int      @default(0)
   featured        Boolean  @default(false)
   metaTitle       String?

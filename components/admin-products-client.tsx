@@ -13,6 +13,8 @@ import {
   Package,
   Eye,
   EyeOff,
+  Star,
+  GripVertical,
 } from "lucide-react";
 
 interface Product {
@@ -22,6 +24,7 @@ interface Product {
   description: string;
   priceCents: number;
   imageUrl: string;
+  imageUrls: string[];
   stock: number;
   featured: boolean;
   metaTitle: string | null;
@@ -41,7 +44,7 @@ interface ProductFormData {
   slug: string;
   description: string;
   priceCents: string;
-  imageUrl: string;
+  imageUrls: string[];
   stock: string;
   featured: boolean;
   metaTitle: string;
@@ -60,7 +63,7 @@ const initialFormData: ProductFormData = {
   slug: "",
   description: "",
   priceCents: "",
-  imageUrl: "",
+  imageUrls: [],
   stock: "0",
   featured: false,
   metaTitle: "",
@@ -120,34 +123,70 @@ export function AdminProductsClient() {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
 
-      const response = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
+        const response = await fetch("/api/admin/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          return data.url;
+        } else {
+          throw new Error(data.error || "Failed to upload image");
+        }
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setFormData((prev) => ({ ...prev, imageUrl: data.url }));
-      } else {
-        setError(data.error || "Failed to upload image");
-      }
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setFormData((prev) => ({
+        ...prev,
+        imageUrls: [...prev.imageUrls, ...uploadedUrls],
+      }));
     } catch (error) {
       console.error("Upload error:", error);
-      setError("Failed to upload image");
+      setError(error instanceof Error ? error.message : "Failed to upload images");
     } finally {
       setIsUploading(false);
+      // Reset the input so the same file can be selected again
+      e.target.value = "";
     }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      imageUrls: prev.imageUrls.filter((_, i) => i !== index),
+    }));
+  };
+
+  const setPrimaryImage = (index: number) => {
+    if (index === 0) return; // Already primary
+    setFormData((prev) => {
+      const newUrls = [...prev.imageUrls];
+      const [movedUrl] = newUrls.splice(index, 1);
+      newUrls.unshift(movedUrl);
+      return { ...prev, imageUrls: newUrls };
+    });
+  };
+
+  const moveImage = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setFormData((prev) => {
+      const newUrls = [...prev.imageUrls];
+      const [movedUrl] = newUrls.splice(fromIndex, 1);
+      newUrls.splice(toIndex, 0, movedUrl);
+      return { ...prev, imageUrls: newUrls };
+    });
   };
 
   const openCreateModal = () => {
@@ -164,7 +203,7 @@ export function AdminProductsClient() {
       slug: product.slug,
       description: product.description,
       priceCents: (product.priceCents / 100).toFixed(2),
-      imageUrl: product.imageUrl,
+      imageUrls: product.imageUrls.length > 0 ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []),
       stock: product.stock.toString(),
       featured: product.featured,
       metaTitle: product.metaTitle || "",
@@ -194,6 +233,7 @@ export function AdminProductsClient() {
         ...formData,
         priceCents,
         stock: parseInt(formData.stock) || 0,
+        imageUrl: formData.imageUrls[0] || "", // Primary image for backwards compatibility
       };
 
       const url = editingProduct
@@ -347,6 +387,9 @@ export function AdminProductsClient() {
                     Stock
                   </th>
                   <th className="text-center px-4 py-3 text-sm font-medium text-neutral-600">
+                    Images
+                  </th>
+                  <th className="text-center px-4 py-3 text-sm font-medium text-neutral-600">
                     Featured
                   </th>
                   <th className="text-right px-4 py-3 text-sm font-medium text-neutral-600">
@@ -391,6 +434,11 @@ export function AdminProductsClient() {
                         }`}
                       >
                         {product.stock}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-sm text-neutral-600">
+                        {product.imageUrls?.length || 1}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -570,50 +618,117 @@ export function AdminProductsClient() {
                 </div>
               </div>
 
-              {/* Image */}
+              {/* Images */}
               <div className="space-y-4">
-                <h3 className="font-medium text-neutral-900">Product Image</h3>
+                <h3 className="font-medium text-neutral-900">Product Images</h3>
+                <p className="text-sm text-neutral-500">
+                  Upload multiple images. The first image will be the primary/hero image.
+                  Click the star to set a different image as primary.
+                </p>
 
-                <div className="flex gap-4 items-start">
-                  {formData.imageUrl && (
-                    <img
-                      src={formData.imageUrl}
-                      alt="Preview"
-                      className="h-24 w-24 object-cover rounded border border-neutral-200"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
-                      Image URL *
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.imageUrl}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, imageUrl: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900 mb-2"
-                      required
-                    />
-                    <div className="flex items-center gap-2">
-                      <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 rounded text-sm transition-colors">
-                        <Upload className="h-4 w-4" />
-                        {isUploading ? "Uploading..." : "Upload Image"}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                          disabled={isUploading}
+                {/* Image Grid */}
+                {formData.imageUrls.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {formData.imageUrls.map((url, index) => (
+                      <div
+                        key={url}
+                        className={`relative group rounded-lg overflow-hidden border-2 ${
+                          index === 0
+                            ? "border-amber-500 ring-2 ring-amber-500/20"
+                            : "border-neutral-200"
+                        }`}
+                      >
+                        <img
+                          src={url}
+                          alt={`Product image ${index + 1}`}
+                          className="aspect-square object-cover"
                         />
-                      </label>
-                    </div>
+
+                        {/* Primary badge */}
+                        {index === 0 && (
+                          <div className="absolute top-1 left-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded">
+                            Primary
+                          </div>
+                        )}
+
+                        {/* Hover controls */}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          {index !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setPrimaryImage(index)}
+                              className="p-2 bg-white rounded-full text-amber-600 hover:text-amber-700 transition-colors"
+                              title="Set as primary image"
+                            >
+                              <Star className="h-4 w-4" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="p-2 bg-white rounded-full text-red-600 hover:text-red-700 transition-colors"
+                            title="Remove image"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {/* Reorder buttons */}
+                        <div className="absolute bottom-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {index > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => moveImage(index, index - 1)}
+                              className="p-1 bg-white rounded text-neutral-600 hover:text-neutral-900 text-xs"
+                              title="Move left"
+                            >
+                              &larr;
+                            </button>
+                          )}
+                          {index < formData.imageUrls.length - 1 && (
+                            <button
+                              type="button"
+                              onClick={() => moveImage(index, index + 1)}
+                              className="p-1 bg-white rounded text-neutral-600 hover:text-neutral-900 text-xs"
+                              title="Move right"
+                            >
+                              &rarr;
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                )}
+
+                {/* Upload button */}
+                <div>
+                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm transition-colors">
+                    <Upload className="h-4 w-4" />
+                    {isUploading ? "Uploading..." : "Upload Images"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={isUploading}
+                    />
+                  </label>
+                  <span className="ml-3 text-sm text-neutral-500">
+                    {formData.imageUrls.length} image{formData.imageUrls.length !== 1 ? "s" : ""} uploaded
+                  </span>
                 </div>
+
+                {formData.imageUrls.length === 0 && (
+                  <p className="text-sm text-red-600">
+                    At least one image is required
+                  </p>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">
-                    Alt Text
+                    Alt Text (for all images)
                   </label>
                   <input
                     type="text"
@@ -751,7 +866,11 @@ export function AdminProductsClient() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSaving} className="flex-1 gap-2">
+                <Button
+                  type="submit"
+                  disabled={isSaving || formData.imageUrls.length === 0}
+                  className="flex-1 gap-2"
+                >
                   {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
                   {editingProduct ? "Save Changes" : "Create Product"}
                 </Button>

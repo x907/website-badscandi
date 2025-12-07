@@ -55,6 +55,7 @@ export async function PUT(
       description,
       priceCents,
       imageUrl,
+      imageUrls,
       stock,
       featured,
       metaTitle,
@@ -90,6 +91,21 @@ export async function PUT(
       }
     }
 
+    // Handle imageUrls - keep imageUrl synced with first image
+    let finalImageUrls = existingProduct.imageUrls;
+    let primaryImageUrl = existingProduct.imageUrl;
+
+    if (imageUrls !== undefined) {
+      finalImageUrls = imageUrls;
+      primaryImageUrl = imageUrls[0] || existingProduct.imageUrl;
+    } else if (imageUrl !== undefined) {
+      // If only imageUrl is provided, update it and add to array if not present
+      primaryImageUrl = imageUrl;
+      if (!finalImageUrls.includes(imageUrl)) {
+        finalImageUrls = [imageUrl, ...finalImageUrls.filter(url => url !== existingProduct.imageUrl)];
+      }
+    }
+
     const product = await db.product.update({
       where: { id },
       data: {
@@ -97,7 +113,8 @@ export async function PUT(
         slug: slug ?? existingProduct.slug,
         description: description ?? existingProduct.description,
         priceCents: priceCents !== undefined ? parseInt(priceCents) : existingProduct.priceCents,
-        imageUrl: imageUrl ?? existingProduct.imageUrl,
+        imageUrl: primaryImageUrl,
+        imageUrls: finalImageUrls,
         stock: stock !== undefined ? parseInt(stock) : existingProduct.stock,
         featured: featured ?? existingProduct.featured,
         metaTitle: metaTitle !== undefined ? metaTitle : existingProduct.metaTitle,
