@@ -22,11 +22,16 @@ function createEasyPostClient(isSandbox: boolean): EasyPostClient | null {
     return null;
   }
 
-  // Log which mode we're using
-  const keyType = apiKey.startsWith("EZAK") ? "production" : "test";
-  console.log(`EasyPost initialized in ${mode} mode (using ${keyType} key)`);
+  try {
+    // Log which mode we're using
+    const keyType = apiKey.startsWith("EZAK") ? "production" : "test";
+    console.log(`EasyPost initialized in ${mode} mode (using ${keyType} key)`);
 
-  return new EasyPost(apiKey);
+    return new EasyPost(apiKey);
+  } catch (error) {
+    console.error(`Failed to initialize EasyPost client for ${mode} mode:`, error);
+    return null;
+  }
 }
 
 /**

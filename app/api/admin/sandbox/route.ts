@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getSandboxStatus, setSandboxMode } from "@/lib/sandbox";
 import { refreshStripeClient } from "@/lib/stripe";
-import { refreshEasyPostClient } from "@/lib/shipping";
 import { z } from "zod";
 
 // Schema for toggle request
@@ -103,6 +102,8 @@ export async function POST(request: NextRequest) {
 
     // Refresh API clients to use new keys
     refreshStripeClient();
+    // Dynamic import to avoid loading EasyPost library at build time
+    const { refreshEasyPostClient } = await import("@/lib/shipping");
     refreshEasyPostClient();
 
     // Create audit log entry
