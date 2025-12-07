@@ -9,14 +9,36 @@ import { useCart } from "@/contexts/cart-context";
 import { useSession, signIn } from "@/lib/auth-client";
 import { trackCheckoutStarted } from "@/lib/analytics";
 import { events } from "@/lib/event-tracker";
+import { ShippingStep } from "./shipping-step";
+
+interface ShippingRate {
+  id: string;
+  carrier: string;
+  service: string;
+  rate: number;
+  deliveryDays: number | null;
+  displayName: string;
+}
+
+interface ShippingAddress {
+  name: string;
+  street1: string;
+  street2: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  phone: string;
+}
 
 export function CartSummary() {
   const { subtotalCents, items, closeCart, clearCart } = useCart();
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showShipping, setShowShipping] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (shipping?: { rate: ShippingRate; address: ShippingAddress }) => {
     setIsLoading(true);
     setError(null);
 
@@ -41,6 +63,10 @@ export function CartSummary() {
             productId: item.productId,
             quantity: item.quantity,
           })),
+          shipping: shipping ? {
+            rate: shipping.rate,
+            address: shipping.address,
+          } : undefined,
         }),
       });
 
@@ -67,6 +93,36 @@ export function CartSummary() {
     }
   };
 
+  const handleSelectRate = (rate: ShippingRate, address: ShippingAddress) => {
+    handleCheckout({ rate, address });
+  };
+
+  // Show shipping step if user is signed in and clicked continue
+  if (showShipping && session?.user) {
+    return (
+      <div className="border-t border-neutral-200 pt-4 mt-4">
+        {error && (
+          <div className="flex items-start gap-2 p-3 mb-4 bg-red-50 border border-red-200 rounded-md">
+            <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-amber-900" />
+            <span className="ml-2 text-neutral-600">Creating checkout...</span>
+          </div>
+        ) : (
+          <ShippingStep
+            subtotalCents={subtotalCents}
+            onBack={() => setShowShipping(false)}
+            onSelectRate={handleSelectRate}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="border-t border-neutral-200 pt-4 mt-4">
       <div className="flex justify-between items-center mb-4">
@@ -77,7 +133,7 @@ export function CartSummary() {
       </div>
 
       <p className="text-xs sm:text-sm text-neutral-500 mb-4">
-        Shipping calculated at checkout
+        Shipping calculated in the next step
       </p>
 
       {error && (
@@ -90,17 +146,10 @@ export function CartSummary() {
       {session?.user ? (
         <Button
           className="w-full h-12"
-          onClick={handleCheckout}
+          onClick={() => setShowShipping(true)}
           disabled={isLoading || items.length === 0}
         >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
-              Processing...
-            </>
-          ) : (
-            "Checkout"
-          )}
+          Continue to Shipping
         </Button>
       ) : (
         <Button asChild className="w-full h-12" onClick={closeCart}>
