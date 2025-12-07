@@ -94,9 +94,10 @@ Complete step-by-step guide to get your fiber art e-commerce site live!
 - Sign up at [ads.pinterest.com](https://ads.pinterest.com)
 - Create tag → Get Tag ID
 
-**Resend** (contact form emails):
-- Sign up at [resend.com](https://resend.com)
-- Verify domain → Get API key
+**AWS SES** (transactional emails):
+- See AWS_SES_SETUP.md for detailed instructions
+- Create IAM user with SES permissions
+- Verify your email/domain in SES Console
 
 ---
 
@@ -126,11 +127,7 @@ Fill in your values:
 # Database (from Supabase)
 DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.xxx.supabase.co:5432/postgres"
 
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="generate-a-secret-below"
-
-# WebAuthn (Passkeys)
+# Better Auth - WebAuthn (Passkeys) Configuration
 RP_NAME="Bad Scandi"
 RP_ID="localhost"
 RP_ORIGIN="http://localhost:3000"
@@ -153,6 +150,13 @@ STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET=""  # Leave empty for now, add after Vercel deploy
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."  # Same as above
 
+# AWS SES Email (See AWS_SES_SETUP.md for details)
+AWS_REGION="us-east-1"
+AWS_ACCESS_KEY_ID=""  # IAM Access Key ID (NOT SMTP credentials)
+AWS_SECRET_ACCESS_KEY=""  # IAM Secret Access Key
+EMAIL_FROM="noreply@yourdomain.com"  # Verified sender email
+CONTACT_EMAIL="hello@yourdomain.com"  # Where contact form goes
+
 # Analytics (Optional - leave empty to disable)
 NEXT_PUBLIC_GA_ID=""
 NEXT_PUBLIC_META_PIXEL_ID=""
@@ -160,16 +164,7 @@ NEXT_PUBLIC_PINTEREST_TAG_ID=""
 
 # Site URL
 NEXT_PUBLIC_SITE_URL="http://localhost:3000"
-
-# Contact form (Optional)
-RESEND_API_KEY=""  # Leave empty for now
 ```
-
-**Generate NextAuth Secret**:
-```bash
-openssl rand -base64 32
-```
-Copy output and paste as `NEXTAUTH_SECRET`
 
 **Save the file** (Ctrl+X, Y, Enter)
 
@@ -263,19 +258,22 @@ Add each variable from your `.env` file, but **UPDATE THESE**:
 
 ```env
 # Use production values!
-NEXTAUTH_URL="https://your-project-name.vercel.app"  # Vercel will show this
 RP_ID="your-project-name.vercel.app"
 RP_ORIGIN="https://your-project-name.vercel.app"
 NEXT_PUBLIC_SITE_URL="https://your-project-name.vercel.app"
 
 # Everything else: copy from your .env file
 DATABASE_URL="..."
-NEXTAUTH_SECRET="..."
 GOOGLE_CLIENT_ID="..."
 GOOGLE_CLIENT_SECRET="..."
 STRIPE_SECRET_KEY="..."
 STRIPE_PUBLISHABLE_KEY="..."
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="..."
+AWS_REGION="..."
+AWS_ACCESS_KEY_ID="..."
+AWS_SECRET_ACCESS_KEY="..."
+EMAIL_FROM="..."
+CONTACT_EMAIL="..."
 ```
 
 **Tip**: Leave `STRIPE_WEBHOOK_SECRET` empty for now
@@ -370,7 +368,6 @@ Visit: `https://your-project-name.vercel.app`
 3. Follow DNS instructions
 4. Wait 5-30 minutes for DNS to propagate
 5. **Update environment variables**:
-   - `NEXTAUTH_URL="https://badscandi.com"`
    - `RP_ID="badscandi.com"`
    - `RP_ORIGIN="https://badscandi.com"`
    - `NEXT_PUBLIC_SITE_URL="https://badscandi.com"`
@@ -391,19 +388,22 @@ Visit: `https://your-project-name.vercel.app`
 
 ---
 
-### ✅ 19. Enable Contact Form Emails (Optional - Free)
+### ✅ 19. Enable Contact Form Emails
 
-**With Resend** (3,000 emails/month free):
+**With AWS SES** (see AWS_SES_SETUP.md for details):
 
-1. Sign up at [resend.com](https://resend.com)
-2. Add your domain OR use their test domain
-3. Get API key
-4. Add to Vercel environment variables:
-   - `RESEND_API_KEY="re_..."`
-5. Uncomment code in `/app/api/contact/route.ts` (instructions in file)
-6. Redeploy
+1. Create IAM user with SES permissions
+2. Verify your sender email in AWS SES Console
+3. Add to Vercel environment variables:
+   - `AWS_REGION="us-east-1"`
+   - `AWS_ACCESS_KEY_ID="AKIA..."`
+   - `AWS_SECRET_ACCESS_KEY="..."`
+   - `EMAIL_FROM="noreply@badscandi.com"`
+   - `CONTACT_EMAIL="hello@badscandi.com"`
+4. Request SES production access (to send to any email)
+5. Redeploy
 
-Now contact form sends emails to hello@badscandi.com! ✅
+Now contact form and magic link emails work! ✅
 
 ---
 
@@ -516,7 +516,7 @@ Use this to track your progress:
 - [ ] Google Search Console set up
 - [ ] Sitemap submitted
 - [ ] Analytics added (GA4/Meta/Pinterest)
-- [ ] Contact form emails (Resend)
+- [ ] AWS SES configured for emails
 - [ ] Real products added
 
 ---
@@ -569,8 +569,11 @@ Once you've completed the main checklist, your site is LIVE!
 
 - **README.md** - Project overview
 - **SETUP_GUIDE.md** - Detailed setup
+- **AWS_SES_SETUP.md** - Email setup (magic links, contact form)
+- **ADMIN_SETUP.md** - Admin dashboard & S3 storage
 - **SEO_GUIDE.md** - SEO strategy & keywords
 - **ANALYTICS_SETUP.md** - Tracking pixels
+- **AUTOMATION_SETUP.md** - GitHub Actions & auto-deploys
 - **DEPLOYMENT_CHECKLIST.md** ← You are here
 
 ---

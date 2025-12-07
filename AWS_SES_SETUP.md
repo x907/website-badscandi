@@ -17,6 +17,12 @@ If you have SMTP credentials, you need to create IAM Access Keys instead (see St
 This application uses AWS SES to send:
 1. **Magic link authentication emails** (passwordless login)
 2. **Contact form submissions** (forwarded to your email)
+3. **Welcome emails** (sent when new users sign up)
+4. **Order confirmation emails** (after successful purchase)
+5. **Drip campaign emails**:
+   - Cart abandonment reminders (24 hours after cart creation)
+   - Review request emails (7 days after order delivery)
+   - Win-back campaigns (30/60/90 days after last purchase)
 
 ## Prerequisites
 
@@ -202,6 +208,51 @@ For a more professional setup:
    - `noreply@badscandi.com`
    - `hello@badscandi.com`
    - `orders@badscandi.com`
+
+## Drip Campaign Cron Jobs
+
+The application includes automated email campaigns that run via Vercel cron jobs:
+
+### Available Cron Endpoints
+
+- `/api/cron/cart-abandonment` - Sends reminders for abandoned carts (24h old)
+- `/api/cron/review-request` - Requests reviews for delivered orders (7 days)
+- `/api/cron/winback` - Re-engages inactive customers (30/60/90 days)
+
+### Setting Up Cron Jobs
+
+Add to your `vercel.json`:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/cart-abandonment",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/review-request",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/winback",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}
+```
+
+### Email Templates
+
+Email templates are defined in `lib/email-templates.ts` and include:
+- Welcome email (sent automatically on signup)
+- Cart abandonment reminders
+- Review request emails
+- Win-back campaigns
+
+Each template uses the site's branding and includes an unsubscribe link.
+
+---
 
 ## Support
 

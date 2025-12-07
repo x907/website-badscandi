@@ -90,16 +90,34 @@ app/
 ├── product/[slug]/page.tsx    # Product details
 ├── account/page.tsx           # User orders + passkey management
 ├── auth/signin/page.tsx       # Sign in page
+├── admin/                     # Admin dashboard
+│   ├── page.tsx               # Dashboard with stats
+│   ├── products/              # Product CRUD
+│   ├── orders/                # Order management
+│   └── reviews/               # Review moderation
 └── api/
     ├── auth/[...all]/         # Better Auth endpoints
     ├── checkout/              # Stripe checkout session
     ├── webhooks/stripe/       # Payment confirmations
-    ├── reviews/               # Customer reviews
-    └── contact/               # Contact form email handler
+    ├── reviews/               # Customer reviews CRUD
+    ├── reviews/[id]/approve/  # Review approval
+    ├── reviews/[id]/featured/ # Feature reviews
+    ├── contact/               # Contact form email handler
+    ├── cart/                  # Cart management
+    ├── user/is-admin/         # Admin check endpoint
+    ├── admin/
+    │   ├── dashboard/         # Admin stats
+    │   ├── products/          # Product CRUD
+    │   ├── orders/            # Order management
+    │   └── upload/            # S3 image uploads
+    └── cron/
+        ├── cart-abandonment/  # Abandoned cart emails
+        ├── review-request/    # Post-purchase review requests
+        └── winback/           # Win-back email campaigns
 
 components/
 ├── ui/                        # shadcn/ui components
-├── layout/                    # Header, Footer
+├── layout/                    # Header, Footer, HeaderUserSection
 ├── passkey-enroll.tsx         # Passkey enrollment UI
 ├── product-card.tsx           # Product display card
 ├── product-grid.tsx           # Product grid layout
@@ -108,10 +126,18 @@ components/
 lib/
 ├── db.ts                      # Prisma client
 ├── auth.ts                    # Better Auth configuration
+├── auth-utils.ts              # Auth helper functions (isAdmin, getSession)
+├── auth-client.ts             # Client-side auth utilities
 ├── ses-client.ts              # AWS SES email client
+├── email.ts                   # Email sending functions
+├── email-templates.ts         # Drip campaign templates
 ├── s3.ts                      # AWS S3 storage client
 ├── products.ts                # Product queries
 ├── stripe.ts                  # Stripe client
+├── audit.ts                   # Admin action audit logging
+├── rate-limit.ts              # API rate limiting (Upstash Redis)
+├── validations.ts             # Zod validation schemas
+├── use-is-admin.ts            # Client hook for admin check
 └── utils.ts                   # Utility functions
 
 prisma/
@@ -138,13 +164,16 @@ prisma/
 See `prisma/schema.prisma` for the complete schema.
 
 Key models:
-- **User**: User accounts
+- **User**: User accounts (with isAdmin flag)
 - **Passkey**: WebAuthn credentials
 - **Account**: OAuth provider accounts
 - **Session**: User sessions
-- **Product**: Store products
+- **Product**: Store products (multi-image support)
 - **Order**: Purchase orders
-- **Review**: Customer reviews
+- **Review**: Customer reviews (with moderation)
+- **Cart**: Shopping cart for abandoned cart emails
+- **AuditLog**: Admin action audit trail
+- **EmailLog**: Drip campaign tracking
 
 ## Deployment
 

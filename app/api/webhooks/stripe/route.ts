@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import Stripe from "stripe";
-import { stripe } from "@/lib/stripe";
+import { getStripeClient, getStripeWebhookSecret, getStripeWebhookSecretForMode } from "@/lib/stripe";
+import { isSandboxMode } from "@/lib/sandbox";
 import { db } from "@/lib/db";
 import { sendDripEmail, TEMPLATE_KEYS } from "@/lib/email-templates";
 import { purchaseShippingLabel } from "@/lib/shipping";
@@ -23,25 +24,44 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  // Get the webhook secret for the current mode (sandbox or production)
+  const webhookSecret = await getStripeWebhookSecret();
   if (!webhookSecret) {
-    console.error("STRIPE_WEBHOOK_SECRET is not configured");
+    console.error("Stripe webhook secret not configured for current mode");
     return NextResponse.json(
       { error: "Webhook secret not configured" },
       { status: 500 }
     );
   }
 
+  // Get the Stripe client for the current mode
+  const stripe = await getStripeClient();
+
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
-    console.error("Webhook signature verification failed:", err);
-    return NextResponse.json(
-      { error: "Invalid signature" },
-      { status: 400 }
-    );
+    // If signature fails, try the OTHER mode's secret (handles race condition during mode switch)
+    const altWebhookSecret = getStripeWebhookSecretForMode(!await isSandboxMode());
+    if (altWebhookSecret && altWebhookSecret !== webhookSecret) {
+      try {
+        event = stripe.webhooks.constructEvent(body, signature, altWebhookSecret);
+        console.log("Webhook verified with alternate mode secret (mode switch race condition)");
+      } catch {
+        console.error("Webhook signature verification failed for both modes:", err);
+        return NextResponse.json(
+          { error: "Invalid signature" },
+          { status: 400 }
+        );
+      }
+    } else {
+      console.error("Webhook signature verification failed:", err);
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 400 }
+      );
+    }
   }
 
   // Handle the checkout.session.completed event
@@ -57,6 +77,14 @@ export async function POST(request: NextRequest) {
       const metadata = fullSession.metadata;
       const userId = metadata?.userId;
       const itemsJson = metadata?.items;
+
+      // Use Stripe's authoritative livemode field, NOT metadata (which could be tampered)
+      // event.livemode === false means this is a test/sandbox transaction
+      const isSandboxOrder = event.livemode === false;
+
+      if (isSandboxOrder) {
+        console.log(`Processing SANDBOX order from session ${session.id} (livemode=${event.livemode})`);
+      }
 
       if (!userId) {
         console.error("Missing userId in session metadata");
@@ -145,7 +173,7 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Create the order
+        // Create the order (mark as sandbox if it was a test order)
         const newOrder = await tx.order.create({
           data: {
             userId,
@@ -161,27 +189,33 @@ export async function POST(request: NextRequest) {
                 }
               : undefined,
             items: orderItems,
+            isSandbox: isSandboxOrder,
           },
         });
 
         // Update stock for all products atomically within the transaction
-        for (const item of orderItems) {
-          const result = await tx.product.updateMany({
-            where: {
-              id: item.productId,
-              stock: { gte: item.quantity }, // Only decrement if enough stock
-            },
-            data: {
-              stock: {
-                decrement: item.quantity,
+        // SKIP stock updates for sandbox orders to preserve real inventory
+        if (isSandboxOrder) {
+          console.log("Sandbox order - skipping stock decrement to preserve inventory");
+        } else {
+          for (const item of orderItems) {
+            const result = await tx.product.updateMany({
+              where: {
+                id: item.productId,
+                stock: { gte: item.quantity }, // Only decrement if enough stock
               },
-            },
-          });
+              data: {
+                stock: {
+                  decrement: item.quantity,
+                },
+              },
+            });
 
-          if (result.count === 0) {
-            console.warn(`Stock update skipped for product ${item.productId} - insufficient stock`);
-          } else {
-            console.log(`Stock updated for product ${item.productId}: -${item.quantity}`);
+            if (result.count === 0) {
+              console.warn(`Stock update skipped for product ${item.productId} - insufficient stock`);
+            } else {
+              console.log(`Stock updated for product ${item.productId}: -${item.quantity}`);
+            }
           }
         }
 

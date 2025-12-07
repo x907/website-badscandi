@@ -13,8 +13,17 @@ import {
   ArrowRight,
   RefreshCw,
   PackageX,
+  FlaskConical,
+  Loader2,
 } from "lucide-react";
 import { Button } from "./ui/button";
+
+interface SandboxStatus {
+  enabled: boolean;
+  stripeMode: "test" | "live";
+  easypostMode: "test" | "live";
+  emailRedirect: string | null;
+}
 
 interface DashboardStats {
   orders: {
@@ -52,6 +61,55 @@ export function AdminDashboardClient() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [sandboxStatus, setSandboxStatus] = useState<SandboxStatus | null>(null);
+  const [isTogglingMode, setIsTogglingMode] = useState(false);
+
+  const fetchSandboxStatus = async () => {
+    try {
+      const response = await fetch("/api/admin/sandbox");
+      if (response.ok) {
+        const data = await response.json();
+        setSandboxStatus(data);
+      }
+    } catch (error) {
+      console.error("Error fetching sandbox status:", error);
+    }
+  };
+
+  const toggleSandboxMode = async () => {
+    if (!sandboxStatus || isTogglingMode) return;
+
+    // Confirmation dialog with different messages based on direction
+    const confirmMessage = sandboxStatus.enabled
+      ? "Switch to PRODUCTION mode?\n\nThis will:\n- Use LIVE Stripe keys (real payments)\n- Use PRODUCTION EasyPost (real shipping labels)\n- Send emails to real customers\n\nAre you sure?"
+      : "Enable SANDBOX mode?\n\nThis will:\n- Use TEST Stripe keys (no real charges)\n- Use TEST EasyPost (no real labels)\n- Redirect all emails to admin\n- Sandbox orders won't affect inventory\n\nAre you sure?";
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    setIsTogglingMode(true);
+    try {
+      const response = await fetch("/api/admin/sandbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !sandboxStatus.enabled }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSandboxStatus(data.status);
+      } else {
+        const error = await response.json();
+        alert(`Failed to toggle sandbox mode: ${error.message || error.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error toggling sandbox mode:", error);
+      alert("Failed to toggle sandbox mode");
+    } finally {
+      setIsTogglingMode(false);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -70,6 +128,7 @@ export function AdminDashboardClient() {
 
   useEffect(() => {
     fetchStats();
+    fetchSandboxStatus();
     // Auto-refresh every 60 seconds
     const interval = setInterval(fetchStats, 60000);
     return () => clearInterval(interval);
@@ -146,6 +205,72 @@ export function AdminDashboardClient() {
           Refresh
         </Button>
       </div>
+
+      {/* Sandbox Mode Banner */}
+      {sandboxStatus && (
+        <div
+          className={`mb-6 p-4 rounded-lg border ${
+            sandboxStatus.enabled
+              ? "bg-purple-50 border-purple-300"
+              : "bg-neutral-50 border-neutral-200"
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div
+                className={`p-2 rounded-full ${
+                  sandboxStatus.enabled ? "bg-purple-200" : "bg-neutral-200"
+                }`}
+              >
+                <FlaskConical
+                  className={`h-5 w-5 ${
+                    sandboxStatus.enabled ? "text-purple-700" : "text-neutral-600"
+                  }`}
+                />
+              </div>
+              <div>
+                <p className="font-semibold text-neutral-900">
+                  {sandboxStatus.enabled ? "Sandbox Mode Active" : "Production Mode"}
+                </p>
+                <p className="text-sm text-neutral-600">
+                  {sandboxStatus.enabled ? (
+                    <>
+                      Stripe: {sandboxStatus.stripeMode} | EasyPost:{" "}
+                      {sandboxStatus.easypostMode}
+                      {sandboxStatus.emailRedirect && (
+                        <> | Emails to: {sandboxStatus.emailRedirect}</>
+                      )}
+                    </>
+                  ) : (
+                    "Using live API keys - orders are real"
+                  )}
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={toggleSandboxMode}
+              disabled={isTogglingMode}
+              variant={sandboxStatus.enabled ? "destructive" : "default"}
+              className={
+                !sandboxStatus.enabled
+                  ? "bg-purple-600 hover:bg-purple-700 text-white"
+                  : ""
+              }
+            >
+              {isTogglingMode ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Switching...
+                </>
+              ) : sandboxStatus.enabled ? (
+                "Switch to Production"
+              ) : (
+                "Enable Sandbox Mode"
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Alerts */}
       {(stats.reviews.pending > 0 ||

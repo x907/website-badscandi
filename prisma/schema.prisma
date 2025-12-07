@@ -135,10 +135,12 @@ model Order {
   labelCostCents  Int?
   shipmentId      String?
   labelRefunded   Boolean  @default(false)
+  isSandbox       Boolean  @default(false)  // Flag for test/sandbox orders
   user            User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([stripeId])
+  @@index([isSandbox])
 }
 
 model Review {
@@ -238,4 +240,12 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@index([userId, entityType, createdAt])
+}
+
+// Site-wide settings (singleton pattern - only one row)
+model SiteSettings {
+  id            String   @id @default("settings")
+  sandboxMode   Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+  updatedBy     String?  // userId of admin who last changed
 }

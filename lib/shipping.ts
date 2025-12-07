@@ -1,12 +1,76 @@
 import EasyPost from "@easypost/api";
+import { isSandboxMode, sandboxConfig, isSandboxModeSync } from "./sandbox";
 
-const apiKey = process.env.EASYPOST_API_KEY;
+// EasyPost client type
+type EasyPostClient = InstanceType<typeof EasyPost>;
 
-if (!apiKey && process.env.NODE_ENV === "production") {
-  console.warn("EASYPOST_API_KEY not configured - automatic label purchasing disabled");
+// Track which mode the current EasyPost client is using
+let currentEasyPostMode: "sandbox" | "production" | null = null;
+let easypostClient: EasyPostClient | null = null;
+
+/**
+ * Create an EasyPost client with the appropriate API key based on sandbox mode
+ */
+function createEasyPostClient(isSandbox: boolean): EasyPostClient | null {
+  const apiKey = sandboxConfig.getEasyPostApiKey(isSandbox);
+  const mode = isSandbox ? "SANDBOX" : "PRODUCTION";
+
+  if (!apiKey) {
+    if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+      console.warn(`EasyPost API key not configured for ${mode} mode - automatic label purchasing disabled`);
+    }
+    return null;
+  }
+
+  // Log which mode we're using
+  const keyType = apiKey.startsWith("EZAK") ? "production" : "test";
+  console.log(`EasyPost initialized in ${mode} mode (using ${keyType} key)`);
+
+  return new EasyPost(apiKey);
 }
 
-const easypost = apiKey ? new EasyPost(apiKey) : null;
+/**
+ * Get the EasyPost client for the current mode
+ */
+export async function getEasyPostClient(): Promise<EasyPostClient | null> {
+  const isSandbox = await isSandboxMode();
+  const newMode = isSandbox ? "sandbox" : "production";
+
+  // Recreate client if mode changed
+  if (easypostClient === undefined || currentEasyPostMode !== newMode) {
+    easypostClient = createEasyPostClient(isSandbox);
+    currentEasyPostMode = newMode;
+  }
+
+  return easypostClient;
+}
+
+/**
+ * Get EasyPost client synchronously (uses cached mode or env var)
+ * Use this for module-level initialization only
+ */
+export function getEasyPostClientSync(): EasyPostClient | null {
+  const isSandbox = isSandboxModeSync();
+  const newMode = isSandbox ? "sandbox" : "production";
+
+  if (easypostClient === undefined || currentEasyPostMode !== newMode) {
+    easypostClient = createEasyPostClient(isSandbox);
+    currentEasyPostMode = newMode;
+  }
+
+  return easypostClient;
+}
+
+/**
+ * Force refresh the EasyPost client (call after sandbox mode change)
+ */
+export function refreshEasyPostClient(): void {
+  easypostClient = null;
+  currentEasyPostMode = null;
+}
+
+// Backward compatibility - initial client using sync mode detection
+const easypost = getEasyPostClientSync();
 
 // Your store's shipping origin
 const ORIGIN_ADDRESS = {
@@ -55,14 +119,15 @@ export interface PurchasedLabel {
 export async function purchaseShippingLabel(
   toAddress: ShippingAddress
 ): Promise<PurchasedLabel | null> {
-  if (!easypost) {
+  const client = await getEasyPostClient();
+  if (!client) {
     console.warn("EasyPost not configured - skipping label purchase");
     return null;
   }
 
   try {
     // Create shipment
-    const shipment = await easypost.Shipment.create({
+    const shipment = await client.Shipment.create({
       from_address: ORIGIN_ADDRESS,
       to_address: {
         name: toAddress.name,
@@ -90,7 +155,7 @@ export async function purchaseShippingLabel(
     const cheapestRate = rates[0];
 
     // Purchase the label
-    const purchasedShipment = await easypost.Shipment.buy(shipment.id, cheapestRate.id);
+    const purchasedShipment = await client.Shipment.buy(shipment.id, cheapestRate.id);
 
     return {
       shipmentId: purchasedShipment.id,
@@ -117,13 +182,14 @@ export async function refundShippingLabel(shipmentId: string): Promise<{
   status?: string;
   error?: string;
 }> {
-  if (!easypost) {
+  const client = await getEasyPostClient();
+  if (!client) {
     return { success: false, error: "EasyPost not configured" };
   }
 
   try {
     // Use the static refund method with shipment ID
-    const refundedShipment = await easypost.Shipment.refund(shipmentId);
+    const refundedShipment = await client.Shipment.refund(shipmentId);
 
     // EasyPost refund statuses: submitted, refunded, rejected
     return {

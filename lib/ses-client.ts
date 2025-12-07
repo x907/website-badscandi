@@ -1,4 +1,5 @@
 import { SESClient, SendEmailCommand, SendEmailCommandInput } from "@aws-sdk/client-ses";
+import { isSandboxMode, sandboxConfig } from "./sandbox";
 
 // SES client configured from environment variables
 // AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY must be set
@@ -37,14 +38,27 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   const { to, subject, html, text, configSet, tags } = options;
   const fromEmail = process.env.EMAIL_FROM || "noreply@badscandi.com";
 
+  // In sandbox mode, redirect all emails to the sandbox recipient
+  const isSandbox = await isSandboxMode();
+  const actualRecipient = sandboxConfig.getEmailRecipient(isSandbox, to);
+
+  // Modify subject in sandbox mode to indicate it was redirected
+  const actualSubject = isSandbox && actualRecipient !== to
+    ? `[SANDBOX - Originally to: ${to}] ${subject}`
+    : subject;
+
+  if (isSandbox && actualRecipient !== to) {
+    console.log(`Sandbox mode: Redirecting email from ${to} to ${actualRecipient}`);
+  }
+
   const params: SendEmailCommandInput = {
     Source: fromEmail,
     Destination: {
-      ToAddresses: [to],
+      ToAddresses: [actualRecipient],
     },
     Message: {
       Subject: {
-        Data: subject,
+        Data: actualSubject,
         Charset: "UTF-8",
       },
       Body: {
@@ -74,14 +88,14 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const response = await sesClient.send(command);
-      console.log(`Email sent to ${to}, MessageId: ${response.MessageId}`);
+      console.log(`Email sent to ${actualRecipient}, MessageId: ${response.MessageId}`);
       return {
         success: true,
         messageId: response.MessageId,
       };
     } catch (error) {
       lastError = error instanceof Error ? error.message : "Unknown error";
-      console.error(`Email send attempt ${attempt + 1}/${maxRetries} to ${to} failed:`, lastError);
+      console.error(`Email send attempt ${attempt + 1}/${maxRetries} to ${actualRecipient} failed:`, lastError);
 
       if (attempt < maxRetries - 1) {
         const backoffMs = Math.pow(2, attempt) * 1000;
@@ -91,7 +105,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   }
 
   // All retries exhausted
-  console.error(`Failed to send email to ${to} after ${maxRetries} attempts`);
+  console.error(`Failed to send email to ${actualRecipient} after ${maxRetries} attempts`);
   return {
     success: false,
     error: lastError,

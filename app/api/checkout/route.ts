@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { stripe } from "@/lib/stripe";
+import { getStripeClient, getStripePublishableKey } from "@/lib/stripe";
+import { isSandboxMode } from "@/lib/sandbox";
 import { db } from "@/lib/db";
 import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
 
@@ -179,6 +180,12 @@ export async function POST(request: Request) {
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
 
+    // Check if we're in sandbox mode
+    const isSandbox = await isSandboxMode();
+    if (isSandbox) {
+      console.log("Creating checkout session in SANDBOX mode");
+    }
+
     // Build checkout session options
     const checkoutOptions: any = {
       mode: "payment",
@@ -191,6 +198,7 @@ export async function POST(request: Request) {
       metadata: {
         userId: session.user.id,
         items: JSON.stringify(itemsMetadata),
+        isSandbox: isSandbox ? "true" : "false",
       },
     };
 
@@ -246,6 +254,7 @@ export async function POST(request: Request) {
       },
     ];
 
+    const stripe = await getStripeClient();
     const checkoutSession = await stripe.checkout.sessions.create(checkoutOptions);
 
     return NextResponse.json({ url: checkoutSession.url });
