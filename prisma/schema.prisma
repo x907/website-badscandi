@@ -126,6 +126,12 @@ model Order {
   customerEmail   String?
   shippingAddress Json?
   shippingCents   Int      @default(0)
+  trackingNumber  String?
+  trackingUrl     String?
+  labelUrl        String?
+  carrier         String?
+  shippingService String?
+  labelCostCents  Int?
   user            User     @relation(fields: [userId], references: [id])
 
   @@index([userId])

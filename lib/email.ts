@@ -230,3 +230,49 @@ export async function sendOrderConfirmationEmail(
     throw error;
   }
 }
+
+/**
+ * Generic email sending function for custom emails
+ */
+export async function sendEmail(options: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}): Promise<void> {
+  const fromEmail = process.env.EMAIL_FROM || "noreply@badscandi.com";
+
+  const params = {
+    Source: fromEmail,
+    Destination: {
+      ToAddresses: [options.to],
+    },
+    Message: {
+      Subject: {
+        Data: options.subject,
+        Charset: "UTF-8",
+      },
+      Body: {
+        Html: {
+          Data: options.html,
+          Charset: "UTF-8",
+        },
+        ...(options.text && {
+          Text: {
+            Data: options.text,
+            Charset: "UTF-8",
+          },
+        }),
+      },
+    },
+  };
+
+  try {
+    const command = new SendEmailCommand(params);
+    await sendEmailWithRetry(command);
+    console.log(`Email sent to ${options.to}: ${options.subject}`);
+  } catch (error) {
+    console.error("Error sending email after retries:", error);
+    throw error;
+  }
+}

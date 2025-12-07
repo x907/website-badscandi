@@ -4,6 +4,8 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { sendDripEmail, TEMPLATE_KEYS } from "@/lib/email-templates";
+import { purchaseShippingLabel } from "@/lib/shipping";
+import { sendEmail } from "@/lib/email";
 
 // Disable Next.js body parsing so we can verify the webhook signature
 export const runtime = "nodejs";
@@ -192,6 +194,81 @@ export async function POST(request: NextRequest) {
       });
 
       console.log(`Order created successfully: ${order.id}`);
+
+      // Purchase shipping label automatically
+      const shippingDetails = fullSession.collected_information?.shipping_details;
+      let labelInfo: {
+        trackingNumber: string;
+        trackingUrl: string;
+        labelUrl: string;
+        carrier: string;
+        service: string;
+        ratePaid: number;
+      } | null = null;
+
+      if (shippingDetails?.address) {
+        try {
+          labelInfo = await purchaseShippingLabel({
+            name: shippingDetails.name || "Customer",
+            street1: shippingDetails.address.line1 || "",
+            street2: shippingDetails.address.line2 || undefined,
+            city: shippingDetails.address.city || "",
+            state: shippingDetails.address.state || "",
+            zip: shippingDetails.address.postal_code || "",
+            country: shippingDetails.address.country || "US",
+          });
+
+          if (labelInfo) {
+            // Update order with tracking info
+            await db.order.update({
+              where: { id: order.id },
+              data: {
+                trackingNumber: labelInfo.trackingNumber,
+                trackingUrl: labelInfo.trackingUrl,
+                labelUrl: labelInfo.labelUrl,
+                carrier: labelInfo.carrier,
+                shippingService: labelInfo.service,
+                labelCostCents: labelInfo.ratePaid,
+              },
+            });
+            console.log(`Shipping label purchased for order ${order.id}: ${labelInfo.trackingNumber}`);
+
+            // Email the label to store owner
+            try {
+              await sendEmail({
+                to: "badscandi@gmail.com",
+                subject: `New Order ${order.id} - Shipping Label Ready`,
+                html: `
+                  <h2>New Order Received!</h2>
+                  <p><strong>Order ID:</strong> ${order.id}</p>
+                  <p><strong>Customer:</strong> ${shippingDetails.name}</p>
+                  <p><strong>Shipping Address:</strong><br>
+                    ${shippingDetails.address.line1}<br>
+                    ${shippingDetails.address.line2 ? shippingDetails.address.line2 + "<br>" : ""}
+                    ${shippingDetails.address.city}, ${shippingDetails.address.state} ${shippingDetails.address.postal_code}<br>
+                    ${shippingDetails.address.country}
+                  </p>
+                  <p><strong>Carrier:</strong> ${labelInfo.carrier} ${labelInfo.service}</p>
+                  <p><strong>Tracking Number:</strong> ${labelInfo.trackingNumber}</p>
+                  <p><strong>Label Cost:</strong> $${(labelInfo.ratePaid / 100).toFixed(2)}</p>
+                  <p><strong>Items:</strong></p>
+                  <ul>
+                    ${orderItems.map(item => `<li>${item.name} (x${item.quantity})</li>`).join("")}
+                  </ul>
+                  <p><a href="${labelInfo.labelUrl}" style="display:inline-block;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:4px;">Download Shipping Label</a></p>
+                  <p><a href="${labelInfo.trackingUrl}">Track Package</a></p>
+                `,
+              });
+              console.log(`Label email sent to store owner for order ${order.id}`);
+            } catch (emailError) {
+              console.error("Failed to send label email to store owner:", emailError);
+            }
+          }
+        } catch (labelError) {
+          // Don't fail the webhook if label purchase fails
+          console.error("Failed to purchase shipping label:", labelError);
+        }
+      }
 
       // Send order confirmation email
       const customerEmail = fullSession.customer_details?.email;
