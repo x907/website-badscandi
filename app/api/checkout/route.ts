@@ -179,7 +179,8 @@ export async function POST(request: Request) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      // Let Stripe automatically show available payment methods (Card, Apple Pay, Google Pay, etc.)
+      // based on customer's device and your Stripe Dashboard settings
       line_items: lineItems,
       shipping_address_collection: {
         allowed_countries: ["US", "CA"],
