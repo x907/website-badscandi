@@ -39,6 +39,7 @@ export interface ShippingAddress {
 }
 
 export interface PurchasedLabel {
+  shipmentId: string; // EasyPost shipment ID for refunds
   trackingNumber: string;
   trackingUrl: string;
   labelUrl: string;
@@ -92,6 +93,7 @@ export async function purchaseShippingLabel(
     const purchasedShipment = await easypost.Shipment.buy(shipment.id, cheapestRate.id);
 
     return {
+      shipmentId: purchasedShipment.id,
       trackingNumber: purchasedShipment.tracking_code,
       trackingUrl: purchasedShipment.tracker?.public_url || `https://track.easypost.com/${purchasedShipment.tracking_code}`,
       labelUrl: purchasedShipment.postage_label?.label_url || "",
@@ -102,5 +104,37 @@ export async function purchaseShippingLabel(
   } catch (error) {
     console.error("Error purchasing shipping label:", error);
     return null;
+  }
+}
+
+/**
+ * Request a refund for a shipping label
+ * Returns true if refund was successfully submitted
+ * Note: Refunds typically take 5-7 business days to process
+ */
+export async function refundShippingLabel(shipmentId: string): Promise<{
+  success: boolean;
+  status?: string;
+  error?: string;
+}> {
+  if (!easypost) {
+    return { success: false, error: "EasyPost not configured" };
+  }
+
+  try {
+    // Use the static refund method with shipment ID
+    const refundedShipment = await easypost.Shipment.refund(shipmentId);
+
+    // EasyPost refund statuses: submitted, refunded, rejected
+    return {
+      success: true,
+      status: refundedShipment.refund_status,
+    };
+  } catch (error: any) {
+    console.error("Error refunding shipping label:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to refund label",
+    };
   }
 }

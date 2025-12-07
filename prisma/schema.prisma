@@ -132,6 +132,8 @@ model Order {
   carrier         String?
   shippingService String?
   labelCostCents  Int?
+  shipmentId      String?
+  labelRefunded   Boolean  @default(false)
   user            User     @relation(fields: [userId], references: [id])
 
   @@index([userId])

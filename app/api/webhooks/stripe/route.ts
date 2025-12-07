@@ -198,6 +198,7 @@ export async function POST(request: NextRequest) {
       // Purchase shipping label automatically
       const shippingDetails = fullSession.collected_information?.shipping_details;
       let labelInfo: {
+        shipmentId: string;
         trackingNumber: string;
         trackingUrl: string;
         labelUrl: string;
@@ -223,6 +224,7 @@ export async function POST(request: NextRequest) {
             await db.order.update({
               where: { id: order.id },
               data: {
+                shipmentId: labelInfo.shipmentId,
                 trackingNumber: labelInfo.trackingNumber,
                 trackingUrl: labelInfo.trackingUrl,
                 labelUrl: labelInfo.labelUrl,
