@@ -1,50 +1,27 @@
-import Link from "next/link";
-import { CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ClearCart } from "./clear-cart";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+import { OrderDetails } from "./order-details";
 
 export const metadata = {
   title: "Order Confirmed | Bad Scandi",
   description: "Your order has been successfully placed.",
 };
 
-export default function CheckoutSuccessPage() {
+function LoadingFallback() {
   return (
-    <>
-      <ClearCart />
     <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16">
       <div className="max-w-md mx-auto text-center">
-        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5 sm:mb-6">
-          <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
-        </div>
-
-        <h1 className="text-2xl font-semibold text-neutral-900 mb-3">
-          Thank you for your order!
-        </h1>
-
-        <p className="text-neutral-600 mb-8">
-          Your order has been confirmed and is being prepared. You&apos;ll
-          receive an email confirmation shortly.
-        </p>
-
-        <div className="space-y-3">
-          <Button asChild className="w-full">
-            <Link href="/account">View Order Details</Link>
-          </Button>
-
-          <Button asChild variant="outline" className="w-full">
-            <Link href="/shop">Continue Shopping</Link>
-          </Button>
-        </div>
-
-        <p className="text-sm text-neutral-500 mt-8">
-          Questions about your order?{" "}
-          <Link href="/contact" className="text-amber-900 hover:underline">
-            Contact us
-          </Link>
-        </p>
+        <Loader2 className="w-10 h-10 animate-spin text-amber-900 mx-auto mb-4" />
+        <p className="text-neutral-600">Loading order details...</p>
       </div>
     </div>
-    </>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OrderDetails />
+    </Suspense>
   );
 }

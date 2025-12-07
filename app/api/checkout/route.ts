@@ -177,38 +177,62 @@ export async function POST(request: Request) {
       };
     });
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com";
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       // Let Stripe automatically show available payment methods (Card, Apple Pay, Google Pay, etc.)
-      // based on customer's device and your Stripe Dashboard settings
       line_items: lineItems,
+
+      // Enable promotional codes/coupons
+      allow_promotion_codes: true,
+
+      // Collect shipping address
       shipping_address_collection: {
         allowed_countries: ["US", "CA"],
       },
+
+      // Shipping options with real rates
       shipping_options: [
         {
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: {
-              amount: 0,
+              amount: 999, // $9.99
               currency: "usd",
             },
-            display_name: "Free Standard Shipping",
+            display_name: "Standard Shipping",
             delivery_estimate: {
-              minimum: {
-                unit: "business_day",
-                value: 5,
-              },
-              maximum: {
-                unit: "business_day",
-                value: 7,
-              },
+              minimum: { unit: "business_day", value: 5 },
+              maximum: { unit: "business_day", value: 7 },
+            },
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: 1999, // $19.99
+              currency: "usd",
+            },
+            display_name: "Expedited Shipping",
+            delivery_estimate: {
+              minimum: { unit: "business_day", value: 2 },
+              maximum: { unit: "business_day", value: 3 },
             },
           },
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com"}/checkout/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com"}/shop?canceled=true`,
+
+      // Collect phone number for shipping updates
+      phone_number_collection: {
+        enabled: true,
+      },
+
+      // Include session ID in success URL for verification
+      success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/shop?canceled=true`,
+
       customer_email: session.user.email,
       metadata: {
         userId: session.user.id,
