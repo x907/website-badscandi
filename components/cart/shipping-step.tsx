@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, ArrowLeft, Package, Truck } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,59 +19,34 @@ interface ShippingRate {
 interface ShippingStepProps {
   subtotalCents: number;
   onBack: () => void;
-  onSelectRate: (rate: ShippingRate, address: ShippingAddress) => void;
+  onSelectRate: (rate: ShippingRate, zip: string, country: string) => void;
 }
-
-interface ShippingAddress {
-  name: string;
-  street1: string;
-  street2: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  phone: string;
-}
-
-const US_STATES = [
-  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
-  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
-];
-
-const CA_PROVINCES = [
-  "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT",
-];
 
 export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingStepProps) {
-  const [step, setStep] = useState<"address" | "rates">("address");
+  const [step, setStep] = useState<"zip" | "rates">("zip");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rates, setRates] = useState<ShippingRate[]>([]);
   const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null);
-
-  const [address, setAddress] = useState<ShippingAddress>({
-    name: "",
-    street1: "",
-    street2: "",
-    city: "",
-    state: "",
-    zip: "",
-    country: "US",
-    phone: "",
-  });
-
-  const handleAddressChange = (field: keyof ShippingAddress, value: string) => {
-    setAddress((prev) => ({ ...prev, [field]: value }));
-    setError(null);
-  };
+  const [zip, setZip] = useState("");
+  const [country, setCountry] = useState("US");
 
   const calculateRates = async () => {
-    // Validate required fields
-    if (!address.name || !address.street1 || !address.city || !address.state || !address.zip) {
-      setError("Please fill in all required fields");
+    if (!zip) {
+      setError("Please enter your ZIP/postal code");
+      return;
+    }
+
+    // Basic ZIP validation
+    const usZipRegex = /^\d{5}(-\d{4})?$/;
+    const caPostalRegex = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
+
+    if (country === "US" && !usZipRegex.test(zip)) {
+      setError("Please enter a valid US ZIP code (e.g., 12345)");
+      return;
+    }
+    if (country === "CA" && !caPostalRegex.test(zip)) {
+      setError("Please enter a valid Canadian postal code (e.g., A1A 1A1)");
       return;
     }
 
@@ -83,7 +58,14 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          address,
+          address: {
+            zip,
+            country,
+            // Minimal address for rate estimation
+            street1: "123 Main St",
+            city: "City",
+            state: country === "US" ? "NY" : "ON",
+          },
           totalCents: subtotalCents,
         }),
       });
@@ -92,10 +74,10 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
 
       if (data.rates && data.rates.length > 0) {
         setRates(data.rates);
-        setSelectedRate(data.rates[0]); // Select cheapest by default
+        setSelectedRate(data.rates[0]);
         setStep("rates");
       } else {
-        setError(data.error || "No shipping options available");
+        setError(data.error || "No shipping options available for this location");
       }
     } catch (err) {
       setError("Failed to calculate shipping. Please try again.");
@@ -106,7 +88,7 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
 
   const handleContinue = () => {
     if (selectedRate) {
-      onSelectRate(selectedRate, address);
+      onSelectRate(selectedRate, zip, country);
     }
   };
 
@@ -114,20 +96,18 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
     return (
       <div className="space-y-4">
         <button
-          onClick={() => setStep("address")}
+          onClick={() => setStep("zip")}
           className="flex items-center text-sm text-neutral-600 hover:text-neutral-900"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Edit address
+          Change location
         </button>
 
-        <div className="bg-neutral-50 rounded-lg p-3 text-sm">
-          <p className="font-medium text-neutral-900">{address.name}</p>
-          <p className="text-neutral-600">{address.street1}</p>
-          {address.street2 && <p className="text-neutral-600">{address.street2}</p>}
-          <p className="text-neutral-600">
-            {address.city}, {address.state} {address.zip}
-          </p>
+        <div className="bg-neutral-50 rounded-lg p-3 text-sm flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-neutral-500" />
+          <span className="text-neutral-700">
+            Shipping to <span className="font-medium">{zip}</span>, {country === "US" ? "United States" : "Canada"}
+          </span>
         </div>
 
         <div className="space-y-2">
@@ -188,6 +168,10 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
         >
           Continue to Payment
         </Button>
+
+        <p className="text-xs text-neutral-500 text-center">
+          You'll enter your full address at checkout
+        </p>
       </div>
     );
   }
@@ -202,10 +186,14 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
         Back to cart
       </button>
 
-      <div className="flex items-center gap-2 mb-4">
-        <Package className="w-5 h-5 text-amber-900" />
-        <h3 className="font-medium text-neutral-900">Shipping Address</h3>
+      <div className="flex items-center gap-2 mb-2">
+        <MapPin className="w-5 h-5 text-amber-900" />
+        <h3 className="font-medium text-neutral-900">Where are we shipping to?</h3>
       </div>
+
+      <p className="text-sm text-neutral-500">
+        Enter your ZIP code to see shipping options
+      </p>
 
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
@@ -215,108 +203,40 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
 
       <div className="space-y-3">
         <div>
-          <Label htmlFor="name" className="text-sm">Full Name *</Label>
-          <Input
-            id="name"
-            value={address.name}
-            onChange={(e) => handleAddressChange("name", e.target.value)}
-            placeholder="John Doe"
-            className="mt-1"
-          />
+          <Label htmlFor="country" className="text-sm">Country</Label>
+          <select
+            id="country"
+            value={country}
+            onChange={(e) => {
+              setCountry(e.target.value);
+              setZip("");
+              setError(null);
+            }}
+            className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
+            <option value="US">United States</option>
+            <option value="CA">Canada</option>
+          </select>
         </div>
 
         <div>
-          <Label htmlFor="street1" className="text-sm">Address Line 1 *</Label>
+          <Label htmlFor="zip" className="text-sm">
+            {country === "US" ? "ZIP Code" : "Postal Code"}
+          </Label>
           <Input
-            id="street1"
-            value={address.street1}
-            onChange={(e) => handleAddressChange("street1", e.target.value)}
-            placeholder="123 Main Street"
+            id="zip"
+            value={zip}
+            onChange={(e) => {
+              setZip(e.target.value);
+              setError(null);
+            }}
+            placeholder={country === "US" ? "12345" : "A1A 1A1"}
             className="mt-1"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="street2" className="text-sm">Address Line 2</Label>
-          <Input
-            id="street2"
-            value={address.street2}
-            onChange={(e) => handleAddressChange("street2", e.target.value)}
-            placeholder="Apt, Suite, Unit (optional)"
-            className="mt-1"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label htmlFor="city" className="text-sm">City *</Label>
-            <Input
-              id="city"
-              value={address.city}
-              onChange={(e) => handleAddressChange("city", e.target.value)}
-              placeholder="City"
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="state" className="text-sm">State/Province *</Label>
-            <select
-              id="state"
-              value={address.state}
-              onChange={(e) => handleAddressChange("state", e.target.value)}
-              className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Select...</option>
-              {address.country === "US" ? (
-                US_STATES.map((state) => (
-                  <option key={state} value={state}>{state}</option>
-                ))
-              ) : (
-                CA_PROVINCES.map((prov) => (
-                  <option key={prov} value={prov}>{prov}</option>
-                ))
-              )}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label htmlFor="zip" className="text-sm">ZIP/Postal Code *</Label>
-            <Input
-              id="zip"
-              value={address.zip}
-              onChange={(e) => handleAddressChange("zip", e.target.value)}
-              placeholder={address.country === "US" ? "12345" : "A1A 1A1"}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="country" className="text-sm">Country *</Label>
-            <select
-              id="country"
-              value={address.country}
-              onChange={(e) => {
-                handleAddressChange("country", e.target.value);
-                handleAddressChange("state", ""); // Reset state when country changes
-              }}
-              className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="US">United States</option>
-              <option value="CA">Canada</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="phone" className="text-sm">Phone (for delivery updates)</Label>
-          <Input
-            id="phone"
-            type="tel"
-            value={address.phone}
-            onChange={(e) => handleAddressChange("phone", e.target.value)}
-            placeholder="(555) 123-4567"
-            className="mt-1"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                calculateRates();
+              }
+            }}
           />
         </div>
       </div>
@@ -329,10 +249,10 @@ export function ShippingStep({ subtotalCents, onBack, onSelectRate }: ShippingSt
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Calculating shipping...
+            Getting rates...
           </>
         ) : (
-          "Calculate Shipping"
+          "See Shipping Options"
         )}
       </Button>
     </div>

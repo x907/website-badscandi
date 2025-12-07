@@ -20,16 +20,7 @@ interface ShippingInfo {
     displayName: string;
     deliveryDays: number | null;
   };
-  address: {
-    name: string;
-    street1: string;
-    street2?: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-    phone?: string;
-  };
+  country: string;
 }
 
 export async function POST(request: Request) {
@@ -62,7 +53,7 @@ export async function POST(request: Request) {
 
     // Validate shipping info if provided
     if (shipping) {
-      if (!shipping.rate || !shipping.address) {
+      if (!shipping.rate || !shipping.country) {
         return NextResponse.json(
           { error: "Invalid shipping information" },
           { status: 400 }
@@ -246,10 +237,9 @@ export async function POST(request: Request) {
         },
       ];
 
-      // Pre-fill shipping address but don't collect again
-      // Note: Stripe still needs to collect for payment verification
+      // Collect full address at Stripe checkout, but restrict to selected country
       checkoutOptions.shipping_address_collection = {
-        allowed_countries: [shipping.address.country],
+        allowed_countries: [shipping.country],
       };
 
       // Store shipping details in metadata for reference

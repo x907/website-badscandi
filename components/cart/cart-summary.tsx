@@ -20,17 +20,6 @@ interface ShippingRate {
   displayName: string;
 }
 
-interface ShippingAddress {
-  name: string;
-  street1: string;
-  street2: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  phone: string;
-}
-
 export function CartSummary() {
   const { subtotalCents, items, closeCart, clearCart } = useCart();
   const { data: session } = useSession();
@@ -38,7 +27,7 @@ export function CartSummary() {
   const [error, setError] = useState<string | null>(null);
   const [showShipping, setShowShipping] = useState(false);
 
-  const handleCheckout = async (shipping?: { rate: ShippingRate; address: ShippingAddress }) => {
+  const handleCheckout = async (shipping?: { rate: ShippingRate; zip: string; country: string }) => {
     setIsLoading(true);
     setError(null);
 
@@ -65,7 +54,7 @@ export function CartSummary() {
           })),
           shipping: shipping ? {
             rate: shipping.rate,
-            address: shipping.address,
+            country: shipping.country,
           } : undefined,
         }),
       });
@@ -93,8 +82,8 @@ export function CartSummary() {
     }
   };
 
-  const handleSelectRate = (rate: ShippingRate, address: ShippingAddress) => {
-    handleCheckout({ rate, address });
+  const handleSelectRate = (rate: ShippingRate, zip: string, country: string) => {
+    handleCheckout({ rate, zip, country });
   };
 
   // Show shipping step if user is signed in and clicked continue
