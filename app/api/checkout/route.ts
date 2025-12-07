@@ -131,6 +131,23 @@ export async function POST(request: Request) {
       );
     }
 
+    // Calculate total to validate minimum amount (Stripe requires at least $0.50)
+    const totalCents = items.reduce((sum, item) => {
+      const product = products.find((p) => p.id === item.productId)!;
+      return sum + product.priceCents * item.quantity;
+    }, 0);
+
+    if (totalCents < 50) {
+      return NextResponse.json(
+        {
+          error: "Order total must be at least $0.50",
+          code: "AMOUNT_TOO_SMALL",
+          message: "The minimum order amount is $0.50. Please add more items to your cart.",
+        },
+        { status: 400 }
+      );
+    }
+
     // Create line items for Stripe
     const lineItems = items.map((item) => {
       const product = products.find((p) => p.id === item.productId)!;
