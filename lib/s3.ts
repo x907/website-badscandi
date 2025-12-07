@@ -1,5 +1,20 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { randomBytes } from "crypto";
+
+function generateId(): string {
+  return randomBytes(12).toString("hex");
+}
+
+function getExtension(contentType: string): string {
+  const map: Record<string, string> = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/gif": ".gif",
+  };
+  return map[contentType] || ".jpg";
+}
 
 // Initialize S3 client
 const s3Client = new S3Client({
@@ -72,7 +87,7 @@ export function getS3Url(key: string): string {
  */
 export async function uploadProductImage(
   file: Buffer,
-  filename: string,
+  _filename: string,
   contentType: string
 ): Promise<string> {
   // Validate S3 configuration
@@ -86,7 +101,7 @@ export async function uploadProductImage(
     throw new Error("AWS_SECRET_ACCESS_KEY is not configured");
   }
 
-  const key = `products/${Date.now()}-${filename}`;
+  const key = `products/${generateId()}${getExtension(contentType)}`;
 
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
