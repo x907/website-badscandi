@@ -13,6 +13,8 @@ export interface OrderConfirmationEmailData {
   firstName?: string;
   orderId: string;
   items: OrderItem[];
+  subtotalCents: number;
+  shippingCents: number;
   totalCents: number;
   shippingAddress?: {
     name?: string;
@@ -91,11 +93,11 @@ export function orderConfirmationTemplate(data: OrderConfirmationEmailData, _uns
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <tr>
           <td style="font-size: 14px; color: #666;">Subtotal</td>
-          <td align="right" style="font-size: 14px; color: #1a1a1a;">${formatPrice(data.totalCents)}</td>
+          <td align="right" style="font-size: 14px; color: #1a1a1a;">${formatPrice(data.subtotalCents)}</td>
         </tr>
         <tr>
           <td style="font-size: 14px; color: #666; padding-top: 8px;">Shipping</td>
-          <td align="right" style="font-size: 14px; color: #1a1a1a; padding-top: 8px;">Free</td>
+          <td align="right" style="font-size: 14px; color: #1a1a1a; padding-top: 8px;">${data.shippingCents === 0 ? "Free" : formatPrice(data.shippingCents)}</td>
         </tr>
         <tr>
           <td style="font-size: 16px; font-weight: 700; color: #1a1a1a; padding-top: 12px;">Total</td>
@@ -131,8 +133,8 @@ ${greeting}, thank you for shopping with Bad Scandi! We're preparing your handcr
 Order Summary:
 ${data.items.map((item) => `- ${item.name} (Qty: ${item.quantity}) - ${formatPrice(item.priceCents * item.quantity)}`).join("\n")}
 
-Subtotal: ${formatPrice(data.totalCents)}
-Shipping: Free
+Subtotal: ${formatPrice(data.subtotalCents)}
+Shipping: ${data.shippingCents === 0 ? "Free" : formatPrice(data.shippingCents)}
 Total: ${formatPrice(data.totalCents)}
 
 ${

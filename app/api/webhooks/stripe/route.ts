@@ -336,6 +336,8 @@ export async function POST(request: NextRequest) {
                   quantity: item.quantity,
                   imageUrl: item.imageUrl,
                 })),
+                subtotalCents: totalCents - shippingCents,
+                shippingCents,
                 totalCents,
                 shippingAddress: shippingDetails?.address
                   ? {
