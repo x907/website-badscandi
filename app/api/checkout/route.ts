@@ -194,19 +194,30 @@ export async function POST(request: Request) {
       },
     };
 
-    // Shipping options - shown in Stripe checkout
+    // Shipping options - flat rates by region
+    // US: $30, Canada: $55, International: $95
     checkoutOptions.shipping_address_collection = {
-      allowed_countries: ["US", "CA"],
+      allowed_countries: [
+        // North America
+        "US", "CA",
+        // Europe
+        "GB", "IE", "FR", "DE", "NL", "BE", "AT", "CH", "IT", "ES", "PT",
+        "SE", "NO", "DK", "FI", "PL", "CZ",
+        // Pacific
+        "AU", "NZ",
+        // Asia
+        "JP", "KR", "SG",
+      ],
     };
 
     checkoutOptions.shipping_options = [
       {
         shipping_rate_data: {
           type: "fixed_amount",
-          fixed_amount: { amount: 999, currency: "usd" },
-          display_name: "Standard Shipping",
+          fixed_amount: { amount: 3000, currency: "usd" },
+          display_name: "United States",
           delivery_estimate: {
-            minimum: { unit: "business_day", value: 5 },
+            minimum: { unit: "business_day", value: 4 },
             maximum: { unit: "business_day", value: 7 },
           },
         },
@@ -214,11 +225,22 @@ export async function POST(request: Request) {
       {
         shipping_rate_data: {
           type: "fixed_amount",
-          fixed_amount: { amount: 1999, currency: "usd" },
-          display_name: "Expedited Shipping",
+          fixed_amount: { amount: 5500, currency: "usd" },
+          display_name: "Canada",
           delivery_estimate: {
-            minimum: { unit: "business_day", value: 2 },
-            maximum: { unit: "business_day", value: 3 },
+            minimum: { unit: "business_day", value: 7 },
+            maximum: { unit: "business_day", value: 14 },
+          },
+        },
+      },
+      {
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: { amount: 9500, currency: "usd" },
+          display_name: "International (Europe, Australia, Asia)",
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: 10 },
+            maximum: { unit: "business_day", value: 21 },
           },
         },
       },
