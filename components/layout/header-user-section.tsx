@@ -4,9 +4,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { UserAvatar, getFirstName } from "@/components/user-avatar";
 import { useSession } from "@/lib/auth-client";
+import { useIsAdmin } from "@/lib/use-is-admin";
+import { Settings } from "lucide-react";
 
 export function HeaderUserSection() {
   const { data: session, isPending } = useSession();
+  const { isAdmin } = useIsAdmin();
 
   // Show nothing while loading to prevent layout shift
   if (isPending) {
@@ -19,17 +22,28 @@ export function HeaderUserSection() {
     const firstName = getFirstName(session.user.name, session.user.email);
 
     return (
-      <Link href="/account" className="flex items-center gap-2">
-        <UserAvatar
-          name={session.user.name}
-          email={session.user.email}
-          image={session.user.image}
-          size="md"
-        />
-        <span className="hidden lg:block text-sm font-medium text-neutral-700">
-          {firstName}
-        </span>
-      </Link>
+      <div className="flex items-center gap-3">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="flex items-center gap-1.5 text-sm font-medium text-amber-700 hover:text-amber-900 transition-colors"
+          >
+            <Settings className="h-4 w-4" />
+            <span className="hidden sm:inline">Admin</span>
+          </Link>
+        )}
+        <Link href="/account" className="flex items-center gap-2">
+          <UserAvatar
+            name={session.user.name}
+            email={session.user.email}
+            image={session.user.image}
+            size="md"
+          />
+          <span className="hidden lg:block text-sm font-medium text-neutral-700">
+            {firstName}
+          </span>
+        </Link>
+      </div>
     );
   }
 
