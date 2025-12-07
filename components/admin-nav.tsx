@@ -20,6 +20,11 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
+    href: "/admin/products",
+    label: "Products",
+    icon: ShoppingBag,
+  },
+  {
     href: "/admin/orders",
     label: "Orders",
     icon: Package,

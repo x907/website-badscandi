@@ -66,3 +66,25 @@ export async function getPresignedUploadUrl(
 export function getS3Url(key: string): string {
   return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${key}`;
 }
+
+/**
+ * Upload a product image to S3
+ */
+export async function uploadProductImage(
+  file: Buffer,
+  filename: string,
+  contentType: string
+): Promise<string> {
+  const key = `products/${Date.now()}-${filename}`;
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    Body: file,
+    ContentType: contentType,
+  });
+
+  await s3Client.send(command);
+
+  return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${key}`;
+}
