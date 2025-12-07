@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 // Initialize S3 client
@@ -98,4 +98,34 @@ export async function uploadProductImage(
   await s3Client.send(command);
 
   return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${key}`;
+}
+
+/**
+ * Delete a product image from S3
+ */
+export async function deleteProductImage(imageUrl: string): Promise<boolean> {
+  try {
+    // Extract the key from the URL
+    // URL format: https://bucket.s3.region.amazonaws.com/products/timestamp-filename.jpg
+    const url = new URL(imageUrl);
+    const key = url.pathname.slice(1); // Remove leading slash
+
+    // Only delete if it's from our bucket and is a product image
+    if (!key.startsWith("products/")) {
+      console.log("Skipping deletion - not a product image:", key);
+      return false;
+    }
+
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+
+    await s3Client.send(command);
+    console.log("Deleted from S3:", key);
+    return true;
+  } catch (error) {
+    console.error("Error deleting from S3:", error);
+    return false;
+  }
 }

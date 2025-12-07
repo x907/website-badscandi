@@ -162,11 +162,28 @@ export function AdminProductsClient() {
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = async (index: number) => {
+    const imageUrl = formData.imageUrls[index];
+
+    // Remove from form immediately for responsive UI
     setFormData((prev) => ({
       ...prev,
       imageUrls: prev.imageUrls.filter((_, i) => i !== index),
     }));
+
+    // Delete from S3 in background (only for product images)
+    if (imageUrl.includes("/products/")) {
+      try {
+        await fetch("/api/admin/upload/delete", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageUrl }),
+        });
+      } catch (error) {
+        console.error("Failed to delete image from S3:", error);
+        // Don't show error to user - image is already removed from form
+      }
+    }
   };
 
   const setPrimaryImage = (index: number) => {
@@ -720,10 +737,17 @@ export function AdminProductsClient() {
                   </span>
                 </div>
 
-                {formData.imageUrls.length === 0 && (
+                {formData.imageUrls.length === 0 && !isUploading && (
                   <p className="text-sm text-red-600">
                     At least one image is required
                   </p>
+                )}
+
+                {isUploading && (
+                  <div className="flex items-center gap-2 text-sm text-amber-600">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Uploading images...
+                  </div>
                 )}
 
                 <div>

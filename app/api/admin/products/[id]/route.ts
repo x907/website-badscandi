@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { deleteProductImage } from "@/lib/s3";
 
 // GET - Get single product
 export async function GET(
@@ -160,6 +161,20 @@ export async function DELETE(
 
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    // Delete all images from S3 before deleting the product
+    const imagesToDelete = product.imageUrls.length > 0
+      ? product.imageUrls
+      : (product.imageUrl ? [product.imageUrl] : []);
+
+    for (const imageUrl of imagesToDelete) {
+      try {
+        await deleteProductImage(imageUrl);
+      } catch (error) {
+        console.error("Error deleting image from S3:", imageUrl, error);
+        // Continue with other images even if one fails
+      }
     }
 
     await db.product.delete({
