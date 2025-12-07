@@ -11,18 +11,6 @@ interface CartItemInput {
   priceCents?: number; // Optional - if provided, will validate against current price
 }
 
-interface ShippingInfo {
-  rate: {
-    id: string;
-    carrier: string;
-    service: string;
-    rate: number; // in cents
-    displayName: string;
-    deliveryDays: number | null;
-  };
-  country: string;
-}
-
 export async function POST(request: Request) {
   // Rate limiting
   const rateLimitResponse = await checkRateLimit(request, "checkout");
@@ -45,20 +33,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { items, shipping } = body as { items: CartItemInput[]; shipping?: ShippingInfo };
+    const { items } = body as { items: CartItemInput[] };
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "No items in cart" }, { status: 400 });
-    }
-
-    // Validate shipping info if provided
-    if (shipping) {
-      if (!shipping.rate || !shipping.country) {
-        return NextResponse.json(
-          { error: "Invalid shipping information" },
-          { status: 400 }
-        );
-      }
     }
 
     // Fetch all products
@@ -216,67 +194,35 @@ export async function POST(request: Request) {
       },
     };
 
-    // If shipping info is provided, use calculated rate
-    if (shipping) {
-      const deliveryDays = shipping.rate.deliveryDays || 7;
+    // Shipping options - shown in Stripe checkout
+    checkoutOptions.shipping_address_collection = {
+      allowed_countries: ["US", "CA"],
+    };
 
-      checkoutOptions.shipping_options = [
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            fixed_amount: {
-              amount: shipping.rate.rate,
-              currency: "usd",
-            },
-            display_name: shipping.rate.displayName,
-            delivery_estimate: {
-              minimum: { unit: "business_day", value: Math.max(1, deliveryDays - 1) },
-              maximum: { unit: "business_day", value: deliveryDays + 1 },
-            },
+    checkoutOptions.shipping_options = [
+      {
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: { amount: 999, currency: "usd" },
+          display_name: "Standard Shipping",
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: 5 },
+            maximum: { unit: "business_day", value: 7 },
           },
         },
-      ];
-
-      // Collect full address at Stripe checkout, but restrict to selected country
-      checkoutOptions.shipping_address_collection = {
-        allowed_countries: [shipping.country],
-      };
-
-      // Store shipping details in metadata for reference
-      checkoutOptions.metadata.shippingCarrier = shipping.rate.carrier;
-      checkoutOptions.metadata.shippingService = shipping.rate.service;
-      checkoutOptions.metadata.shippingRateId = shipping.rate.id;
-    } else {
-      // Fallback to static shipping options if no calculated rate provided
-      checkoutOptions.shipping_address_collection = {
-        allowed_countries: ["US", "CA"],
-      };
-
-      checkoutOptions.shipping_options = [
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            fixed_amount: { amount: 999, currency: "usd" },
-            display_name: "Standard Shipping",
-            delivery_estimate: {
-              minimum: { unit: "business_day", value: 5 },
-              maximum: { unit: "business_day", value: 7 },
-            },
+      },
+      {
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: { amount: 1999, currency: "usd" },
+          display_name: "Expedited Shipping",
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: 2 },
+            maximum: { unit: "business_day", value: 3 },
           },
         },
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            fixed_amount: { amount: 1999, currency: "usd" },
-            display_name: "Expedited Shipping",
-            delivery_estimate: {
-              minimum: { unit: "business_day", value: 2 },
-              maximum: { unit: "business_day", value: 3 },
-            },
-          },
-        },
-      ];
-    }
+      },
+    ];
 
     const checkoutSession = await stripe.checkout.sessions.create(checkoutOptions);
 
