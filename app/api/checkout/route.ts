@@ -206,8 +206,8 @@ export async function POST(request: Request) {
           },
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/shop?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com"}/checkout/success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://badscandi.com"}/shop?canceled=true`,
       customer_email: session.user.email,
       metadata: {
         userId: session.user.id,
