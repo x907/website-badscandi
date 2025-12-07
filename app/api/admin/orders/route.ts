@@ -1,8 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
+import { checkRateLimit } from "@/lib/rate-limit";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(request, "admin");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     await requireAdmin();
 

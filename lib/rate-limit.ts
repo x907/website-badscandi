@@ -46,6 +46,12 @@ const rateLimiters = {
     limiter: Ratelimit.slidingWindow(30, "1 m"),
     prefix: "ratelimit:general",
   }),
+  // Admin API: 30 requests per minute
+  admin: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, "1 m"),
+    prefix: "ratelimit:admin",
+  }),
 };
 
 type RateLimitType = keyof typeof rateLimiters;
@@ -131,4 +137,5 @@ export const rateLimits = {
   events: "events" as const,
   auth: "auth" as const,
   general: "general" as const,
+  admin: "admin" as const,
 };

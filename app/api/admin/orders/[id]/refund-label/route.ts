@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
 import { refundShippingLabel } from "@/lib/shipping";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const rateLimitResponse = await checkRateLimit(request, "admin");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     await requireAdmin();
 
