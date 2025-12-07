@@ -219,24 +219,48 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating checkout session:", error);
 
-    // Provide more specific error messages for common Stripe errors
+    // Log detailed error info for debugging
     if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error name:", error.name);
+
+      // Check if it's a Stripe error with more details
+      const stripeError = error as any;
+      if (stripeError.type) {
+        console.error("Stripe error type:", stripeError.type);
+        console.error("Stripe error code:", stripeError.code);
+        console.error("Stripe error param:", stripeError.param);
+      }
+
       const message = error.message;
 
       // Check for common Stripe errors
       if (message.includes("Invalid API Key")) {
         return NextResponse.json(
-          { error: "Payment system configuration error", code: "STRIPE_CONFIG_ERROR" },
+          { error: "Payment system configuration error", code: "STRIPE_CONFIG_ERROR", message },
           { status: 500 }
         );
       }
 
       if (message.includes("No such")) {
         return NextResponse.json(
-          { error: "Payment configuration error", code: "STRIPE_NOT_FOUND" },
+          { error: "Payment configuration error", code: "STRIPE_NOT_FOUND", message },
           { status: 500 }
         );
       }
+
+      if (message.includes("amount")) {
+        return NextResponse.json(
+          { error: "Invalid order amount", code: "AMOUNT_ERROR", message },
+          { status: 400 }
+        );
+      }
+
+      // Return the actual error message for debugging
+      return NextResponse.json(
+        { error: "Failed to create checkout session", code: "CHECKOUT_ERROR", message },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(
