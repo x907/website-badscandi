@@ -81,6 +81,13 @@ export function getStripeWebhookSecretForMode(isSandbox: boolean): string {
 }
 
 /**
+ * Get a Stripe client for a specific mode (used when mode is known from context, e.g., session ID prefix)
+ */
+export function getStripeClientForMode(isSandbox: boolean): Stripe {
+  return createStripeClient(isSandbox);
+}
+
+/**
  * Get the publishable key for the current mode (for client-side)
  */
 export async function getStripePublishableKey(): Promise<string> {

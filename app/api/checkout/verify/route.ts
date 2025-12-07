@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripeClientForMode } from "@/lib/stripe";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,6 +13,11 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Detect if this is a test or live session from the ID prefix
+    // cs_test_ = sandbox/test mode, cs_live_ = production mode
+    const isTestSession = sessionId.startsWith("cs_test_");
+    const stripe = getStripeClientForMode(isTestSession);
+
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["line_items", "customer_details", "shipping_cost"],
     });
