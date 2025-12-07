@@ -81,36 +81,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ rates: getStaticRates(address.country) });
     }
 
-    const rates = await calculateShippingRates(address, totalCents);
+    try {
+      const rates = await calculateShippingRates(address, totalCents);
 
-    if (rates.length === 0) {
-      // Fall back to static rates if no carrier rates available
+      if (rates.length === 0) {
+        // Fall back to static rates if no carrier rates available
+        console.log("No carrier rates returned, using static rates");
+        return NextResponse.json({ rates: getStaticRates(address.country) });
+      }
+
+      return NextResponse.json({ rates });
+    } catch (easypostError) {
+      // EasyPost failed (invalid address, API error, etc.) - fall back to static rates
+      console.error("EasyPost rate calculation failed, using static rates:", easypostError);
       return NextResponse.json({ rates: getStaticRates(address.country) });
     }
-
-    return NextResponse.json({ rates });
   } catch (error) {
-    console.error("Error calculating shipping rates:", error);
+    console.error("Error in shipping rates endpoint:", error);
 
-    // Check for EasyPost specific errors
-    if (error instanceof Error) {
-      if (error.message.includes("Invalid address")) {
-        return NextResponse.json(
-          { error: "Please check your address and try again" },
-          { status: 400 }
-        );
-      }
-
-      // For shipping service errors, fall back to static rates
-      if (error.message.includes("Shipping service not configured")) {
-        const body = await request.clone().json();
-        return NextResponse.json({ rates: getStaticRates(body.address?.country || "US") });
-      }
-    }
-
-    return NextResponse.json(
-      { error: "Unable to calculate shipping rates. Please try again." },
-      { status: 500 }
-    );
+    // For any unexpected errors, still try to return static rates
+    return NextResponse.json({ rates: getStaticRates("US") });
   }
 }
