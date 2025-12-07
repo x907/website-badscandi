@@ -54,8 +54,10 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    // Return more specific error message for debugging
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to upload image" },
+      { error: `Failed to upload image: ${errorMessage}` },
       { status: 500 }
     );
   }
