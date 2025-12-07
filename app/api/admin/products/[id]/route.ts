@@ -3,6 +3,9 @@ import { requireAdmin } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { deleteProductImage } from "@/lib/s3";
+import { productUpdateSchema } from "@/lib/validations";
+import { logAuditEvent, createChangesObject } from "@/lib/audit";
+import { ZodError } from "zod";
 
 // GET - Get single product
 export async function GET(
@@ -50,25 +53,6 @@ export async function PUT(
     const { id } = await params;
 
     const body = await request.json();
-    const {
-      name,
-      slug,
-      description,
-      priceCents,
-      imageUrl,
-      imageUrls,
-      stock,
-      featured,
-      metaTitle,
-      metaDescription,
-      altText,
-      category,
-      tags,
-      materials,
-      colors,
-      dimensions,
-      room,
-    } = body;
 
     // Check product exists
     const existingProduct = await db.product.findUnique({
@@ -79,10 +63,31 @@ export async function PUT(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    // Prepare data for validation
+    const dataToValidate: Record<string, unknown> = {};
+    if (body.name !== undefined) dataToValidate.name = body.name;
+    if (body.slug !== undefined) dataToValidate.slug = body.slug;
+    if (body.description !== undefined) dataToValidate.description = body.description;
+    if (body.priceCents !== undefined) dataToValidate.priceCents = parseInt(body.priceCents);
+    if (body.stock !== undefined) dataToValidate.stock = parseInt(body.stock);
+    if (body.featured !== undefined) dataToValidate.featured = body.featured;
+    if (body.metaTitle !== undefined) dataToValidate.metaTitle = body.metaTitle;
+    if (body.metaDescription !== undefined) dataToValidate.metaDescription = body.metaDescription;
+    if (body.altText !== undefined) dataToValidate.altText = body.altText;
+    if (body.category !== undefined) dataToValidate.category = body.category;
+    if (body.tags !== undefined) dataToValidate.tags = body.tags;
+    if (body.materials !== undefined) dataToValidate.materials = body.materials;
+    if (body.colors !== undefined) dataToValidate.colors = body.colors;
+    if (body.dimensions !== undefined) dataToValidate.dimensions = body.dimensions;
+    if (body.room !== undefined) dataToValidate.room = body.room;
+
+    // Validate with Zod schema (partial - all fields optional)
+    const validatedData = productUpdateSchema.parse(dataToValidate);
+
     // If slug changed, check it's unique
-    if (slug && slug !== existingProduct.slug) {
+    if (validatedData.slug && validatedData.slug !== existingProduct.slug) {
       const slugExists = await db.product.findUnique({
-        where: { slug },
+        where: { slug: validatedData.slug },
       });
       if (slugExists) {
         return NextResponse.json(
@@ -96,43 +101,68 @@ export async function PUT(
     let finalImageUrls = existingProduct.imageUrls;
     let primaryImageUrl = existingProduct.imageUrl;
 
-    if (imageUrls !== undefined) {
-      finalImageUrls = imageUrls;
-      primaryImageUrl = imageUrls[0] || existingProduct.imageUrl;
-    } else if (imageUrl !== undefined) {
-      // If only imageUrl is provided, update it and add to array if not present
-      primaryImageUrl = imageUrl;
-      if (!finalImageUrls.includes(imageUrl)) {
-        finalImageUrls = [imageUrl, ...finalImageUrls.filter(url => url !== existingProduct.imageUrl)];
+    if (body.imageUrls !== undefined) {
+      finalImageUrls = body.imageUrls;
+      primaryImageUrl = body.imageUrls[0] || existingProduct.imageUrl;
+    } else if (body.imageUrl !== undefined) {
+      primaryImageUrl = body.imageUrl;
+      if (!finalImageUrls.includes(body.imageUrl)) {
+        finalImageUrls = [body.imageUrl, ...finalImageUrls.filter((url: string) => url !== existingProduct.imageUrl)];
       }
     }
 
     const product = await db.product.update({
       where: { id },
       data: {
-        name: name ?? existingProduct.name,
-        slug: slug ?? existingProduct.slug,
-        description: description ?? existingProduct.description,
-        priceCents: priceCents !== undefined ? parseInt(priceCents) : existingProduct.priceCents,
+        name: validatedData.name ?? existingProduct.name,
+        slug: validatedData.slug ?? existingProduct.slug,
+        description: validatedData.description ?? existingProduct.description,
+        priceCents: validatedData.priceCents ?? existingProduct.priceCents,
         imageUrl: primaryImageUrl,
         imageUrls: finalImageUrls,
-        stock: stock !== undefined ? parseInt(stock) : existingProduct.stock,
-        featured: featured ?? existingProduct.featured,
-        metaTitle: metaTitle !== undefined ? metaTitle : existingProduct.metaTitle,
-        metaDescription: metaDescription !== undefined ? metaDescription : existingProduct.metaDescription,
-        altText: altText !== undefined ? altText : existingProduct.altText,
-        category: category !== undefined ? category : existingProduct.category,
-        tags: tags !== undefined ? tags : existingProduct.tags,
-        materials: materials !== undefined ? materials : existingProduct.materials,
-        colors: colors !== undefined ? colors : existingProduct.colors,
-        dimensions: dimensions !== undefined ? dimensions : existingProduct.dimensions,
-        room: room !== undefined ? room : existingProduct.room,
+        stock: validatedData.stock ?? existingProduct.stock,
+        featured: validatedData.featured ?? existingProduct.featured,
+        metaTitle: validatedData.metaTitle !== undefined ? validatedData.metaTitle : existingProduct.metaTitle,
+        metaDescription: validatedData.metaDescription !== undefined ? validatedData.metaDescription : existingProduct.metaDescription,
+        altText: validatedData.altText !== undefined ? validatedData.altText : existingProduct.altText,
+        category: validatedData.category !== undefined ? validatedData.category : existingProduct.category,
+        tags: validatedData.tags !== undefined ? validatedData.tags : existingProduct.tags,
+        materials: validatedData.materials !== undefined ? validatedData.materials : existingProduct.materials,
+        colors: validatedData.colors !== undefined ? validatedData.colors : existingProduct.colors,
+        dimensions: validatedData.dimensions !== undefined ? validatedData.dimensions : existingProduct.dimensions,
+        room: validatedData.room !== undefined ? validatedData.room : existingProduct.room,
       },
+    });
+
+    // Log audit event with changes
+    const changes = createChangesObject(
+      existingProduct as unknown as Record<string, unknown>,
+      product as unknown as Record<string, unknown>,
+      ["name", "slug", "description", "priceCents", "stock", "featured", "category"]
+    );
+
+    await logAuditEvent({
+      action: "update",
+      entityType: "product",
+      entityId: product.id,
+      changes: changes || { updated: true },
     });
 
     return NextResponse.json(product);
   } catch (error) {
     console.error("Error updating product:", error);
+
+    if (error instanceof ZodError) {
+      const errors = error.issues.map((e) => ({
+        field: e.path.join("."),
+        message: e.message,
+      }));
+      return NextResponse.json(
+        { error: "Validation failed", details: errors },
+        { status: 400 }
+      );
+    }
+
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -173,12 +203,19 @@ export async function DELETE(
         await deleteProductImage(imageUrl);
       } catch (error) {
         console.error("Error deleting image from S3:", imageUrl, error);
-        // Continue with other images even if one fails
       }
     }
 
     await db.product.delete({
       where: { id },
+    });
+
+    // Log audit event
+    await logAuditEvent({
+      action: "delete",
+      entityType: "product",
+      entityId: id,
+      changes: { name: product.name, slug: product.slug },
     });
 
     return NextResponse.json({ success: true });

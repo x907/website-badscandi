@@ -18,12 +18,34 @@ const securityHeaders = [
     value: "nosniff",
   },
   {
+    key: "X-XSS-Protection",
+    value: "1; mode=block",
+  },
+  {
     key: "Referrer-Policy",
     value: "strict-origin-when-cross-origin",
   },
   {
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
+  },
+  {
+    // Content Security Policy - prevents XSS attacks
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://accounts.google.com https://appleid.cdn-apple.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://badscandi-assets.s3.us-east-1.amazonaws.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.stripe.com",
+      "font-src 'self'",
+      "connect-src 'self' https://api.stripe.com https://accounts.google.com https://appleid.apple.com",
+      "frame-src 'self' https://js.stripe.com https://accounts.google.com https://appleid.apple.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+      "upgrade-insecure-requests",
+    ].join("; "),
   },
 ];
 

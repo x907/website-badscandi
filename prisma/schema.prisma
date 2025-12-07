@@ -218,3 +218,24 @@ model EmailLog {
   @@index([sentAt])
   @@index([userId, templateKey, relatedEntityId])
 }
+
+// Audit log for tracking admin actions
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  userEmail  String
+  action     String   // create, update, delete, approve, etc.
+  entityType String   // product, review, order, etc.
+  entityId   String?
+  changes    Json?    // What changed (before/after for updates)
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId, entityType, createdAt])
+}

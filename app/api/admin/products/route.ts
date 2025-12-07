@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
 import { db } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { productSchema } from "@/lib/validations";
+import { logAuditEvent } from "@/lib/audit";
+import { ZodError } from "zod";
 
 // GET - List all products
 export async function GET(request: NextRequest) {
@@ -37,43 +40,25 @@ export async function POST(request: NextRequest) {
     await requireAdmin();
 
     const body = await request.json();
-    const {
-      name,
-      slug,
-      description,
-      priceCents,
-      imageUrl,
-      imageUrls,
-      stock,
-      featured,
-      metaTitle,
-      metaDescription,
-      altText,
-      category,
-      tags,
-      materials,
-      colors,
-      dimensions,
-      room,
-    } = body;
 
     // Handle imageUrls - use imageUrls array if provided, otherwise use single imageUrl
-    const finalImageUrls: string[] = imageUrls?.length > 0
-      ? imageUrls
-      : (imageUrl ? [imageUrl] : []);
+    const finalImageUrls: string[] = body.imageUrls?.length > 0
+      ? body.imageUrls
+      : (body.imageUrl ? [body.imageUrl] : []);
     const primaryImageUrl = finalImageUrls[0] || "";
 
-    // Validate required fields
-    if (!name || !slug || !description || !priceCents || !primaryImageUrl) {
-      return NextResponse.json(
-        { error: "Missing required fields: name, slug, description, priceCents, imageUrl" },
-        { status: 400 }
-      );
-    }
+    // Validate with Zod schema (includes XSS sanitization)
+    const validatedData = productSchema.parse({
+      ...body,
+      priceCents: parseInt(body.priceCents) || 0,
+      stock: parseInt(body.stock) || 0,
+      imageUrl: primaryImageUrl,
+      imageUrls: finalImageUrls,
+    });
 
     // Check if slug already exists
     const existingProduct = await db.product.findUnique({
-      where: { slug },
+      where: { slug: validatedData.slug },
     });
 
     if (existingProduct) {
@@ -85,29 +70,50 @@ export async function POST(request: NextRequest) {
 
     const product = await db.product.create({
       data: {
-        name,
-        slug,
-        description,
-        priceCents: parseInt(priceCents),
+        name: validatedData.name,
+        slug: validatedData.slug,
+        description: validatedData.description,
+        priceCents: validatedData.priceCents,
         imageUrl: primaryImageUrl,
         imageUrls: finalImageUrls,
-        stock: parseInt(stock) || 0,
-        featured: featured || false,
-        metaTitle: metaTitle || null,
-        metaDescription: metaDescription || null,
-        altText: altText || null,
-        category: category || null,
-        tags: tags || null,
-        materials: materials || null,
-        colors: colors || null,
-        dimensions: dimensions || null,
-        room: room || null,
+        stock: validatedData.stock,
+        featured: validatedData.featured || false,
+        metaTitle: validatedData.metaTitle || null,
+        metaDescription: validatedData.metaDescription || null,
+        altText: validatedData.altText || null,
+        category: validatedData.category || null,
+        tags: validatedData.tags || null,
+        materials: validatedData.materials || null,
+        colors: validatedData.colors || null,
+        dimensions: validatedData.dimensions || null,
+        room: validatedData.room || null,
       },
+    });
+
+    // Log audit event
+    await logAuditEvent({
+      action: "create",
+      entityType: "product",
+      entityId: product.id,
+      changes: { name: product.name, slug: product.slug },
     });
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
     console.error("Error creating product:", error);
+
+    // Handle Zod validation errors
+    if (error instanceof ZodError) {
+      const errors = error.issues.map((e) => ({
+        field: e.path.join("."),
+        message: e.message,
+      }));
+      return NextResponse.json(
+        { error: "Validation failed", details: errors },
+        { status: 400 }
+      );
+    }
+
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
