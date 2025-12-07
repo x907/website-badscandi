@@ -1,17 +1,28 @@
-import EasyPost from "@easypost/api";
-import { isSandboxMode, sandboxConfig, isSandboxModeSync } from "./sandbox";
+import { isSandboxMode, sandboxConfig } from "./sandbox";
 
-// EasyPost client type
-type EasyPostClient = InstanceType<typeof EasyPost>;
+// EasyPost client type - use any to avoid importing the module at build time
+type EasyPostClient = any;
 
 // Track which mode the current EasyPost client is using
 let currentEasyPostMode: "sandbox" | "production" | null = null;
 let easypostClient: EasyPostClient | null = null;
+let EasyPostClass: any = null;
+
+/**
+ * Lazily load the EasyPost library
+ */
+async function loadEasyPost(): Promise<any> {
+  if (!EasyPostClass) {
+    const module = await import("@easypost/api");
+    EasyPostClass = module.default;
+  }
+  return EasyPostClass;
+}
 
 /**
  * Create an EasyPost client with the appropriate API key based on sandbox mode
  */
-function createEasyPostClient(isSandbox: boolean): EasyPostClient | null {
+async function createEasyPostClient(isSandbox: boolean): Promise<EasyPostClient | null> {
   const apiKey = sandboxConfig.getEasyPostApiKey(isSandbox);
   const mode = isSandbox ? "SANDBOX" : "PRODUCTION";
 
@@ -23,6 +34,7 @@ function createEasyPostClient(isSandbox: boolean): EasyPostClient | null {
   }
 
   try {
+    const EasyPost = await loadEasyPost();
     // Log which mode we're using
     const keyType = apiKey.startsWith("EZAK") ? "production" : "test";
     console.log(`EasyPost initialized in ${mode} mode (using ${keyType} key)`);
@@ -42,24 +54,8 @@ export async function getEasyPostClient(): Promise<EasyPostClient | null> {
   const newMode = isSandbox ? "sandbox" : "production";
 
   // Recreate client if mode changed
-  if (easypostClient === undefined || currentEasyPostMode !== newMode) {
-    easypostClient = createEasyPostClient(isSandbox);
-    currentEasyPostMode = newMode;
-  }
-
-  return easypostClient;
-}
-
-/**
- * Get EasyPost client synchronously (uses cached mode or env var)
- * Use this for module-level initialization only
- */
-export function getEasyPostClientSync(): EasyPostClient | null {
-  const isSandbox = isSandboxModeSync();
-  const newMode = isSandbox ? "sandbox" : "production";
-
-  if (easypostClient === undefined || currentEasyPostMode !== newMode) {
-    easypostClient = createEasyPostClient(isSandbox);
+  if (easypostClient === null || currentEasyPostMode !== newMode) {
+    easypostClient = await createEasyPostClient(isSandbox);
     currentEasyPostMode = newMode;
   }
 
