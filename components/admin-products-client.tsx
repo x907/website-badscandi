@@ -15,6 +15,7 @@ import {
   EyeOff,
   Star,
   GripVertical,
+  EyeClosed,
 } from "lucide-react";
 
 interface Product {
@@ -27,6 +28,7 @@ interface Product {
   imageUrls: string[];
   stock: number;
   featured: boolean;
+  hidden: boolean;
   metaTitle: string | null;
   metaDescription: string | null;
   altText: string | null;
@@ -47,6 +49,7 @@ interface ProductFormData {
   imageUrls: string[];
   stock: string;
   featured: boolean;
+  hidden: boolean;
   metaTitle: string;
   metaDescription: string;
   altText: string;
@@ -66,6 +69,7 @@ const initialFormData: ProductFormData = {
   imageUrls: [],
   stock: "0",
   featured: false,
+  hidden: false,
   metaTitle: "",
   metaDescription: "",
   altText: "",
@@ -223,6 +227,7 @@ export function AdminProductsClient() {
       imageUrls: product.imageUrls.length > 0 ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []),
       stock: product.stock.toString(),
       featured: product.featured,
+      hidden: product.hidden,
       metaTitle: product.metaTitle || "",
       metaDescription: product.metaDescription || "",
       altText: product.altText || "",
@@ -315,6 +320,22 @@ export function AdminProductsClient() {
     }
   };
 
+  const toggleHidden = async (product: Product) => {
+    try {
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hidden: !product.hidden }),
+      });
+
+      if (response.ok) {
+        fetchProducts();
+      }
+    } catch (error) {
+      console.error("Toggle hidden error:", error);
+    }
+  };
+
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -360,6 +381,7 @@ export function AdminProductsClient() {
         <div className="flex gap-4 text-sm text-neutral-600">
           <span>{products.length} products</span>
           <span>{products.filter((p) => p.featured).length} featured</span>
+          <span>{products.filter((p) => p.hidden).length} hidden</span>
           <span>
             {products.filter((p) => p.stock <= 5).length} low stock
           </span>
@@ -409,6 +431,9 @@ export function AdminProductsClient() {
                   <th className="text-center px-4 py-3 text-sm font-medium text-neutral-600">
                     Featured
                   </th>
+                  <th className="text-center px-4 py-3 text-sm font-medium text-neutral-600">
+                    Visible
+                  </th>
                   <th className="text-right px-4 py-3 text-sm font-medium text-neutral-600">
                     Actions
                   </th>
@@ -416,7 +441,7 @@ export function AdminProductsClient() {
               </thead>
               <tbody className="divide-y divide-neutral-100">
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-neutral-50">
+                  <tr key={product.id} className={`hover:bg-neutral-50 ${product.hidden ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {product.imageUrl && (
@@ -463,15 +488,28 @@ export function AdminProductsClient() {
                         onClick={() => toggleFeatured(product)}
                         className={`p-1 rounded transition-colors ${
                           product.featured
-                            ? "text-amber-900 hover:bg-amber-50"
+                            ? "text-amber-600 hover:bg-amber-50"
                             : "text-neutral-400 hover:bg-neutral-100"
                         }`}
                         title={product.featured ? "Remove from featured" : "Add to featured"}
                       >
-                        {product.featured ? (
-                          <Eye className="h-5 w-5" />
-                        ) : (
+                        <Star className={`h-5 w-5 ${product.featured ? "fill-amber-600" : ""}`} />
+                      </button>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => toggleHidden(product)}
+                        className={`p-1 rounded transition-colors ${
+                          product.hidden
+                            ? "text-red-500 hover:bg-red-50"
+                            : "text-green-600 hover:bg-green-50"
+                        }`}
+                        title={product.hidden ? "Hidden from shop (click to show)" : "Visible in shop (click to hide)"}
+                      >
+                        {product.hidden ? (
                           <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
                         )}
                       </button>
                     </td>
@@ -631,6 +669,21 @@ export function AdminProductsClient() {
                   />
                   <label htmlFor="featured" className="text-sm text-neutral-700">
                     Featured product (shown on homepage)
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="hidden"
+                    checked={formData.hidden}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, hidden: e.target.checked }))
+                    }
+                    className="h-4 w-4 text-amber-900 border-neutral-300 rounded focus:ring-amber-900"
+                  />
+                  <label htmlFor="hidden" className="text-sm text-neutral-700">
+                    Hidden product (not visible in shop or homepage)
                   </label>
                 </div>
               </div>

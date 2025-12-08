@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
         imageUrls: finalImageUrls,
         stock: validatedData.stock,
         featured: validatedData.featured || false,
+        hidden: validatedData.hidden || false,
         metaTitle: validatedData.metaTitle || null,
         metaDescription: validatedData.metaDescription || null,
         altText: validatedData.altText || null,

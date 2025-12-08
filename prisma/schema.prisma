@@ -99,6 +99,7 @@ model Product {
   imageUrls       String[] @default([]) // All images, first is primary
   stock           Int      @default(0)
   featured        Boolean  @default(false)
+  hidden          Boolean  @default(false) // Hide from public shop/homepage, visible only in admin
   metaTitle       String?
   metaDescription String?
   altText         String?
@@ -118,6 +119,7 @@ model Product {
 
   @@index([category])
   @@index([featured])
+  @@index([hidden])
 }
 
 model Order {

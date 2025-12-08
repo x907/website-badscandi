@@ -71,6 +71,7 @@ export async function PUT(
     if (body.priceCents !== undefined) dataToValidate.priceCents = parseInt(body.priceCents);
     if (body.stock !== undefined) dataToValidate.stock = parseInt(body.stock);
     if (body.featured !== undefined) dataToValidate.featured = body.featured;
+    if (body.hidden !== undefined) dataToValidate.hidden = body.hidden;
     if (body.metaTitle !== undefined) dataToValidate.metaTitle = body.metaTitle;
     if (body.metaDescription !== undefined) dataToValidate.metaDescription = body.metaDescription;
     if (body.altText !== undefined) dataToValidate.altText = body.altText;
@@ -122,6 +123,7 @@ export async function PUT(
         imageUrls: finalImageUrls,
         stock: validatedData.stock ?? existingProduct.stock,
         featured: validatedData.featured ?? existingProduct.featured,
+        hidden: validatedData.hidden ?? existingProduct.hidden,
         metaTitle: validatedData.metaTitle !== undefined ? validatedData.metaTitle : existingProduct.metaTitle,
         metaDescription: validatedData.metaDescription !== undefined ? validatedData.metaDescription : existingProduct.metaDescription,
         altText: validatedData.altText !== undefined ? validatedData.altText : existingProduct.altText,
@@ -138,7 +140,7 @@ export async function PUT(
     const changes = createChangesObject(
       existingProduct as unknown as Record<string, unknown>,
       product as unknown as Record<string, unknown>,
-      ["name", "slug", "description", "priceCents", "stock", "featured", "category"]
+      ["name", "slug", "description", "priceCents", "stock", "featured", "hidden", "category"]
     );
 
     await logAuditEvent({

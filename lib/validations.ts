@@ -53,6 +53,7 @@ export const productSchema = z.object({
     .min(0, "Stock cannot be negative")
     .max(99999, "Stock too high"),
   featured: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   metaTitle: z
     .string()
     .max(70, "Meta title too long (max 70 chars)")
