@@ -58,6 +58,12 @@ const rateLimiters = {
     limiter: Ratelimit.slidingWindow(20, "1 m"),
     prefix: "ratelimit:shipping",
   }),
+  // Cart operations: 30 requests per minute
+  cart: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, "1 m"),
+    prefix: "ratelimit:cart",
+  }),
 };
 
 type RateLimitType = keyof typeof rateLimiters;
@@ -145,4 +151,5 @@ export const rateLimits = {
   general: "general" as const,
   admin: "admin" as const,
   shipping: "shipping" as const,
+  cart: "cart" as const,
 };

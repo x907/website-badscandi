@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 interface CartItem {
   productId: string;
@@ -12,7 +13,10 @@ interface CartItem {
   stock: number;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(request, "cart");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -37,7 +41,10 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(request, "cart");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -71,7 +78,10 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  const rateLimitResponse = await checkRateLimit(request, "cart");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
