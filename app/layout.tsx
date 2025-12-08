@@ -1,5 +1,5 @@
 import type { Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Raleway } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -14,6 +14,13 @@ import { getBaseMetadata } from "@/lib/metadata";
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-inter",
+});
+
+const raleway = Raleway({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-raleway",
 });
 
 export const viewport: Viewport = {
@@ -33,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} flex flex-col min-h-screen`}>
+      <body className={`${raleway.variable} ${inter.variable} flex flex-col min-h-screen`}>
         <CartProvider>
           <a
             href="#main-content"
