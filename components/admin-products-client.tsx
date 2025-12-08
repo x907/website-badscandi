@@ -102,7 +102,8 @@ export function AdminProductsClient() {
       const response = await fetch("/api/admin/products");
       if (response.ok) {
         const data = await response.json();
-        setProducts(data);
+        // Handle paginated response format
+        setProducts(data.products || data);
       }
     } catch (error) {
       console.error("Error fetching products:", error);
