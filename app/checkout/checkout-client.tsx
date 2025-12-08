@@ -498,6 +498,7 @@ export function CheckoutClient() {
                       variables: {
                         colorPrimary: "#78350f",
                         borderRadius: "8px",
+                        fontSizeBase: "16px",
                       },
                     },
                   }}
@@ -650,9 +651,9 @@ function PaymentForm({
       <PaymentElement
         options={{
           layout: {
-            type: "tabs",
+            type: "accordion",
             defaultCollapsed: false,
-            radios: false,
+            radios: true,
             spacedAccordionItems: true,
           },
           paymentMethodOrder: ["apple_pay", "google_pay", "card"],
