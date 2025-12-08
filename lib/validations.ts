@@ -1,12 +1,26 @@
 import { z } from "zod";
 
 // Sanitize string to prevent XSS - strips HTML tags and dangerous characters
+// Uses loop-until-stable approach to prevent bypass via nested payloads
 export function sanitizeString(str: string): string {
-  return str
-    .replace(/<[^>]*>/g, "") // Remove HTML tags
-    .replace(/javascript:/gi, "") // Remove javascript: protocol
-    .replace(/on\w+=/gi, "") // Remove event handlers
-    .trim();
+  let result = str;
+  let previous: string;
+
+  // Loop until no more changes occur (prevents nested bypass attacks)
+  do {
+    previous = result;
+    result = result
+      // Remove HTML tags and angle brackets to prevent tag injection
+      .replace(/[<>]/g, "")
+      // Remove dangerous URL schemes (javascript:, data:, vbscript:)
+      .replace(/javascript\s*:/gi, "")
+      .replace(/data\s*:/gi, "")
+      .replace(/vbscript\s*:/gi, "")
+      // Remove event handlers (onclick=, onerror=, etc.)
+      .replace(/on\w+\s*=/gi, "");
+  } while (result !== previous);
+
+  return result.trim();
 }
 
 // Product validation schema
