@@ -136,11 +136,11 @@ export async function PUT(
       },
     });
 
-    // Log audit event with changes
+    // Log audit event with changes (including imageUrls for image reordering)
     const changes = createChangesObject(
       existingProduct as unknown as Record<string, unknown>,
       product as unknown as Record<string, unknown>,
-      ["name", "slug", "description", "priceCents", "stock", "featured", "hidden", "category"]
+      ["name", "slug", "description", "priceCents", "stock", "featured", "hidden", "category", "imageUrls"]
     );
 
     await logAuditEvent({

@@ -1,5 +1,42 @@
 import { z } from "zod";
 
+// Maximum number of images per product
+export const MAX_PRODUCT_IMAGES = 10;
+
+// S3 bucket name for validation (set from env at runtime)
+const S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "";
+
+/**
+ * Validate that an image URL is from our S3 bucket
+ * This prevents external URL injection attacks
+ */
+export function validateImageUrlOrigin(url: string): boolean {
+  if (!url) return true; // Allow empty/optional
+
+  try {
+    const parsed = new URL(url);
+    // Check if it's an S3 URL from our bucket
+    // Format: https://bucket.s3.region.amazonaws.com/...
+    const isS3Url = parsed.hostname.includes(".s3.") && parsed.hostname.includes(".amazonaws.com");
+    const isOurBucket = S3_BUCKET_NAME ? parsed.hostname.startsWith(S3_BUCKET_NAME) : true;
+    const isProductPath = parsed.pathname.startsWith("/products/");
+
+    return isS3Url && isOurBucket && isProductPath;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Custom Zod refinement for S3 image URL validation
+ */
+const s3ImageUrl = z
+  .string()
+  .url("Invalid image URL")
+  .refine(validateImageUrlOrigin, {
+    message: "Image URL must be from the authorized S3 bucket",
+  });
+
 // Sanitize string to prevent XSS - strips HTML tags and dangerous characters
 // Uses loop-until-stable approach to prevent bypass via nested payloads
 export function sanitizeString(str: string): string {
@@ -45,8 +82,11 @@ export const productSchema = z.object({
     .int("Price must be a whole number")
     .min(0, "Price cannot be negative")
     .max(100000000, "Price too high"), // Max $1M
-  imageUrl: z.string().url("Invalid image URL").optional(),
-  imageUrls: z.array(z.string().url("Invalid image URL")).optional(),
+  imageUrl: s3ImageUrl.optional(),
+  imageUrls: z
+    .array(s3ImageUrl)
+    .max(MAX_PRODUCT_IMAGES, `Maximum ${MAX_PRODUCT_IMAGES} images allowed`)
+    .optional(),
   stock: z
     .number()
     .int("Stock must be a whole number")

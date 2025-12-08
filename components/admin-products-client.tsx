@@ -16,7 +16,11 @@ import {
   Star,
   GripVertical,
   EyeClosed,
+  AlertCircle,
 } from "lucide-react";
+
+// Maximum images per product (matches server validation)
+const MAX_PRODUCT_IMAGES = 10;
 
 interface Product {
   id: string;
@@ -130,11 +134,24 @@ export function AdminProductsClient() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    // Enforce max image limit
+    const remainingSlots = MAX_PRODUCT_IMAGES - formData.imageUrls.length;
+    if (remainingSlots <= 0) {
+      setError(`Maximum ${MAX_PRODUCT_IMAGES} images allowed`);
+      e.target.value = "";
+      return;
+    }
+
+    // Limit files to remaining slots
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    if (filesToUpload.length < files.length) {
+      setError(`Only uploading ${filesToUpload.length} images (max ${MAX_PRODUCT_IMAGES} total)`);
+    }
+
     setIsUploading(true);
-    setError(null);
 
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
+      const uploadPromises = filesToUpload.map(async (file) => {
         const formData = new FormData();
         formData.append("file", file);
 
@@ -702,12 +719,22 @@ export function AdminProductsClient() {
                     {formData.imageUrls.map((url, index) => (
                       <div
                         key={url}
-                        className={`relative group rounded-lg overflow-hidden border-2 ${
+                        className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
                           index === 0
                             ? "border-amber-500 ring-2 ring-amber-500/20"
-                            : "border-neutral-200"
+                            : "border-neutral-200 hover:border-neutral-300"
                         }`}
                       >
+                        {/* Grip handle for drag indication */}
+                        <div className="absolute top-1 right-1 z-10 p-1 bg-white/80 rounded opacity-50 group-hover:opacity-100 transition-opacity cursor-grab">
+                          <GripVertical className="h-3 w-3 text-neutral-500" />
+                        </div>
+
+                        {/* Image position number */}
+                        <div className="absolute top-1 left-1 z-10 w-5 h-5 bg-black/60 text-white text-xs font-medium rounded-full flex items-center justify-center">
+                          {index + 1}
+                        </div>
+
                         <img
                           src={url}
                           alt={`Product image ${index + 1}`}
@@ -716,7 +743,7 @@ export function AdminProductsClient() {
 
                         {/* Primary badge */}
                         {index === 0 && (
-                          <div className="absolute top-1 left-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded">
+                          <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded">
                             Primary
                           </div>
                         )}
@@ -727,7 +754,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => setPrimaryImage(index)}
-                              className="p-2 bg-white rounded-full text-amber-600 hover:text-amber-700 transition-colors"
+                              className="p-2 bg-white rounded-full text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-colors"
                               title="Set as primary image"
                             >
                               <Star className="h-4 w-4" />
@@ -736,7 +763,7 @@ export function AdminProductsClient() {
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
-                            className="p-2 bg-white rounded-full text-red-600 hover:text-red-700 transition-colors"
+                            className="p-2 bg-white rounded-full text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
                             title="Remove image"
                           >
                             <X className="h-4 w-4" />
@@ -749,7 +776,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => moveImage(index, index - 1)}
-                              className="p-1 bg-white rounded text-neutral-600 hover:text-neutral-900 text-xs"
+                              className="p-1.5 bg-white rounded shadow-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 text-xs font-medium"
                               title="Move left"
                             >
                               &larr;
@@ -759,7 +786,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => moveImage(index, index + 1)}
-                              className="p-1 bg-white rounded text-neutral-600 hover:text-neutral-900 text-xs"
+                              className="p-1.5 bg-white rounded shadow-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 text-xs font-medium"
                               title="Move right"
                             >
                               &rarr;
@@ -772,8 +799,12 @@ export function AdminProductsClient() {
                 )}
 
                 {/* Upload button */}
-                <div>
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-sm transition-colors">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <label className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
+                    formData.imageUrls.length >= MAX_PRODUCT_IMAGES
+                      ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
+                      : "bg-neutral-100 hover:bg-neutral-200"
+                  }`}>
                     <Upload className="h-4 w-4" />
                     {isUploading ? "Uploading..." : "Upload Images"}
                     <input
@@ -782,12 +813,22 @@ export function AdminProductsClient() {
                       multiple
                       onChange={handleImageUpload}
                       className="hidden"
-                      disabled={isUploading}
+                      disabled={isUploading || formData.imageUrls.length >= MAX_PRODUCT_IMAGES}
                     />
                   </label>
-                  <span className="ml-3 text-sm text-neutral-500">
-                    {formData.imageUrls.length} image{formData.imageUrls.length !== 1 ? "s" : ""} uploaded
+                  <span className={`text-sm ${
+                    formData.imageUrls.length >= MAX_PRODUCT_IMAGES
+                      ? "text-amber-600 font-medium"
+                      : "text-neutral-500"
+                  }`}>
+                    {formData.imageUrls.length} / {MAX_PRODUCT_IMAGES} images
                   </span>
+                  {formData.imageUrls.length >= MAX_PRODUCT_IMAGES && (
+                    <span className="text-xs text-amber-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Maximum reached
+                    </span>
+                  )}
                 </div>
 
                 {formData.imageUrls.length === 0 && !isUploading && (

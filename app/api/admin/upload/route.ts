@@ -3,6 +3,9 @@ import { requireAdmin } from "@/lib/auth-utils";
 import { uploadProductImage } from "@/lib/s3";
 import { checkRateLimit } from "@/lib/rate-limit";
 
+// Maximum image dimensions (pixels) - prevents memory exhaustion
+const MAX_IMAGE_DIMENSION = 4096;
+
 // Magic bytes for image file type verification
 const MAGIC_BYTES: Record<string, number[][]> = {
   "image/jpeg": [[0xff, 0xd8, 0xff]],
@@ -18,6 +21,63 @@ function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
   return signatures.some((signature) =>
     signature.every((byte, index) => buffer[index] === byte)
   );
+}
+
+/**
+ * Parse image dimensions from buffer without external dependencies
+ * Returns { width, height } or null if unable to parse
+ */
+function getImageDimensions(buffer: Buffer, mimeType: string): { width: number; height: number } | null {
+  try {
+    if (mimeType === "image/png") {
+      // PNG: width at bytes 16-19, height at 20-23 (big-endian)
+      if (buffer.length >= 24) {
+        const width = buffer.readUInt32BE(16);
+        const height = buffer.readUInt32BE(20);
+        return { width, height };
+      }
+    } else if (mimeType === "image/jpeg") {
+      // JPEG: Need to parse SOF markers
+      let offset = 2;
+      while (offset < buffer.length - 8) {
+        if (buffer[offset] !== 0xff) {
+          offset++;
+          continue;
+        }
+        const marker = buffer[offset + 1];
+        // SOF0, SOF1, SOF2 markers contain dimensions
+        if (marker >= 0xc0 && marker <= 0xc3) {
+          const height = buffer.readUInt16BE(offset + 5);
+          const width = buffer.readUInt16BE(offset + 7);
+          return { width, height };
+        }
+        // Skip to next marker
+        const length = buffer.readUInt16BE(offset + 2);
+        offset += 2 + length;
+      }
+    } else if (mimeType === "image/gif") {
+      // GIF: width at bytes 6-7, height at 8-9 (little-endian)
+      if (buffer.length >= 10) {
+        const width = buffer.readUInt16LE(6);
+        const height = buffer.readUInt16LE(8);
+        return { width, height };
+      }
+    } else if (mimeType === "image/webp") {
+      // WebP: More complex, check for VP8 chunk
+      // VP8 (lossy): dimensions at offset 26-29
+      // VP8L (lossless): dimensions encoded differently
+      if (buffer.length >= 30 && buffer.toString("ascii", 12, 16) === "VP8 ") {
+        const width = (buffer.readUInt16LE(26) & 0x3fff);
+        const height = (buffer.readUInt16LE(28) & 0x3fff);
+        return { width, height };
+      }
+      // For VP8L and other formats, allow (we can't easily parse all WebP variants)
+      return null;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -62,6 +122,17 @@ export async function POST(request: NextRequest) {
         { error: "File content does not match declared type" },
         { status: 400 }
       );
+    }
+
+    // Validate image dimensions to prevent memory exhaustion
+    const dimensions = getImageDimensions(buffer, file.type);
+    if (dimensions) {
+      if (dimensions.width > MAX_IMAGE_DIMENSION || dimensions.height > MAX_IMAGE_DIMENSION) {
+        return NextResponse.json(
+          { error: `Image too large. Maximum dimensions: ${MAX_IMAGE_DIMENSION}x${MAX_IMAGE_DIMENSION} pixels` },
+          { status: 400 }
+        );
+      }
     }
 
     // Clean filename
