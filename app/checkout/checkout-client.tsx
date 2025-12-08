@@ -67,7 +67,7 @@ const SUPPORTED_COUNTRIES = [
 
 export function CheckoutClient() {
   const router = useRouter();
-  const { items, subtotalCents, closeCart } = useCart();
+  const { items, subtotalCents, closeCart, isLoading: isCartLoading } = useCart();
   const { data: session, isPending: isSessionLoading } = useSession();
 
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
@@ -114,12 +114,12 @@ export function CheckoutClient() {
     }
   }, [session, isSessionLoading, router]);
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty (only after cart has loaded)
   useEffect(() => {
-    if (!isSessionLoading && items.length === 0) {
+    if (!isSessionLoading && !isCartLoading && items.length === 0) {
       router.push("/shop");
     }
-  }, [items, isSessionLoading, router]);
+  }, [items, isSessionLoading, isCartLoading, router]);
 
   // Track checkout started
   useEffect(() => {
@@ -235,7 +235,7 @@ export function CheckoutClient() {
     fetchShippingRates();
   };
 
-  if (isSessionLoading) {
+  if (isSessionLoading || isCartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-amber-800" />
