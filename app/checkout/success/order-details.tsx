@@ -37,6 +37,8 @@ interface Order {
 
 export function OrderDetails() {
   const searchParams = useSearchParams();
+  // Support both payment_intent (new PaymentIntent flow) and session_id (legacy Checkout Sessions flow)
+  const paymentIntentId = searchParams.get("payment_intent");
   const sessionId = searchParams.get("session_id");
   const { clearCart } = useCart();
 
@@ -50,31 +52,44 @@ export function OrderDetails() {
   }, [clearCart]);
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!paymentIntentId && !sessionId) {
       setError("No order information found. Please check your email for order confirmation.");
       setLoading(false);
       return;
     }
 
+    let retryCount = 0;
+    const maxRetries = 5;
+    const retryDelay = 2000; // 2 seconds between retries
+
     async function verifyOrder() {
       try {
-        const response = await fetch(`/api/checkout/verify?session_id=${sessionId}`);
+        // Use the appropriate parameter based on what we have
+        const param = paymentIntentId
+          ? `payment_intent=${paymentIntentId}`
+          : `session_id=${sessionId}`;
+        const response = await fetch(`/api/checkout/verify?${param}`);
         const data = await response.json();
 
         if (data.success && data.order) {
           setOrder(data.order);
+          setLoading(false);
+        } else if (data.pending && retryCount < maxRetries) {
+          // Order is being processed (webhook delay) - retry after a delay
+          retryCount++;
+          setTimeout(verifyOrder, retryDelay);
         } else {
           setError(data.error || "Could not verify order. Please check your email for confirmation.");
+          setLoading(false);
         }
       } catch (err) {
         setError("Could not verify order. Please check your email for confirmation.");
-      } finally {
         setLoading(false);
       }
     }
 
     verifyOrder();
-  }, [sessionId]);
+  }, [paymentIntentId, sessionId]);
 
   if (loading) {
     return (

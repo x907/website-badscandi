@@ -1,13 +1,88 @@
 import { NextResponse } from "next/server";
 import { getStripeClientForMode } from "@/lib/stripe";
+import { db } from "@/lib/db";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get("session_id");
+  const paymentIntentId = searchParams.get("payment_intent");
 
+  // Handle PaymentIntent flow (new Stripe Elements checkout)
+  if (paymentIntentId) {
+    try {
+      // Look up the order in our database by the PaymentIntent ID (stripeId)
+      const order = await db.order.findUnique({
+        where: { stripeId: paymentIntentId },
+        include: {
+          user: {
+            select: { email: true, name: true },
+          },
+        },
+      });
+
+      if (!order) {
+        // Order might not be created yet (webhook delay) - give a helpful message
+        return NextResponse.json(
+          {
+            error: "Order is being processed. Please check your email for confirmation.",
+            pending: true
+          },
+          { status: 202 }
+        );
+      }
+
+      // Parse the items and shipping address from the order
+      const items = order.items as Array<{
+        name: string;
+        priceCents: number;
+        quantity: number;
+        imageUrl: string;
+      }>;
+
+      const shippingAddress = order.shippingAddress as {
+        name: string;
+        address: {
+          line1: string;
+          line2?: string;
+          city: string;
+          state: string;
+          postal_code: string;
+          country: string;
+        };
+      } | null;
+
+      return NextResponse.json({
+        success: true,
+        order: {
+          id: order.id,
+          email: order.customerEmail || order.user.email,
+          name: shippingAddress?.name || order.user.name,
+          amountTotal: order.totalCents,
+          currency: "usd",
+          shippingCost: order.shippingCents,
+          shippingMethod: order.shippingService || "Standard Shipping",
+          items: items.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            amountTotal: item.priceCents * item.quantity,
+          })),
+          shippingAddress: shippingAddress?.address,
+          createdAt: order.createdAt.toISOString(),
+        },
+      });
+    } catch (error) {
+      console.error("Error verifying PaymentIntent order:", error);
+      return NextResponse.json(
+        { error: "Could not verify order" },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Handle legacy Checkout Session flow
   if (!sessionId) {
     return NextResponse.json(
-      { error: "Missing session_id" },
+      { error: "Missing session_id or payment_intent" },
       { status: 400 }
     );
   }
