@@ -39,12 +39,23 @@
   html {
     /* Safe area insets for notched devices */
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
   body {
     @apply bg-neutral-50 text-neutral-900 antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Safe area inset for mobile sticky footers */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Ensure touch targets are optimized */
+  .touch-manipulation {
+    touch-action: manipulation;
   }
 }

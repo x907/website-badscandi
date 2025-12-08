@@ -254,29 +254,43 @@ export function CheckoutClient() {
   const totalCents = subtotalCents + (selectedRate?.rate || 0);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <Link
-          href="/shop"
-          className="inline-flex items-center text-neutral-600 hover:text-neutral-900 mb-8"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Continue Shopping
-        </Link>
+    <div className="min-h-screen bg-neutral-50 pb-24 lg:pb-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        {/* Mobile-optimized header */}
+        <div className="flex items-center justify-between mb-4 sm:mb-8">
+          <Link
+            href="/shop"
+            className="inline-flex items-center text-neutral-600 hover:text-neutral-900 py-2 -ml-2 px-2 touch-manipulation"
+          >
+            <ArrowLeft className="h-5 w-5 sm:h-4 sm:w-4 mr-2" />
+            <span className="text-sm sm:text-base">Back</span>
+          </Link>
+          <h1 className="text-lg sm:text-2xl font-semibold text-neutral-900">Checkout</h1>
+          <div className="w-16" /> {/* Spacer for centering */}
+        </div>
 
-        <h1 className="text-2xl font-semibold text-neutral-900 mb-8">Checkout</h1>
+        {/* Mobile-optimized Progress Steps */}
+        <div className="flex items-center justify-between mb-6 sm:mb-8 px-2">
+          <MobileStepIndicator step={1} current={step === "address"} completed={step !== "address"} label="Address" />
+          <div className="flex-1 h-0.5 bg-neutral-200 mx-2 sm:mx-4" />
+          <MobileStepIndicator step={2} current={step === "shipping"} completed={step === "payment"} label="Shipping" />
+          <div className="flex-1 h-0.5 bg-neutral-200 mx-2 sm:mx-4" />
+          <MobileStepIndicator step={3} current={step === "payment"} completed={false} label="Payment" />
+        </div>
 
-        <div className="grid lg:grid-cols-5 gap-8">
+        <div className="grid lg:grid-cols-5 gap-4 sm:gap-8">
+          {/* Order Summary - Shows first on mobile */}
+          <div className="lg:col-span-2 lg:order-2">
+            <MobileOrderSummary
+              items={items}
+              subtotalCents={subtotalCents}
+              selectedRate={selectedRate}
+              totalCents={totalCents}
+            />
+          </div>
+
           {/* Main Form */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Progress Steps */}
-            <div className="flex items-center space-x-4 mb-8">
-              <StepIndicator step={1} current={step === "address"} completed={step !== "address"} label="Address" />
-              <div className="flex-1 h-px bg-neutral-200" />
-              <StepIndicator step={2} current={step === "shipping"} completed={step === "payment"} label="Shipping" />
-              <div className="flex-1 h-px bg-neutral-200" />
-              <StepIndicator step={3} current={step === "payment"} completed={false} label="Payment" />
-            </div>
+          <div className="lg:col-span-3 lg:order-1 space-y-4 sm:space-y-6">
 
             {error && (
               <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -287,106 +301,129 @@ export function CheckoutClient() {
 
             {/* Step 1: Address */}
             {step === "address" && (
-              <form onSubmit={handleAddressSubmit} className="bg-white rounded-lg border border-neutral-200 p-6">
-                <h2 className="text-lg font-medium text-neutral-900 mb-6">Shipping Address</h2>
+              <form onSubmit={handleAddressSubmit} className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-6">
+                <h2 className="text-base sm:text-lg font-medium text-neutral-900 mb-4 sm:mb-6">Shipping Address</h2>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">Full Name</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">Full Name</label>
                     <input
                       type="text"
                       required
+                      autoComplete="name"
                       value={address.name}
                       onChange={(e) => setAddress({ ...address, name: e.target.value })}
-                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent touch-manipulation"
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">Street Address</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">Street Address</label>
                     <input
                       type="text"
                       required
+                      autoComplete="address-line1"
                       value={address.street1}
                       onChange={(e) => setAddress({ ...address, street1: e.target.value })}
-                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent touch-manipulation"
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
-                      Apartment, suite, etc. (optional)
+                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                      Apt, suite, etc. <span className="text-neutral-400 font-normal">(optional)</span>
                     </label>
                     <input
                       type="text"
+                      autoComplete="address-line2"
                       value={address.street2}
                       onChange={(e) => setAddress({ ...address, street2: e.target.value })}
-                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent touch-manipulation"
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* City - Full width on mobile */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">City</label>
+                    <input
+                      type="text"
+                      required
+                      autoComplete="address-level2"
+                      value={address.city}
+                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                      className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent touch-manipulation"
+                      style={{ fontSize: '16px' }}
+                    />
+                  </div>
+
+                  {/* State + Postal Code - Side by side */}
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">City</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5">State</label>
                       <input
                         type="text"
-                        required
-                        value={address.city}
-                        onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        autoComplete="address-level1"
+                        value={address.state}
+                        onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                        className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent touch-manipulation"
+                        style={{ fontSize: '16px' }}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">State / Province</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5">ZIP Code</label>
                       <input
                         type="text"
-                        value={address.state}
-                        onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        required
+                        autoComplete="postal-code"
+                        inputMode="numeric"
+                        value={address.zip}
+                        onChange={(e) => setAddress({ ...address, zip: e.target.value })}
+                        className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent touch-manipulation"
+                        style={{ fontSize: '16px' }}
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">Postal Code</label>
-                      <input
-                        type="text"
-                        required
-                        value={address.zip}
-                        onChange={(e) => setAddress({ ...address, zip: e.target.value })}
-                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">Country</label>
-                      <select
-                        required
-                        value={address.country}
-                        onChange={(e) => setAddress({ ...address, country: e.target.value })}
-                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      >
-                        {SUPPORTED_COUNTRIES.map((country) => (
-                          <option key={country.code} value={country.code}>
-                            {country.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {/* Country - Full width */}
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">Country</label>
+                    <select
+                      required
+                      autoComplete="country"
+                      value={address.country}
+                      onChange={(e) => setAddress({ ...address, country: e.target.value })}
+                      className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white touch-manipulation"
+                      style={{ fontSize: '16px' }}
+                    >
+                      {SUPPORTED_COUNTRIES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">Phone (optional)</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">
+                      Phone <span className="text-neutral-400 font-normal">(for delivery updates)</span>
+                    </label>
                     <input
                       type="tel"
+                      autoComplete="tel"
+                      inputMode="tel"
                       value={address.phone}
                       onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-3 sm:px-4 py-3 text-base border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent touch-manipulation"
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full mt-6 h-12" disabled={isLoadingRates}>
+                {/* Desktop CTA */}
+                <Button type="submit" className="hidden sm:flex w-full mt-6 h-12" disabled={isLoadingRates}>
                   {isLoadingRates ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -403,65 +440,92 @@ export function CheckoutClient() {
               </form>
             )}
 
+            {/* Mobile Sticky CTA for Address Step */}
+            {step === "address" && (
+              <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 p-4 z-50">
+                <Button
+                  type="button"
+                  onClick={handleAddressSubmit as any}
+                  className="w-full h-14 text-base font-medium"
+                  disabled={isLoadingRates}
+                >
+                  {isLoadingRates ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Calculating...
+                    </>
+                  ) : (
+                    "Continue to Shipping"
+                  )}
+                </Button>
+              </div>
+            )}
+
             {/* Step 2: Shipping Selection */}
             {step === "shipping" && (
-              <div className="bg-white rounded-lg border border-neutral-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-medium text-neutral-900">Select Shipping</h2>
+              <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-base sm:text-lg font-medium text-neutral-900">Select Shipping</h2>
                   <button
                     onClick={() => setStep("address")}
-                    className="text-sm text-amber-700 hover:text-amber-800"
+                    className="text-sm text-amber-700 hover:text-amber-800 py-1 px-2 -mr-2 touch-manipulation"
                   >
-                    Edit Address
+                    Edit
                   </button>
                 </div>
 
+                {/* Compact address display */}
                 <div className="mb-4 p-3 bg-neutral-50 rounded-lg text-sm text-neutral-600">
-                  <p className="font-medium">{address.name}</p>
-                  <p>{address.street1}{address.street2 && `, ${address.street2}`}</p>
-                  <p>{address.city}, {address.state} {address.zip}</p>
-                  <p>{SUPPORTED_COUNTRIES.find(c => c.code === address.country)?.name}</p>
+                  <p className="font-medium text-neutral-800">{address.name}</p>
+                  <p className="text-neutral-600">
+                    {address.street1}{address.street2 && `, ${address.street2}`}, {address.city}, {address.state} {address.zip}
+                  </p>
                 </div>
 
-                <div className="space-y-3">
+                {/* Mobile-optimized shipping rates */}
+                <div className="space-y-2 sm:space-y-3">
                   {shippingRates.map((rate) => (
                     <label
                       key={rate.id}
-                      className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
+                      className={`flex items-center p-3 sm:p-4 border-2 rounded-xl cursor-pointer transition-all touch-manipulation ${
                         selectedRate?.id === rate.id
                           ? "border-amber-500 bg-amber-50"
-                          : "border-neutral-200 hover:border-neutral-300"
+                          : "border-neutral-200 hover:border-neutral-300 active:bg-neutral-50"
                       }`}
                     >
-                      <div className="flex items-center">
-                        <input
-                          type="radio"
-                          name="shipping"
-                          checked={selectedRate?.id === rate.id}
-                          onChange={() => setSelectedRate(rate)}
-                          className="h-4 w-4 text-amber-600 focus:ring-amber-500"
-                        />
-                        <div className="ml-3">
-                          <p className="font-medium text-neutral-900">
-                            {rate.carrier} {rate.service}
+                      <input
+                        type="radio"
+                        name="shipping"
+                        checked={selectedRate?.id === rate.id}
+                        onChange={() => setSelectedRate(rate)}
+                        className="h-5 w-5 text-amber-600 focus:ring-amber-500 flex-shrink-0"
+                      />
+                      <div className="ml-3 flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium text-neutral-900 text-sm sm:text-base truncate pr-2">
+                            {rate.service}
                           </p>
+                          <span className="font-semibold text-neutral-900 text-sm sm:text-base flex-shrink-0">
+                            {formatPrice(rate.rate)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-0.5">
+                          <p className="text-xs sm:text-sm text-neutral-500">{rate.carrier}</p>
                           {rate.deliveryDays && (
-                            <p className="text-sm text-neutral-500">
-                              {rate.deliveryDays} business day{rate.deliveryDays > 1 ? "s" : ""}
+                            <p className="text-xs sm:text-sm text-neutral-500">
+                              {rate.deliveryDays} day{rate.deliveryDays > 1 ? "s" : ""}
                             </p>
                           )}
                         </div>
                       </div>
-                      <span className="font-medium text-neutral-900">
-                        {formatPrice(rate.rate)}
-                      </span>
                     </label>
                   ))}
                 </div>
 
+                {/* Desktop CTA */}
                 <Button
                   onClick={createPaymentIntent}
-                  className="w-full mt-6 h-12"
+                  className="hidden sm:flex w-full mt-6 h-12"
                   disabled={!selectedRate || isCreatingIntent}
                 >
                   {isCreatingIntent ? (
@@ -476,16 +540,40 @@ export function CheckoutClient() {
               </div>
             )}
 
+            {/* Mobile Sticky CTA for Shipping Step */}
+            {step === "shipping" && (
+              <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 p-4 z-50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-neutral-600">Shipping</span>
+                  <span className="font-medium">{selectedRate ? formatPrice(selectedRate.rate) : '—'}</span>
+                </div>
+                <Button
+                  onClick={createPaymentIntent}
+                  className="w-full h-14 text-base font-medium"
+                  disabled={!selectedRate || isCreatingIntent}
+                >
+                  {isCreatingIntent ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Preparing...
+                    </>
+                  ) : (
+                    "Continue to Payment"
+                  )}
+                </Button>
+              </div>
+            )}
+
             {/* Step 3: Payment */}
             {step === "payment" && clientSecret && stripePromise && (
-              <div className="bg-white rounded-lg border border-neutral-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-medium text-neutral-900">Payment</h2>
+              <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-base sm:text-lg font-medium text-neutral-900">Payment</h2>
                   <button
                     onClick={() => setStep("shipping")}
-                    className="text-sm text-amber-700 hover:text-amber-800"
+                    className="text-sm text-amber-700 hover:text-amber-800 py-1 px-2 -mr-2 touch-manipulation"
                   >
-                    Change Shipping
+                    Edit
                   </button>
                 </div>
 
@@ -497,8 +585,19 @@ export function CheckoutClient() {
                       theme: "stripe",
                       variables: {
                         colorPrimary: "#78350f",
-                        borderRadius: "8px",
+                        borderRadius: "12px",
                         fontSizeBase: "16px",
+                        spacingUnit: "4px",
+                      },
+                      rules: {
+                        '.Input': {
+                          padding: '12px',
+                          fontSize: '16px',
+                        },
+                        '.Label': {
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                        },
                       },
                     },
                   }}
@@ -511,77 +610,13 @@ export function CheckoutClient() {
               </div>
             )}
           </div>
-
-          {/* Order Summary */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg border border-neutral-200 p-6 sticky top-6">
-              <h2 className="text-lg font-medium text-neutral-900 mb-4">Order Summary</h2>
-
-              <div className="space-y-4 mb-6">
-                {items.map((item) => (
-                  <div key={item.productId} className="flex gap-4">
-                    <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-neutral-100">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-neutral-800 text-white text-xs rounded-full flex items-center justify-center">
-                        {item.quantity}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-neutral-900 truncate">{item.name}</p>
-                      <p className="text-sm text-neutral-500">{formatPrice(item.priceCents)}</p>
-                    </div>
-                    <p className="font-medium text-neutral-900">
-                      {formatPrice(item.priceCents * item.quantity)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border-t border-neutral-200 pt-4 space-y-3">
-                <div className="flex justify-between text-neutral-600">
-                  <span>Subtotal</span>
-                  <span>{formatPrice(subtotalCents)}</span>
-                </div>
-                <div className="flex justify-between text-neutral-600">
-                  <span className="flex items-center gap-2">
-                    <Truck className="h-4 w-4" />
-                    Shipping
-                  </span>
-                  <span>
-                    {selectedRate ? formatPrice(selectedRate.rate) : "Calculated next"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-lg font-semibold text-neutral-900 pt-2 border-t border-neutral-200">
-                  <span>Total</span>
-                  <span>{formatPrice(totalCents)}</span>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-amber-50 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Package className="h-5 w-5 text-amber-700 mt-0.5" />
-                  <div className="text-sm text-amber-800">
-                    <p className="font-medium">Handcrafted with care</p>
-                    <p className="mt-1 text-amber-700">
-                      Each piece is carefully packaged to ensure safe delivery.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function StepIndicator({
+function MobileStepIndicator({
   step,
   current,
   completed,
@@ -593,9 +628,9 @@ function StepIndicator({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col items-center gap-1">
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
           completed
             ? "bg-amber-600 text-white"
             : current
@@ -603,11 +638,121 @@ function StepIndicator({
             : "bg-neutral-100 text-neutral-400"
         }`}
       >
-        {completed ? <CheckCircle2 className="h-5 w-5" /> : step}
+        {completed ? <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" /> : step}
       </div>
-      <span className={current || completed ? "text-neutral-900 font-medium" : "text-neutral-400"}>
+      <span className={`text-xs sm:text-sm ${current || completed ? "text-neutral-900 font-medium" : "text-neutral-400"}`}>
         {label}
       </span>
+    </div>
+  );
+}
+
+function MobileOrderSummary({
+  items,
+  subtotalCents,
+  selectedRate,
+  totalCents,
+}: {
+  items: Array<{ productId: string; name: string; priceCents: number; quantity: number; imageUrl: string }>;
+  subtotalCents: number;
+  selectedRate: ShippingRate | null;
+  totalCents: number;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden lg:sticky lg:top-6">
+      {/* Collapsed mobile view - tap to expand */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-4 flex items-center justify-between lg:hidden touch-manipulation"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex -space-x-2">
+            {items.slice(0, 3).map((item, i) => (
+              <div key={item.productId} className="relative w-10 h-10 rounded-lg overflow-hidden border-2 border-white bg-neutral-100">
+                <Image src={item.imageUrl} alt="" fill className="object-cover" />
+              </div>
+            ))}
+            {items.length > 3 && (
+              <div className="w-10 h-10 rounded-lg bg-neutral-100 border-2 border-white flex items-center justify-center text-xs font-medium text-neutral-600">
+                +{items.length - 3}
+              </div>
+            )}
+          </div>
+          <span className="text-sm text-neutral-600">
+            {items.reduce((sum, item) => sum + item.quantity, 0)} item{items.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-neutral-900">{formatPrice(totalCents)}</span>
+          <svg className={`w-5 h-5 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </button>
+
+      {/* Expanded view (always visible on desktop) */}
+      <div className={`${isExpanded ? 'block' : 'hidden'} lg:block`}>
+        <div className="p-4 sm:p-6 border-t border-neutral-200 lg:border-t-0">
+          <h2 className="text-base sm:text-lg font-medium text-neutral-900 mb-4 hidden lg:block">Order Summary</h2>
+
+          <div className="space-y-3 mb-4">
+            {items.map((item) => (
+              <div key={item.productId} className="flex gap-3">
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden bg-neutral-100">
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-neutral-800 text-white text-xs rounded-full flex items-center justify-center">
+                    {item.quantity}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-neutral-900 text-sm truncate">{item.name}</p>
+                  <p className="text-sm text-neutral-500">{formatPrice(item.priceCents)}</p>
+                </div>
+                <p className="font-medium text-neutral-900 text-sm">
+                  {formatPrice(item.priceCents * item.quantity)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-neutral-200 pt-3 space-y-2">
+            <div className="flex justify-between text-sm text-neutral-600">
+              <span>Subtotal</span>
+              <span>{formatPrice(subtotalCents)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-neutral-600">
+              <span className="flex items-center gap-1.5">
+                <Truck className="h-4 w-4" />
+                Shipping
+              </span>
+              <span>
+                {selectedRate ? formatPrice(selectedRate.rate) : "—"}
+              </span>
+            </div>
+            <div className="flex justify-between text-base font-semibold text-neutral-900 pt-2 border-t border-neutral-200">
+              <span>Total</span>
+              <span>{formatPrice(totalCents)}</span>
+            </div>
+          </div>
+
+          {/* Trust badge - hidden on mobile for space */}
+          <div className="hidden sm:block mt-4 p-3 bg-amber-50 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Package className="h-4 w-4 text-amber-700 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-amber-800">
+                Handcrafted with care & carefully packaged for safe delivery
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -621,7 +766,6 @@ function PaymentForm({
 }) {
   const stripe = useStripe();
   const elements = useElements();
-  const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -647,47 +791,76 @@ function PaymentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <PaymentElement
-        options={{
-          layout: {
-            type: "accordion",
-            defaultCollapsed: false,
-            radios: true,
-            spacedAccordionItems: true,
-          },
-          paymentMethodOrder: ["apple_pay", "google_pay", "card"],
-          wallets: {
-            applePay: "auto",
-            googlePay: "auto",
-          },
-        }}
-      />
+    <>
+      <form onSubmit={handleSubmit} id="payment-form">
+        <PaymentElement
+          options={{
+            layout: {
+              type: "accordion",
+              defaultCollapsed: false,
+              radios: true,
+              spacedAccordionItems: true,
+            },
+            paymentMethodOrder: ["apple_pay", "google_pay", "card"],
+            wallets: {
+              applePay: "auto",
+              googlePay: "auto",
+            },
+          }}
+        />
 
-      {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
-        </div>
-      )}
-
-      <Button
-        type="submit"
-        className="w-full mt-6 h-12"
-        disabled={!stripe || isProcessing}
-      >
-        {isProcessing ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Processing...
-          </>
-        ) : (
-          `Pay ${formatPrice(totalCents)}`
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
         )}
-      </Button>
 
-      <p className="mt-4 text-xs text-center text-neutral-500">
-        Your payment is securely processed by Stripe
-      </p>
-    </form>
+        {/* Desktop CTA */}
+        <Button
+          type="submit"
+          className="hidden sm:flex w-full mt-6 h-12"
+          disabled={!stripe || isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            `Pay ${formatPrice(totalCents)}`
+          )}
+        </Button>
+
+        <p className="hidden sm:block mt-4 text-xs text-center text-neutral-500">
+          Your payment is securely processed by Stripe
+        </p>
+      </form>
+
+      {/* Mobile Sticky CTA for Payment */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 p-4 z-50 safe-area-inset-bottom">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-neutral-600">Total</span>
+          <span className="font-semibold text-lg">{formatPrice(totalCents)}</span>
+        </div>
+        <Button
+          type="submit"
+          form="payment-form"
+          className="w-full h-14 text-base font-medium"
+          disabled={!stripe || isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            `Pay Now`
+          )}
+        </Button>
+        <p className="mt-2 text-xs text-center text-neutral-400">
+          Secured by Stripe
+        </p>
+      </div>
+    </>
   );
 }
