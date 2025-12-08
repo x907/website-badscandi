@@ -218,15 +218,21 @@ export async function POST(request: Request) {
       ],
     };
 
+    // Shipping rates with metadata for country validation
+    // Each rate specifies which countries it applies to
     checkoutOptions.shipping_options = [
       {
         shipping_rate_data: {
           type: "fixed_amount",
           fixed_amount: { amount: 3000, currency: "usd" },
-          display_name: "United States",
+          display_name: "Standard Shipping (US Only)",
           delivery_estimate: {
             minimum: { unit: "business_day", value: 4 },
             maximum: { unit: "business_day", value: 7 },
+          },
+          metadata: {
+            allowed_countries: "US",
+            rate_id: "us_standard",
           },
         },
       },
@@ -234,10 +240,14 @@ export async function POST(request: Request) {
         shipping_rate_data: {
           type: "fixed_amount",
           fixed_amount: { amount: 5500, currency: "usd" },
-          display_name: "Canada",
+          display_name: "Standard Shipping (Canada Only)",
           delivery_estimate: {
             minimum: { unit: "business_day", value: 7 },
             maximum: { unit: "business_day", value: 14 },
+          },
+          metadata: {
+            allowed_countries: "CA",
+            rate_id: "ca_standard",
           },
         },
       },
@@ -245,10 +255,14 @@ export async function POST(request: Request) {
         shipping_rate_data: {
           type: "fixed_amount",
           fixed_amount: { amount: 9500, currency: "usd" },
-          display_name: "International (Europe, Australia, Asia)",
+          display_name: "International Shipping (Europe, Australia, Asia)",
           delivery_estimate: {
             minimum: { unit: "business_day", value: 10 },
             maximum: { unit: "business_day", value: 21 },
+          },
+          metadata: {
+            allowed_countries: "GB,IE,FR,DE,NL,BE,AT,CH,IT,ES,PT,SE,NO,DK,FI,PL,CZ,AU,NZ,JP,KR,SG",
+            rate_id: "intl_standard",
           },
         },
       },

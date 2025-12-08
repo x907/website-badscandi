@@ -152,6 +152,40 @@ export async function POST(request: NextRequest) {
       const totalCents = fullSession.amount_total || 0;
       const shippingCents = fullSession.total_details?.amount_shipping || 0;
 
+      // Validate shipping rate matches customer's country
+      const shippingCountry = fullSession.collected_information?.shipping_details?.address?.country;
+      let shippingMismatch = false;
+      let expectedShippingCents = shippingCents;
+
+      if (shippingCountry && fullSession.shipping_cost?.shipping_rate) {
+        // Get the shipping rate to check its metadata
+        const shippingRateId = typeof fullSession.shipping_cost.shipping_rate === 'string'
+          ? fullSession.shipping_cost.shipping_rate
+          : fullSession.shipping_cost.shipping_rate.id;
+
+        try {
+          const shippingRate = await stripe.shippingRates.retrieve(shippingRateId);
+          const allowedCountries = shippingRate.metadata?.allowed_countries?.split(',') || [];
+
+          if (allowedCountries.length > 0 && !allowedCountries.includes(shippingCountry)) {
+            shippingMismatch = true;
+
+            // Calculate what the correct shipping should have been
+            const shippingRates: Record<string, number> = {
+              'US': 3000,
+              'CA': 5500,
+            };
+            // Default to international for countries not in US/CA
+            expectedShippingCents = shippingRates[shippingCountry] || 9500;
+
+            console.warn(`SHIPPING MISMATCH: Customer in ${shippingCountry} selected rate for ${allowedCountries.join(',')}. ` +
+              `Paid: $${(shippingCents / 100).toFixed(2)}, Expected: $${(expectedShippingCents / 100).toFixed(2)}`);
+          }
+        } catch (rateError) {
+          console.warn("Could not retrieve shipping rate for validation:", rateError);
+        }
+      }
+
       // Use a transaction to ensure order creation and stock updates are atomic
       // This prevents partial updates if something fails mid-operation
       const order = await db.$transaction(async (tx) => {
