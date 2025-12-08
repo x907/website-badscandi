@@ -649,7 +649,17 @@ function PaymentForm({
     <form onSubmit={handleSubmit}>
       <PaymentElement
         options={{
-          layout: "tabs",
+          layout: {
+            type: "tabs",
+            defaultCollapsed: false,
+            radios: false,
+            spacedAccordionItems: true,
+          },
+          paymentMethodOrder: ["apple_pay", "google_pay", "card"],
+          wallets: {
+            applePay: "auto",
+            googlePay: "auto",
+          },
         }}
       />
 
