@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ShoppingBag, Minus, Plus } from "lucide-react";
+import { ShoppingBag, Minus, Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
 import { useSession } from "@/lib/auth-client";
@@ -91,13 +91,13 @@ export function AddToCartButton({
   return (
     <div className="flex flex-col gap-3">
       {showQuantitySelector && (
-        <div className="flex items-center justify-center gap-4">
-          <span className="text-sm text-neutral-600">Quantity:</span>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-sm text-neutral-600 hidden sm:inline">Quantity:</span>
+          <div className="flex items-center gap-2 bg-neutral-50 rounded-lg p-1">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-11 w-11"
+              className="h-11 w-11 hover:bg-neutral-200 active:bg-neutral-300 touch-manipulation"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={quantity <= 1}
               aria-label="Decrease quantity"
@@ -105,14 +105,14 @@ export function AddToCartButton({
               <Minus className="w-4 h-4" aria-hidden="true" />
             </Button>
 
-            <span className="w-10 text-center font-medium" aria-live="polite">
+            <span className="w-10 text-center font-medium text-lg" aria-live="polite">
               {quantity}
             </span>
 
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-11 w-11"
+              className="h-11 w-11 hover:bg-neutral-200 active:bg-neutral-300 touch-manipulation"
               onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
               disabled={quantity >= product.stock}
               aria-label="Increase quantity"
@@ -126,11 +126,22 @@ export function AddToCartButton({
       <Button
         onClick={handleAddToCart}
         disabled={isAdding}
-        className="w-full"
+        className={`w-full touch-manipulation transition-all ${
+          isAdding ? "bg-green-600 hover:bg-green-600" : ""
+        }`}
         size="lg"
       >
-        <ShoppingBag className="w-5 h-5 mr-2" />
-        {isAdding ? "Added!" : "Add to Cart"}
+        {isAdding ? (
+          <>
+            <Check className="w-5 h-5 mr-2" />
+            Added to Cart
+          </>
+        ) : (
+          <>
+            <ShoppingBag className="w-5 h-5 mr-2" />
+            Add to Cart
+          </>
+        )}
       </Button>
 
       {product.stock <= 5 && product.stock > 0 && (

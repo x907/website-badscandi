@@ -23,15 +23,15 @@ export function ProductCard({ slug, name, description, priceCents, imageUrl, sto
   const showDescription = cleanDescription.length > 0 && cleanDescription !== description;
 
   return (
-    <Link href={`/product/${slug}`}>
-      <Card className="group overflow-hidden hover:shadow-md transition-all duration-300">
+    <Link href={`/product/${slug}`} className="block touch-manipulation">
+      <Card className="group overflow-hidden hover:shadow-md active:shadow-lg active:scale-[0.98] transition-all duration-300">
         <div className="aspect-square relative overflow-hidden bg-neutral-100">
           <Image
             src={imageUrl}
             alt={name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-105 group-active:scale-105 transition-transform duration-500"
           />
           {stock === 0 && (
             <div className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-white/90 backdrop-blur-sm text-neutral-700 rounded-full shadow-md">

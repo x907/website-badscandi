@@ -28,27 +28,25 @@ export function CookieConsent() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 p-4 bg-white border-t border-neutral-200 shadow-lg">
+    <div className="fixed bottom-0 inset-x-0 z-50 p-3 sm:p-4 bg-white border-t border-neutral-200 shadow-lg safe-area-inset-bottom">
       <div className="container mx-auto max-w-4xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-sm text-neutral-600">
-              We use cookies to improve your experience and analyze site traffic.{" "}
-              <Link href="/privacy" className="text-amber-900 hover:underline">
-                Privacy Policy
-              </Link>
-            </p>
-          </div>
-          <div className="flex gap-3 w-full sm:w-auto">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
+          <p className="text-xs sm:text-sm text-neutral-600 flex-1">
+            We use cookies.{" "}
+            <Link href="/privacy" className="text-amber-900 hover:underline">
+              Learn more
+            </Link>
+          </p>
+          <div className="flex gap-2 sm:gap-3 flex-shrink-0">
             <button
               onClick={handleDecline}
-              className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 rounded-md transition-colors touch-manipulation"
             >
               Decline
             </button>
             <button
               onClick={handleAccept}
-              className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-700 rounded-md transition-colors touch-manipulation"
             >
               Accept
             </button>
