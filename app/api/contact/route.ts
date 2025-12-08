@@ -3,6 +3,19 @@ import { SendEmailCommand } from "@aws-sdk/client-ses";
 import { sesClient } from "@/lib/ses-client";
 import { checkRateLimit } from "@/lib/rate-limit";
 
+// HTML escape function to prevent XSS in email templates
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Email validation regex
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(request: Request) {
   // Rate limiting
   const rateLimitResponse = await checkRateLimit(request, "contact");
@@ -20,6 +33,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate email format
+    if (!EMAIL_REGEX.test(email.trim())) {
+      return NextResponse.json(
+        { error: "Invalid email address" },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize inputs for HTML email - escape all user content
+    const safeName = escapeHtml(name.trim());
+    const safeEmail = escapeHtml(email.trim());
+    const safeSubject = escapeHtml(subject.trim());
+    const safeMessage = escapeHtml(message.trim());
+
     const fromEmail = process.env.EMAIL_FROM || "noreply@badscandi.com";
     const recipientEmail = process.env.CONTACT_EMAIL || "hello@badscandi.com";
 
@@ -32,7 +59,7 @@ export async function POST(request: Request) {
       ReplyToAddresses: [email],
       Message: {
         Subject: {
-          Data: `Contact Form: ${subject}`,
+          Data: `Contact Form: ${safeSubject}`,
           Charset: "UTF-8",
         },
         Body: {
@@ -48,14 +75,14 @@ export async function POST(request: Request) {
                     <h2 style="color: #1a1a1a; margin-top: 0;">New Contact Form Submission</h2>
 
                     <div style="background-color: white; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                      <p style="margin: 0 0 10px 0;"><strong>From:</strong> ${name}</p>
-                      <p style="margin: 0 0 10px 0;"><strong>Email:</strong> ${email}</p>
-                      <p style="margin: 0 0 10px 0;"><strong>Subject:</strong> ${subject}</p>
+                      <p style="margin: 0 0 10px 0;"><strong>From:</strong> ${safeName}</p>
+                      <p style="margin: 0 0 10px 0;"><strong>Email:</strong> ${safeEmail}</p>
+                      <p style="margin: 0 0 10px 0;"><strong>Subject:</strong> ${safeSubject}</p>
                     </div>
 
                     <div style="background-color: white; padding: 20px; border-radius: 6px;">
                       <p style="margin: 0 0 10px 0;"><strong>Message:</strong></p>
-                      <p style="margin: 0; white-space: pre-wrap;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                      <p style="margin: 0; white-space: pre-wrap;">${safeMessage}</p>
                     </div>
 
                     <p style="font-size: 12px; color: #999; margin-top: 20px;">
@@ -68,7 +95,7 @@ export async function POST(request: Request) {
             Charset: "UTF-8",
           },
           Text: {
-            Data: `New Contact Form Submission\n\nFrom: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}\n\nSubmitted: ${new Date().toLocaleString()}`,
+            Data: `New Contact Form Submission\n\nFrom: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subject.trim()}\n\nMessage:\n${message.trim()}\n\nSubmitted: ${new Date().toLocaleString()}`,
             Charset: "UTF-8",
           },
         },

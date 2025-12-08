@@ -6,7 +6,7 @@ import { productSchema } from "@/lib/validations";
 import { logAuditEvent } from "@/lib/audit";
 import { ZodError } from "zod";
 
-// GET - List all products
+// GET - List all products with pagination
 export async function GET(request: NextRequest) {
   const rateLimitResponse = await checkRateLimit(request, "admin");
   if (rateLimitResponse) return rateLimitResponse;
@@ -14,11 +14,38 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin();
 
+    // Parse pagination params
+    const searchParams = request.nextUrl.searchParams;
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100); // Max 100 per page
+    const skip = (page - 1) * limit;
+    const category = searchParams.get("category"); // Optional filter
+    const hidden = searchParams.get("hidden"); // Optional filter
+
+    // Build where clause
+    const where: { category?: string; hidden?: boolean } = {};
+    if (category) where.category = category;
+    if (hidden !== null) where.hidden = hidden === "true";
+
+    // Get total count for pagination
+    const total = await db.product.count({ where });
+
     const products = await db.product.findMany({
+      where,
       orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(products);
+    return NextResponse.json({
+      products,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching products:", error);
     if (error instanceof Error && error.message.includes("Unauthorized")) {

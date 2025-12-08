@@ -197,20 +197,80 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to fetch reviews (for admin interface later)
+// GET endpoint to fetch reviews
+// Public access only returns approved reviews with pagination
+// Admin access returns all reviews based on filter
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const approved = searchParams.get("approved");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100); // Max 100 per page
+    const skip = (page - 1) * limit;
 
-    const where = approved !== null ? { approved: approved === "true" } : {};
+    // Check if user is admin
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    // Determine filter based on auth status
+    let where: { approved?: boolean } = {};
+
+    if (session?.user?.id) {
+      // Check admin status for authenticated users
+      const user = await db.user.findUnique({
+        where: { id: session.user.id },
+        select: { isAdmin: true },
+      });
+
+      if (user?.isAdmin) {
+        // Admin can filter by approved status or see all
+        if (approved !== null) {
+          where = { approved: approved === "true" };
+        }
+        // If no filter, admin sees all reviews
+      } else {
+        // Non-admin authenticated users only see approved
+        where = { approved: true };
+      }
+    } else {
+      // Unauthenticated users only see approved reviews
+      where = { approved: true };
+    }
+
+    // Get total count for pagination
+    const total = await db.review.count({ where });
 
     const reviews = await db.review.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        customerName: true,
+        rating: true,
+        comment: true,
+        productName: true,
+        imageUrls: true,
+        approved: true,
+        verified: true,
+        featured: true,
+        createdAt: true,
+        // Don't expose email to public
+        ...(session?.user?.id ? { email: true } : {}),
+      },
     });
 
-    return NextResponse.json({ reviews });
+    return NextResponse.json({
+      reviews,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching reviews:", error);
     return NextResponse.json(

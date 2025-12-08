@@ -112,8 +112,11 @@ export async function POST(request: Request) {
     let maxWidthIn = 0;
     let totalHeightIn = 0;
 
+    // Create Map for O(1) product lookups (fixes N+1 query pattern)
+    const productMap = new Map(products.map(p => [p.id, p]));
+
     for (const item of items) {
-      const product = products.find(p => p.id === item.productId);
+      const product = productMap.get(item.productId);
       if (!product) continue;
 
       const quantity = item.quantity || 1;

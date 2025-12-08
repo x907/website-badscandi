@@ -275,7 +275,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating checkout session:", error);
 
-    // Log detailed error info for debugging
+    // Log detailed error info for debugging (server-side only)
     if (error instanceof Error) {
       console.error("Error message:", error.message);
       console.error("Error name:", error.name);
@@ -290,37 +290,32 @@ export async function POST(request: Request) {
 
       const message = error.message;
 
-      // Check for common Stripe errors
+      // Return user-friendly error messages without exposing system details
       if (message.includes("Invalid API Key")) {
         return NextResponse.json(
-          { error: "Payment system configuration error", code: "STRIPE_CONFIG_ERROR", message },
+          { error: "Payment system temporarily unavailable. Please try again later.", code: "STRIPE_CONFIG_ERROR" },
           { status: 500 }
         );
       }
 
       if (message.includes("No such")) {
         return NextResponse.json(
-          { error: "Payment configuration error", code: "STRIPE_NOT_FOUND", message },
+          { error: "Payment configuration error. Please contact support.", code: "STRIPE_NOT_FOUND" },
           { status: 500 }
         );
       }
 
       if (message.includes("amount")) {
         return NextResponse.json(
-          { error: "Invalid order amount", code: "AMOUNT_ERROR", message },
+          { error: "Invalid order amount. Please review your cart.", code: "AMOUNT_ERROR" },
           { status: 400 }
         );
       }
-
-      // Return the actual error message for debugging
-      return NextResponse.json(
-        { error: "Failed to create checkout session", code: "CHECKOUT_ERROR", message },
-        { status: 500 }
-      );
     }
 
+    // Generic error - don't expose internal details
     return NextResponse.json(
-      { error: "Failed to create checkout session", code: "CHECKOUT_ERROR" },
+      { error: "Unable to process checkout. Please try again.", code: "CHECKOUT_ERROR" },
       { status: 500 }
     );
   }

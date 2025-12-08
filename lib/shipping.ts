@@ -70,15 +70,15 @@ export function refreshEasyPostClient(): void {
   currentEasyPostMode = null;
 }
 
-// Your store's shipping origin
+// Your store's shipping origin - configurable via env vars
 const ORIGIN_ADDRESS = {
-  company: "Bad Scandi",
-  street1: "5555 Yellowstone Trl",
-  city: "Minnetrista",
-  state: "MN",
-  zip: "55331",
-  country: "US",
-  phone: "",
+  company: process.env.STORE_NAME || "Bad Scandi",
+  street1: process.env.STORE_ADDRESS_STREET || "5555 Yellowstone Trl",
+  city: process.env.STORE_ADDRESS_CITY || "Minnetrista",
+  state: process.env.STORE_ADDRESS_STATE || "MN",
+  zip: process.env.STORE_ADDRESS_ZIP || "55331",
+  country: process.env.STORE_ADDRESS_COUNTRY || "US",
+  phone: process.env.STORE_PHONE || "",
 };
 
 // Default parcel size for fiber art
