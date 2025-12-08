@@ -14,14 +14,14 @@ export function Footer() {
 
           <div>
             <h4 className="font-medium mb-3 sm:mb-4 text-sm">Shop</h4>
-            <ul className="space-y-2 text-sm text-neutral-600">
+            <ul className="space-y-1 text-sm text-neutral-600">
               <li>
-                <Link href="/shop" className="hover:text-amber-900 transition-colors">
+                <Link href="/shop" className="block py-2 -mx-2 px-2 hover:text-amber-900 active:text-amber-900 active:bg-amber-50 rounded-lg transition-colors touch-manipulation">
                   All Products
                 </Link>
               </li>
               <li>
-                <Link href="/shop?featured=true" className="hover:text-amber-900 transition-colors">
+                <Link href="/shop?featured=true" className="block py-2 -mx-2 px-2 hover:text-amber-900 active:text-amber-900 active:bg-amber-50 rounded-lg transition-colors touch-manipulation">
                   Featured
                 </Link>
               </li>
@@ -30,14 +30,14 @@ export function Footer() {
 
           <div>
             <h4 className="font-medium mb-3 sm:mb-4 text-sm">Company</h4>
-            <ul className="space-y-2 text-sm text-neutral-600">
+            <ul className="space-y-1 text-sm text-neutral-600">
               <li>
-                <Link href="/about" className="hover:text-amber-900 transition-colors">
+                <Link href="/about" className="block py-2 -mx-2 px-2 hover:text-amber-900 active:text-amber-900 active:bg-amber-50 rounded-lg transition-colors touch-manipulation">
                   About
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-amber-900 transition-colors">
+                <Link href="/contact" className="block py-2 -mx-2 px-2 hover:text-amber-900 active:text-amber-900 active:bg-amber-50 rounded-lg transition-colors touch-manipulation">
                   Contact
                 </Link>
               </li>
@@ -46,14 +46,14 @@ export function Footer() {
 
           <div>
             <h4 className="font-medium mb-3 sm:mb-4 text-sm">Legal</h4>
-            <ul className="space-y-2 text-sm text-neutral-600">
+            <ul className="space-y-1 text-sm text-neutral-600">
               <li>
-                <Link href="/privacy" className="hover:text-amber-900 transition-colors">
+                <Link href="/privacy" className="block py-2 -mx-2 px-2 hover:text-amber-900 active:text-amber-900 active:bg-amber-50 rounded-lg transition-colors touch-manipulation">
                   Privacy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-amber-900 transition-colors">
+                <Link href="/terms" className="block py-2 -mx-2 px-2 hover:text-amber-900 active:text-amber-900 active:bg-amber-50 rounded-lg transition-colors touch-manipulation">
                   Terms
                 </Link>
               </li>

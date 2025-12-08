@@ -1,7 +1,7 @@
 "use client";
 
-import { Star } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 
 type Review = {
@@ -14,26 +14,107 @@ type Review = {
 
 export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Touch/swipe handling
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const minSwipeDistance = 50;
+
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex((prev) => (prev === 0 ? reviews.length - 1 : prev - 1));
+  }, [reviews.length]);
+
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % reviews.length);
+  }, [reviews.length]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setIsPaused(true);
+    touchEndX.current = null;
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) {
+      setIsPaused(false);
+      return;
+    }
+
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      goToNext();
+    } else if (isRightSwipe) {
+      goToPrevious();
+    }
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+
+    // Resume autoplay after 5 seconds
+    setTimeout(() => setIsPaused(false), 5000);
+  };
 
   useEffect(() => {
-    if (reviews.length <= 1) return;
+    if (reviews.length <= 1 || isPaused) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % reviews.length);
     }, 5000); // Change review every 5 seconds
 
     return () => clearInterval(interval);
-  }, [reviews.length]);
+  }, [reviews.length, isPaused]);
 
   if (reviews.length === 0) {
     return null;
   }
 
   const currentReview = reviews[currentIndex];
+  const hasMultipleReviews = reviews.length > 1;
 
   return (
-    <div className="relative bg-neutral-50 rounded-2xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto">
-      <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6">
+    <div
+      className="relative bg-neutral-50 rounded-2xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto touch-pan-y"
+      onTouchStart={hasMultipleReviews ? onTouchStart : undefined}
+      onTouchMove={hasMultipleReviews ? onTouchMove : undefined}
+      onTouchEnd={hasMultipleReviews ? onTouchEnd : undefined}
+    >
+      {/* Navigation arrows for desktop/tablet */}
+      {hasMultipleReviews && (
+        <>
+          <button
+            onClick={() => {
+              goToPrevious();
+              setIsPaused(true);
+              setTimeout(() => setIsPaused(false), 5000);
+            }}
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white hover:bg-neutral-100 active:bg-neutral-200 active:scale-95 rounded-full shadow-md transition-all touch-manipulation z-10"
+            aria-label="Previous review"
+          >
+            <ChevronLeft className="h-5 w-5 text-neutral-700" />
+          </button>
+          <button
+            onClick={() => {
+              goToNext();
+              setIsPaused(true);
+              setTimeout(() => setIsPaused(false), 5000);
+            }}
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white hover:bg-neutral-100 active:bg-neutral-200 active:scale-95 rounded-full shadow-md transition-all touch-manipulation z-10"
+            aria-label="Next review"
+          >
+            <ChevronRight className="h-5 w-5 text-neutral-700" />
+          </button>
+        </>
+      )}
+
+      <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6 px-8 sm:px-12">
         {/* Stars - Always 5 stars */}
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -55,6 +136,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
                   fill
                   className="object-cover"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                  draggable={false}
                 />
               </div>
             ))}
@@ -63,7 +145,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
 
         {/* Comment */}
         <p className="text-base sm:text-lg md:text-xl text-neutral-700 leading-relaxed italic max-w-2xl">
-          "{currentReview.text}"
+          &ldquo;{currentReview.text}&rdquo;
         </p>
 
         {/* Customer Info */}
@@ -73,20 +155,28 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
           </p>
         </div>
 
-        {/* Dots Navigation */}
-        {reviews.length > 1 && (
+        {/* Dots Navigation - larger touch targets */}
+        {hasMultipleReviews && (
           <div className="flex gap-2 pt-4">
             {reviews.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentIndex
-                    ? "w-8 bg-neutral-900"
-                    : "w-2 bg-neutral-300 hover:bg-neutral-400"
-                }`}
+                onClick={() => {
+                  setCurrentIndex(index);
+                  setIsPaused(true);
+                  setTimeout(() => setIsPaused(false), 5000);
+                }}
+                className="min-w-[24px] min-h-[24px] flex items-center justify-center touch-manipulation"
                 aria-label={`Go to review ${index + 1}`}
-              />
+              >
+                <span
+                  className={`rounded-full transition-all ${
+                    index === currentIndex
+                      ? "w-8 h-2.5 bg-neutral-900"
+                      : "w-2.5 h-2.5 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500"
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}
