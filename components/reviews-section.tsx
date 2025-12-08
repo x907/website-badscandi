@@ -8,6 +8,7 @@ interface Review {
   rating: number | null;
   text: string;
   photos: string[];
+  verified?: boolean;
 }
 
 export function ReviewsSection() {
@@ -31,6 +32,7 @@ export function ReviewsSection() {
                 author={review.author}
                 text={review.text}
                 photos={review.photos}
+                verified={review.verified}
               />
             ))}
           </div>
