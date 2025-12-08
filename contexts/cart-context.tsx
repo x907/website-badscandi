@@ -42,10 +42,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
-  const { data: session } = useSession();
+  const { data: session, isPending: isSessionPending } = useSession();
 
   // Load cart from database when user logs in
   useEffect(() => {
+    // Don't do anything while session is still loading
+    if (isSessionPending) {
+      return;
+    }
+
     if (session?.user?.id) {
       loadCartFromServer();
     } else {
@@ -53,7 +58,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setItems([]);
       setIsLoading(false);
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, isSessionPending]);
 
   const loadCartFromServer = async () => {
     setIsLoading(true);
