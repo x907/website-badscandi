@@ -190,6 +190,12 @@ export async function POST(request: Request) {
       automatic_payment_methods: {
         enabled: true,
       },
+      // Request 3D Secure authentication when available for liability shift
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "any",
+        },
+      },
       metadata: {
         userId: session.user.id,
         userEmail: session.user.email,

@@ -10,6 +10,8 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  AlertTriangle,
+  ShieldCheck,
 } from "lucide-react";
 
 interface OrderItem {
@@ -54,6 +56,7 @@ interface Order {
     name: string | null;
     email: string;
   };
+  threeDSecureStatus: string | null;
 }
 
 export function AdminOrdersClient() {
@@ -197,7 +200,19 @@ export function AdminOrdersClient() {
 
                     <div className="flex items-center gap-6">
                       {/* Status Badges */}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
+                        {/* 3D Secure Status */}
+                        {order.threeDSecureStatus === "authenticated" ? (
+                          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full flex items-center gap-1" title="3D Secure verified - liability shift to card issuer">
+                            <ShieldCheck className="h-3 w-3" />
+                            3DS
+                          </span>
+                        ) : order.threeDSecureStatus && order.threeDSecureStatus !== "authenticated" ? (
+                          <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full flex items-center gap-1" title={`3D Secure: ${order.threeDSecureStatus} - no liability shift`}>
+                            <AlertTriangle className="h-3 w-3" />
+                            No 3DS
+                          </span>
+                        ) : null}
                         {order.trackingNumber && !order.labelRefunded && (
                           <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full flex items-center gap-1">
                             <Truck className="h-3 w-3" />

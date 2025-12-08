@@ -426,6 +426,31 @@ export async function POST(request: NextRequest) {
         console.log(`Processing SANDBOX PaymentIntent order ${paymentIntent.id} (livemode=${event.livemode})`);
       }
 
+      // Extract 3D Secure authentication status
+      // This is available on the payment method details after payment succeeds
+      const charges = paymentIntent.latest_charge;
+      let threeDSecureStatus: string | null = null;
+
+      if (charges && typeof charges === 'string') {
+        // Need to retrieve the charge to get payment method details
+        const stripe = await getStripeClient();
+        try {
+          const charge = await stripe.charges.retrieve(charges);
+          const card = charge.payment_method_details?.card;
+          if (card?.three_d_secure) {
+            // Result can be: authenticated, attempted, not_supported, or failed
+            threeDSecureStatus = card.three_d_secure.result || null;
+            console.log(`3D Secure result for ${paymentIntent.id}: ${threeDSecureStatus}`);
+          } else {
+            // Card didn't use 3DS
+            threeDSecureStatus = "not_used";
+            console.log(`3D Secure not used for ${paymentIntent.id}`);
+          }
+        } catch (chargeError) {
+          console.error(`Failed to retrieve charge for 3DS status:`, chargeError);
+        }
+      }
+
       if (!userId || !itemsJson || !shippingAddressJson) {
         console.error("Missing required metadata in PaymentIntent");
         return NextResponse.json(
@@ -525,6 +550,7 @@ export async function POST(request: NextRequest) {
             },
             items: orderItems,
             isSandbox: isSandboxOrder,
+            threeDSecureStatus,
           },
         });
 

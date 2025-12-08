@@ -141,6 +141,7 @@ model Order {
   shipmentId      String?
   labelRefunded   Boolean  @default(false)
   isSandbox       Boolean  @default(false)  // Flag for test/sandbox orders
+  threeDSecureStatus String?  // 3D Secure authentication result: authenticated, attempted, not_supported, failed, etc.
   user            User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
