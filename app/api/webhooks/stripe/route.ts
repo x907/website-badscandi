@@ -5,7 +5,7 @@ import { getStripeClient, getStripeWebhookSecret, getStripeWebhookSecretForMode 
 import { isSandboxMode } from "@/lib/sandbox";
 import { db } from "@/lib/db";
 import { sendDripEmail, TEMPLATE_KEYS } from "@/lib/email-templates";
-import { purchaseShippingLabel } from "@/lib/shipping";
+import { purchaseShippingLabel, purchaseShippingLabelWithRate } from "@/lib/shipping";
 import { sendEmail } from "@/lib/email";
 
 // Disable Next.js body parsing so we can verify the webhook signature
@@ -397,6 +397,287 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, orderId: order.id });
     } catch (err) {
       console.error("Error processing webhook:", err);
+      return NextResponse.json(
+        { error: "Webhook processing failed" },
+        { status: 500 }
+      );
+    }
+  }
+
+  // Handle payment_intent.succeeded for custom Stripe Elements checkout
+  if (event.type === "payment_intent.succeeded") {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+    try {
+      const metadata = paymentIntent.metadata;
+      const userId = metadata?.userId;
+      const userEmail = metadata?.userEmail;
+      const itemsJson = metadata?.items;
+      const shippingAddressJson = metadata?.shippingAddress;
+      const shippingRateCents = parseInt(metadata?.shippingRateCents || "0", 10);
+      const shipmentId = metadata?.shipmentId;
+      const selectedRateId = metadata?.selectedRateId;
+      const subtotalCents = parseInt(metadata?.subtotalCents || "0", 10);
+
+      // Use Stripe's authoritative livemode field
+      const isSandboxOrder = event.livemode === false;
+
+      if (isSandboxOrder) {
+        console.log(`Processing SANDBOX PaymentIntent order ${paymentIntent.id} (livemode=${event.livemode})`);
+      }
+
+      if (!userId || !itemsJson || !shippingAddressJson) {
+        console.error("Missing required metadata in PaymentIntent");
+        return NextResponse.json(
+          { error: "Missing metadata" },
+          { status: 400 }
+        );
+      }
+
+      // Parse metadata
+      let orderItems: Array<{
+        productId: string;
+        name: string;
+        priceCents: number;
+        quantity: number;
+        imageUrl: string;
+      }> = [];
+
+      let shippingAddress: {
+        name: string;
+        street1: string;
+        street2?: string;
+        city: string;
+        state: string;
+        zip: string;
+        country: string;
+        phone?: string;
+      };
+
+      try {
+        orderItems = JSON.parse(itemsJson);
+        shippingAddress = JSON.parse(shippingAddressJson);
+      } catch (parseError) {
+        console.error("Failed to parse PaymentIntent metadata:", parseError);
+        return NextResponse.json(
+          { error: "Invalid metadata" },
+          { status: 400 }
+        );
+      }
+
+      if (orderItems.length === 0) {
+        console.error("No items found in PaymentIntent order");
+        return NextResponse.json(
+          { error: "No items in order" },
+          { status: 400 }
+        );
+      }
+
+      // Idempotency check
+      const existingOrder = await db.order.findUnique({
+        where: { stripeId: paymentIntent.id },
+      });
+
+      if (existingOrder) {
+        console.log(`Order already exists for PaymentIntent ${paymentIntent.id}, skipping duplicate`);
+        return NextResponse.json({ received: true, orderId: existingOrder.id, duplicate: true });
+      }
+
+      const totalCents = paymentIntent.amount;
+
+      // Create order in transaction
+      const order = await db.$transaction(async (tx) => {
+        // Validate stock
+        for (const item of orderItems) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+            select: { id: true, name: true, stock: true },
+          });
+
+          if (!product) {
+            throw new Error(`Product ${item.productId} not found`);
+          }
+
+          if (product.stock < item.quantity) {
+            console.warn(`Insufficient stock for ${product.name}: requested ${item.quantity}, available ${product.stock}`);
+          }
+        }
+
+        // Create order
+        const newOrder = await tx.order.create({
+          data: {
+            userId,
+            stripeId: paymentIntent.id,
+            totalCents,
+            shippingCents: shippingRateCents,
+            status: "completed",
+            customerEmail: userEmail || null,
+            shippingAddress: {
+              name: shippingAddress.name,
+              address: {
+                line1: shippingAddress.street1,
+                line2: shippingAddress.street2 || "",
+                city: shippingAddress.city,
+                state: shippingAddress.state,
+                postal_code: shippingAddress.zip,
+                country: shippingAddress.country,
+              },
+            },
+            items: orderItems,
+            isSandbox: isSandboxOrder,
+          },
+        });
+
+        // Update stock (skip for sandbox)
+        if (isSandboxOrder) {
+          console.log("Sandbox order - skipping stock decrement");
+        } else {
+          for (const item of orderItems) {
+            const result = await tx.product.updateMany({
+              where: {
+                id: item.productId,
+                stock: { gte: item.quantity },
+              },
+              data: {
+                stock: { decrement: item.quantity },
+              },
+            });
+
+            if (result.count === 0) {
+              console.warn(`Stock update skipped for product ${item.productId}`);
+            } else {
+              console.log(`Stock updated for product ${item.productId}: -${item.quantity}`);
+            }
+          }
+        }
+
+        // Clear cart
+        await tx.cart.deleteMany({
+          where: { userId },
+        });
+
+        return newOrder;
+      });
+
+      console.log(`Order created from PaymentIntent: ${order.id}`);
+
+      // Purchase shipping label using the pre-selected rate
+      let labelInfo: {
+        shipmentId: string;
+        trackingNumber: string;
+        trackingUrl: string;
+        labelUrl: string;
+        carrier: string;
+        service: string;
+        ratePaid: number;
+      } | null = null;
+
+      if (shipmentId && selectedRateId) {
+        try {
+          labelInfo = await purchaseShippingLabelWithRate(shipmentId, selectedRateId);
+
+          if (labelInfo) {
+            await db.order.update({
+              where: { id: order.id },
+              data: {
+                shipmentId: labelInfo.shipmentId,
+                trackingNumber: labelInfo.trackingNumber,
+                trackingUrl: labelInfo.trackingUrl,
+                labelUrl: labelInfo.labelUrl,
+                carrier: labelInfo.carrier,
+                shippingService: labelInfo.service,
+                labelCostCents: labelInfo.ratePaid,
+              },
+            });
+            console.log(`Shipping label purchased for order ${order.id}: ${labelInfo.trackingNumber}`);
+
+            // Email label to store owner
+            try {
+              await sendEmail({
+                to: "hello@badscandi.com",
+                subject: `New Order ${order.id} - Shipping Label Ready`,
+                html: `
+                  <h2>New Order Received!</h2>
+                  <p><strong>Order ID:</strong> ${order.id}</p>
+                  <p><strong>Customer:</strong> ${shippingAddress.name}</p>
+                  <p><strong>Shipping Address:</strong><br>
+                    ${shippingAddress.street1}<br>
+                    ${shippingAddress.street2 ? shippingAddress.street2 + "<br>" : ""}
+                    ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zip}<br>
+                    ${shippingAddress.country}
+                  </p>
+                  <p><strong>Carrier:</strong> ${labelInfo.carrier} ${labelInfo.service}</p>
+                  <p><strong>Tracking Number:</strong> ${labelInfo.trackingNumber}</p>
+                  <p><strong>Label Cost:</strong> $${(labelInfo.ratePaid / 100).toFixed(2)}</p>
+                  <p><strong>Items:</strong></p>
+                  <ul>
+                    ${orderItems.map(item => `<li>${item.name} (x${item.quantity})</li>`).join("")}
+                  </ul>
+                  <p><a href="${labelInfo.labelUrl}" style="display:inline-block;padding:12px 24px;background:#000;color:#fff;text-decoration:none;border-radius:4px;">Download Shipping Label</a></p>
+                  <p><a href="${labelInfo.trackingUrl}">Track Package</a></p>
+                `,
+              });
+              console.log(`Label email sent to store owner for order ${order.id}`);
+            } catch (emailError) {
+              console.error("Failed to send label email:", emailError);
+            }
+          }
+        } catch (labelError) {
+          console.error("Failed to purchase shipping label with rate:", labelError);
+        }
+      }
+
+      // Send order confirmation email
+      if (userEmail) {
+        const user = await db.user.findUnique({
+          where: { id: userId },
+          select: { name: true },
+        });
+
+        try {
+          await sendDripEmail(
+            {
+              to: userEmail,
+              userId,
+              templateKey: TEMPLATE_KEYS.ORDER_CONFIRMATION,
+              step: 1,
+              relatedEntityId: order.id,
+            },
+            {
+              key: "order_confirmation",
+              data: {
+                firstName: user?.name?.split(" ")[0],
+                orderId: order.id,
+                items: orderItems.map((item) => ({
+                  name: item.name,
+                  priceCents: item.priceCents,
+                  quantity: item.quantity,
+                  imageUrl: item.imageUrl,
+                })),
+                subtotalCents,
+                shippingCents: shippingRateCents,
+                totalCents,
+                shippingAddress: {
+                  name: shippingAddress.name,
+                  line1: shippingAddress.street1,
+                  line2: shippingAddress.street2,
+                  city: shippingAddress.city,
+                  state: shippingAddress.state,
+                  postal_code: shippingAddress.zip,
+                  country: shippingAddress.country,
+                },
+              },
+            }
+          );
+          console.log(`Order confirmation email sent to ${userEmail}`);
+        } catch (emailError) {
+          console.error("Failed to send order confirmation email:", emailError);
+        }
+      }
+
+      return NextResponse.json({ received: true, orderId: order.id });
+    } catch (err) {
+      console.error("Error processing PaymentIntent webhook:", err);
       return NextResponse.json(
         { error: "Webhook processing failed" },
         { status: 500 }

@@ -110,6 +110,137 @@ export interface PurchasedLabel {
   ratePaid: number; // in cents
 }
 
+export interface ParcelDimensions {
+  lengthIn: number;
+  widthIn: number;
+  heightIn: number;
+  weightOz: number;
+}
+
+export interface ShippingRate {
+  id: string;
+  carrier: string;
+  service: string;
+  rate: number; // in cents
+  currency: string;
+  deliveryDays: number | null;
+  deliveryDate: string | null;
+  deliveryDateGuaranteed: boolean;
+}
+
+export interface ShippingRatesResult {
+  rates: ShippingRate[];
+  shipmentId: string; // Need this to purchase later
+}
+
+/**
+ * Get shipping rates for a destination address and parcel
+ * Returns available rates sorted by price (cheapest first)
+ */
+export async function getShippingRates(
+  toAddress: ShippingAddress,
+  parcel?: ParcelDimensions
+): Promise<ShippingRatesResult | null> {
+  const client = await getEasyPostClient();
+  if (!client) {
+    console.warn("EasyPost not configured - cannot get shipping rates");
+    return null;
+  }
+
+  // Use provided dimensions or fall back to defaults
+  const parcelData = parcel
+    ? {
+        length: parcel.lengthIn,
+        width: parcel.widthIn,
+        height: parcel.heightIn,
+        weight: parcel.weightOz,
+      }
+    : DEFAULT_PARCEL;
+
+  try {
+    // Create shipment to get rates (don't purchase yet)
+    const shipment = await client.Shipment.create({
+      from_address: ORIGIN_ADDRESS,
+      to_address: {
+        name: toAddress.name,
+        street1: toAddress.street1,
+        street2: toAddress.street2 || "",
+        city: toAddress.city,
+        state: toAddress.state,
+        zip: toAddress.zip,
+        country: toAddress.country,
+        phone: toAddress.phone || "",
+      },
+      parcel: parcelData,
+    });
+
+    if (!shipment.rates || shipment.rates.length === 0) {
+      console.warn("No shipping rates returned for address:", toAddress);
+      return null;
+    }
+
+    // Sort rates by price and map to our interface
+    const sortedRates = shipment.rates
+      .sort((a: any, b: any) => parseFloat(a.rate) - parseFloat(b.rate))
+      .map((rate: any) => ({
+        id: rate.id,
+        carrier: rate.carrier,
+        service: rate.service,
+        rate: Math.round(parseFloat(rate.rate) * 100), // Convert to cents
+        currency: rate.currency || "USD",
+        deliveryDays: rate.delivery_days,
+        deliveryDate: rate.delivery_date,
+        deliveryDateGuaranteed: rate.delivery_date_guaranteed || false,
+      }));
+
+    return {
+      rates: sortedRates,
+      shipmentId: shipment.id,
+    };
+  } catch (error: any) {
+    console.error("Error getting shipping rates:", error);
+    // Return more specific error info if available
+    if (error.message?.includes("address")) {
+      throw new Error("Invalid shipping address. Please check your address and try again.");
+    }
+    throw new Error("Unable to calculate shipping rates. Please try again.");
+  }
+}
+
+/**
+ * Purchase a shipping label using a pre-created shipment and rate
+ */
+export async function purchaseShippingLabelWithRate(
+  shipmentId: string,
+  rateId: string
+): Promise<PurchasedLabel | null> {
+  const client = await getEasyPostClient();
+  if (!client) {
+    console.warn("EasyPost not configured - skipping label purchase");
+    return null;
+  }
+
+  try {
+    const purchasedShipment = await client.Shipment.buy(shipmentId, rateId);
+
+    // Get rate info from the purchased shipment
+    const selectedRate = purchasedShipment.selected_rate;
+
+    return {
+      shipmentId: purchasedShipment.id,
+      trackingNumber: purchasedShipment.tracking_code,
+      trackingUrl: purchasedShipment.tracker?.public_url || `https://track.easypost.com/${purchasedShipment.tracking_code}`,
+      labelUrl: purchasedShipment.postage_label?.label_url || "",
+      carrier: selectedRate?.carrier || "Unknown",
+      service: selectedRate?.service || "Unknown",
+      ratePaid: Math.round(parseFloat(selectedRate?.rate || "0") * 100),
+    };
+  } catch (error) {
+    console.error("Error purchasing shipping label with rate:", error);
+    return null;
+  }
+}
+
 /**
  * Purchase a shipping label for an order
  * Returns label URL, tracking number, and tracking URL

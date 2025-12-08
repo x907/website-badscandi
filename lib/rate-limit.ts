@@ -52,6 +52,12 @@ const rateLimiters = {
     limiter: Ratelimit.slidingWindow(30, "1 m"),
     prefix: "ratelimit:admin",
   }),
+  // Shipping rates: 20 requests per minute (rate quote lookups)
+  shipping: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(20, "1 m"),
+    prefix: "ratelimit:shipping",
+  }),
 };
 
 type RateLimitType = keyof typeof rateLimiters;
@@ -138,4 +144,5 @@ export const rateLimits = {
   auth: "auth" as const,
   general: "general" as const,
   admin: "admin" as const,
+  shipping: "shipping" as const,
 };

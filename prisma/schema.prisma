@@ -106,8 +106,13 @@ model Product {
   tags            String?
   materials       String?
   colors          String?
-  dimensions      String?
+  dimensions      String?  // Display dimensions (e.g., "12\" x 8\"")
   room            String?
+  // Shipping dimensions for accurate rate calculation
+  shippingWeightOz  Float?   // Weight in ounces
+  shippingLengthIn  Float?   // Length in inches
+  shippingWidthIn   Float?   // Width in inches
+  shippingHeightIn  Float?   // Height in inches
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
