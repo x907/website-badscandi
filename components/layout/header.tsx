@@ -5,23 +5,23 @@ import { HeaderUserSection } from "@/components/layout/header-user-section";
 
 export function Header() {
   return (
-    <header className="border-b border-neutral-100 bg-white">
+    <header className="border-b border-border bg-card">
       <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-6">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-xl sm:text-2xl font-semibold tracking-tight">
+          <Link href="/" className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
             Bad Scandi
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
             <Link
               href="/shop"
-              className="text-sm font-medium hover:text-amber-900 transition-colors"
+              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
             >
               Shop
             </Link>
             <Link
               href="/about"
-              className="text-sm font-medium hover:text-amber-900 transition-colors"
+              className="text-sm font-medium text-foreground hover:text-accent transition-colors"
             >
               About
             </Link>

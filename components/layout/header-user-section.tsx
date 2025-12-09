@@ -14,7 +14,7 @@ export function HeaderUserSection() {
   // Show nothing while loading to prevent layout shift
   if (isPending) {
     return (
-      <div className="h-9 w-9 rounded-full bg-neutral-100 animate-pulse" />
+      <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
     );
   }
 
@@ -26,7 +26,7 @@ export function HeaderUserSection() {
         {isAdmin && (
           <Link
             href="/admin"
-            className="flex items-center gap-1.5 text-sm font-medium text-amber-700 hover:text-amber-900 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent/80 transition-colors"
           >
             <Settings className="h-4 w-4" />
             <span className="hidden sm:inline">Admin</span>
@@ -39,7 +39,7 @@ export function HeaderUserSection() {
             image={session.user.image}
             size="md"
           />
-          <span className="hidden lg:block text-sm font-medium text-neutral-700">
+          <span className="hidden lg:block text-sm font-medium text-muted-foreground">
             {firstName}
           </span>
         </Link>

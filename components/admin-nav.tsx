@@ -47,22 +47,22 @@ export function AdminNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white border-b border-neutral-200 sticky top-0 z-50">
+    <header className="bg-card border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo / Back to site */}
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline text-sm">Back to site</span>
             </Link>
-            <div className="h-6 w-px bg-neutral-200 hidden sm:block" />
+            <div className="h-6 w-px bg-border hidden sm:block" />
             <Link href="/admin" className="flex items-center gap-2">
-              <ShoppingBag className="h-5 w-5 text-amber-900" />
-              <span className="font-semibold text-neutral-900">
+              <ShoppingBag className="h-5 w-5 text-accent" />
+              <span className="font-semibold text-foreground">
                 Bad Scandi Admin
               </span>
             </Link>
@@ -80,8 +80,8 @@ export function AdminNav() {
                   href={item.href}
                   className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-amber-50 text-amber-900"
-                      : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
+                      ? "bg-accent-soft text-accent-soft-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
                   <item.icon className="h-4 w-4" />
@@ -93,7 +93,7 @@ export function AdminNav() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
+            className="md:hidden p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -106,7 +106,7 @@ export function AdminNav() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-neutral-200">
+          <nav className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-1">
               {navItems.map((item) => {
                 const isActive =
@@ -119,8 +119,8 @@ export function AdminNav() {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-amber-50 text-amber-900"
-                        : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
+                        ? "bg-accent-soft text-accent-soft-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     }`}
                   >
                     <item.icon className="h-5 w-5" />

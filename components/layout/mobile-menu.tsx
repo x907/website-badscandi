@@ -33,15 +33,15 @@ export function MobileMenu() {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/40 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <Dialog.Content className="fixed left-0 top-0 h-full w-full max-w-xs bg-white z-50 shadow-xl flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300">
+        <Dialog.Content className="fixed left-0 top-0 h-full w-full max-w-xs bg-card z-50 shadow-xl flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-neutral-100">
-            <Dialog.Title className="text-lg font-semibold">
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <Dialog.Title className="text-lg font-semibold text-foreground">
               Bad Scandi
             </Dialog.Title>
             <Dialog.Close asChild>
               <button
-                className="p-2 text-neutral-400 hover:text-neutral-600 rounded-full hover:bg-neutral-100 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
@@ -50,12 +50,12 @@ export function MobileMenu() {
           </div>
 
           {/* User Section */}
-          <div className="p-4 border-b border-neutral-100">
+          <div className="p-4 border-b border-border">
             {session?.user ? (
               <Link
                 href="/account"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
               >
                 <div className="flex-shrink-0">
                   <UserAvatar
@@ -66,27 +66,27 @@ export function MobileMenu() {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-neutral-900 truncate">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {getFirstName(session.user.name, session.user.email)}
                   </p>
-                  <p className="text-xs text-neutral-500">View account</p>
+                  <p className="text-xs text-muted-foreground">View account</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-neutral-400" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
             ) : (
               <Link
                 href="/auth/signin"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-50 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
               >
-                <div className="h-10 w-10 rounded-full bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                  <User className="h-5 w-5 text-neutral-600" />
+                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                  <User className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-neutral-900">Sign In</p>
-                  <p className="text-xs text-neutral-500">Access your account</p>
+                  <p className="text-sm font-medium text-foreground">Sign In</p>
+                  <p className="text-xs text-muted-foreground">Access your account</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-neutral-400" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
             )}
           </div>
@@ -97,7 +97,7 @@ export function MobileMenu() {
             <Link
               href="/shop"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 p-4 mb-4 bg-amber-50 text-amber-900 rounded-lg font-medium hover:bg-amber-100 transition-colors"
+              className="flex items-center gap-3 p-4 mb-4 bg-accent-soft text-accent-soft-foreground rounded-lg font-medium hover:bg-accent-soft/80 transition-colors"
             >
               <ShoppingBag className="h-5 w-5" />
               <span>Shop All Products</span>
@@ -110,7 +110,7 @@ export function MobileMenu() {
                   <Link
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className="block py-3 px-4 text-base font-medium text-neutral-900 hover:bg-neutral-50 hover:text-amber-900 rounded-lg transition-colors"
+                    className="block py-3 px-4 text-base font-medium text-foreground hover:bg-muted hover:text-accent rounded-lg transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -119,8 +119,8 @@ export function MobileMenu() {
             </ul>
 
             {/* Secondary Links */}
-            <div className="mt-6 pt-6 border-t border-neutral-100">
-              <p className="px-4 text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">
+            <div className="mt-6 pt-6 border-t border-border">
+              <p className="px-4 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
                 Legal
               </p>
               <ul className="space-y-1">
@@ -129,7 +129,7 @@ export function MobileMenu() {
                     <Link
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className="block py-2 px-4 text-sm text-neutral-600 hover:text-amber-900 rounded-lg transition-colors"
+                      className="block py-2 px-4 text-sm text-muted-foreground hover:text-accent rounded-lg transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -140,8 +140,8 @@ export function MobileMenu() {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-neutral-100 bg-neutral-50">
-            <p className="text-xs text-neutral-500 text-center">
+          <div className="p-4 border-t border-border bg-muted">
+            <p className="text-xs text-muted-foreground text-center">
               Hand-dyed fiber art for your home
             </p>
           </div>

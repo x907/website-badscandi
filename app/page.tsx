@@ -28,11 +28,11 @@ export default async function HomePage() {
               <br />
               Fiber Art
             </h1>
-            <p className="text-xl text-neutral-600 leading-relaxed max-w-lg">
+            <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
               Welcome to Bad Scandi. Original hand-dyed fiber art wall hangings inspired by Scandinavian design.
             </p>
             <div className="space-y-4">
-              <p className="text-neutral-600">
+              <p className="text-muted-foreground">
                 Be sure to follow along{" "}
                 <a
                   href="https://www.instagram.com/badscandi"
@@ -48,7 +48,7 @@ export default async function HomePage() {
                   href="https://www.instagram.com/badscandi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="Instagram"
                 >
                   <Instagram className="h-6 w-6" />
@@ -57,7 +57,7 @@ export default async function HomePage() {
                   href="https://www.tiktok.com/@badscandi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="TikTok"
                 >
                   <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
@@ -68,7 +68,7 @@ export default async function HomePage() {
                   href="https://www.pinterest.com/badscandi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="Pinterest"
                 >
                   <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
@@ -79,7 +79,7 @@ export default async function HomePage() {
                   href="https://www.facebook.com/badscandi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="Facebook"
                 >
                   <Facebook className="h-6 w-6" />
@@ -88,7 +88,7 @@ export default async function HomePage() {
                   href="https://www.youtube.com/@badscandi"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-600 hover:text-neutral-900 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="YouTube"
                 >
                   <Youtube className="h-6 w-6" />
@@ -114,15 +114,15 @@ export default async function HomePage() {
       </section>
 
       {/* As Featured In Section */}
-      <section className="bg-white py-8 sm:py-12 border-y border-neutral-200">
+      <section className="bg-card py-8 sm:py-12 border-y border-border">
         <div className="container mx-auto px-4 sm:px-6">
-          <p className="text-center text-sm text-neutral-500 mb-6">As Featured In</p>
+          <p className="text-center text-sm text-muted-foreground mb-6">As Featured In</p>
           <div className="flex justify-center items-center">
             <a
               href="https://midwestdesignmag.com/interior-spaces/scandinavian-style-tapestries-by-bad-scandi-pay-homage-to-heritage/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-700 hover:text-neutral-900 transition-colors"
+              className="text-foreground/80 hover:text-foreground transition-colors"
             >
               <span className="text-lg font-semibold tracking-wide">Midwest Design Magazine</span>
             </a>
@@ -131,12 +131,12 @@ export default async function HomePage() {
       </section>
 
       {featuredProducts.length > 0 && (
-        <section className="bg-white py-12 sm:py-24">
+        <section className="bg-card py-12 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-12">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-2">Featured Wall Hangings</h2>
-                <p className="text-neutral-600">Hand-dyed fiber art for your walls</p>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground">Featured Wall Hangings</h2>
+                <p className="text-muted-foreground">Hand-dyed fiber art for your walls</p>
               </div>
               <Link href="/shop">
                 <Button variant="ghost" className="gap-2">
@@ -154,8 +154,8 @@ export default async function HomePage() {
       {/* The Dip-Dyeing Process Section */}
       <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-24">
         <div className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8 mb-10 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-bold">The Dip-Dyeing Process</h2>
-          <p className="text-neutral-600 leading-relaxed text-lg">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">The Dip-Dyeing Process</h2>
+          <p className="text-muted-foreground leading-relaxed text-lg">
             Each tapestry is handcrafted using a unique dip-dyeing technique that
             incorporates traditional painting methods. Hundreds of wool strands are
             carefully measured, cut, and hand-dyed over several weeks to create
@@ -165,20 +165,20 @@ export default async function HomePage() {
 
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12">
           <div className="space-y-3">
-            <h3 className="text-lg sm:text-xl font-semibold">Hand-Dyed Artistry</h3>
-            <p className="text-neutral-600 leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground">Hand-Dyed Artistry</h3>
+            <p className="text-muted-foreground leading-relaxed">
               Each wall hanging is uniquely hand-dyed using traditional dip dye techniques. No two pieces are exactly alike.
             </p>
           </div>
           <div className="space-y-3">
-            <h3 className="text-lg sm:text-xl font-semibold">Natural Materials</h3>
-            <p className="text-neutral-600 leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground">Natural Materials</h3>
+            <p className="text-muted-foreground leading-relaxed">
               Premium wool yarns in neutral, earthy tones that complement any boho or minimalist space.
             </p>
           </div>
           <div className="space-y-3 sm:col-span-2 md:col-span-1">
-            <h3 className="text-lg sm:text-xl font-semibold">Handcrafted with Care</h3>
-            <p className="text-neutral-600 leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground">Handcrafted with Care</h3>
+            <p className="text-muted-foreground leading-relaxed">
               Every fiber art piece is lovingly created and finished by hand, bringing texture and warmth to your walls.
             </p>
           </div>
@@ -186,11 +186,11 @@ export default async function HomePage() {
       </section>
 
       {allReviews.length > 0 && (
-        <section className="bg-neutral-50 py-12 sm:py-24">
+        <section className="bg-muted py-12 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">What Our Customers Say</h2>
-              <p className="text-neutral-600">Real reviews from real customers</p>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground">What Our Customers Say</h2>
+              <p className="text-muted-foreground">Real reviews from real customers</p>
             </div>
             <ReviewsGrid reviews={allReviews} initialLimit={3} />
           </div>
