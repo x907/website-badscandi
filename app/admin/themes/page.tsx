@@ -1,6 +1,15 @@
 import { db } from "@/lib/db";
 import { AdminThemesClient } from "@/components/admin-themes-client";
-import { ThemeSettings, defaultThemeSettings, ThemeId, BorderRadiusStyle, ButtonStyle } from "@/lib/themes";
+import {
+  ThemeSettings,
+  defaultThemeSettings,
+  ThemeId,
+  BorderRadiusStyle,
+  ButtonStyle,
+  HeadingStyle,
+  AccentColor,
+  FontScale,
+} from "@/lib/themes";
 
 async function getThemeSettings(): Promise<ThemeSettings> {
   try {
@@ -16,6 +25,9 @@ async function getThemeSettings(): Promise<ThemeSettings> {
       themeId: settings.themeId as ThemeId,
       borderRadius: settings.borderRadius as BorderRadiusStyle,
       buttonStyle: settings.buttonStyle as ButtonStyle,
+      headingStyle: (settings.headingStyle || "normal") as HeadingStyle,
+      accentColor: (settings.accentColor || "amber") as AccentColor,
+      fontScale: (settings.fontScale || "default") as FontScale,
     };
   } catch {
     return defaultThemeSettings;
@@ -32,7 +44,7 @@ export default async function AdminThemesPage() {
           Theme Settings
         </h1>
         <p className="text-neutral-600 mt-2">
-          Customize the look and feel of your website. Preview themes before applying them.
+          Customize fonts, colors, and styles. Preview changes before applying them site-wide.
         </p>
       </div>
 

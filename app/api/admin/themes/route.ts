@@ -8,13 +8,22 @@ import {
   ThemeId,
   BorderRadiusStyle,
   ButtonStyle,
+  HeadingStyle,
+  AccentColor,
+  FontScale,
   defaultThemeSettings,
+  accentColorOptions,
+  fontScaleOptions,
+  headingStyleOptions,
 } from "@/lib/themes";
 
 // Valid options for validation
 const validThemeIds = Object.keys(themes) as ThemeId[];
 const validBorderRadius: BorderRadiusStyle[] = ["default", "sharp", "rounded", "pill"];
 const validButtonStyles: ButtonStyle[] = ["default", "outline", "soft"];
+const validHeadingStyles: HeadingStyle[] = ["normal", "uppercase", "small-caps"];
+const validAccentColors: AccentColor[] = ["amber", "rose", "teal", "slate", "forest", "indigo"];
+const validFontScales: FontScale[] = ["compact", "default", "spacious"];
 
 // GET - Retrieve current theme settings
 export async function GET() {
@@ -32,6 +41,9 @@ export async function GET() {
           themeId: defaultThemeSettings.themeId,
           borderRadius: defaultThemeSettings.borderRadius,
           buttonStyle: defaultThemeSettings.buttonStyle,
+          headingStyle: defaultThemeSettings.headingStyle,
+          accentColor: defaultThemeSettings.accentColor,
+          fontScale: defaultThemeSettings.fontScale,
         },
       });
     }
@@ -41,6 +53,9 @@ export async function GET() {
         themeId: settings.themeId as ThemeId,
         borderRadius: settings.borderRadius as BorderRadiusStyle,
         buttonStyle: settings.buttonStyle as ButtonStyle,
+        headingStyle: (settings.headingStyle || "normal") as HeadingStyle,
+        accentColor: (settings.accentColor || "amber") as AccentColor,
+        fontScale: (settings.fontScale || "default") as FontScale,
       },
       themes: Object.values(themes).map((t) => ({
         id: t.id,
@@ -48,7 +63,14 @@ export async function GET() {
         description: t.description,
         category: t.category,
         readabilityScore: t.readabilityScore,
+        recommendedAccent: t.recommendedAccent,
+        recommendedHeadingStyle: t.recommendedHeadingStyle,
       })),
+      options: {
+        accentColors: accentColorOptions,
+        fontScales: fontScaleOptions,
+        headingStyles: headingStyleOptions,
+      },
     });
   } catch (error) {
     console.error("Error fetching theme settings:", error);
@@ -69,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { themeId, borderRadius, buttonStyle } = body;
+    const { themeId, borderRadius, buttonStyle, headingStyle, accentColor, fontScale } = body;
 
     // Validate inputs
     if (themeId && !validThemeIds.includes(themeId)) {
@@ -93,6 +115,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (headingStyle && !validHeadingStyles.includes(headingStyle)) {
+      return NextResponse.json(
+        { error: `Invalid heading style. Valid options: ${validHeadingStyles.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    if (accentColor && !validAccentColors.includes(accentColor)) {
+      return NextResponse.json(
+        { error: `Invalid accent color. Valid options: ${validAccentColors.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    if (fontScale && !validFontScales.includes(fontScale)) {
+      return NextResponse.json(
+        { error: `Invalid font scale. Valid options: ${validFontScales.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     // Get current user for audit
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -104,6 +147,9 @@ export async function POST(request: NextRequest) {
       themeId?: string;
       borderRadius?: string;
       buttonStyle?: string;
+      headingStyle?: string;
+      accentColor?: string;
+      fontScale?: string;
       updatedBy: string;
     } = {
       updatedBy: userId,
@@ -112,6 +158,9 @@ export async function POST(request: NextRequest) {
     if (themeId) updateData.themeId = themeId;
     if (borderRadius) updateData.borderRadius = borderRadius;
     if (buttonStyle) updateData.buttonStyle = buttonStyle;
+    if (headingStyle) updateData.headingStyle = headingStyle;
+    if (accentColor) updateData.accentColor = accentColor;
+    if (fontScale) updateData.fontScale = fontScale;
 
     // Upsert settings
     const settings = await db.siteSettings.upsert({
@@ -122,6 +171,9 @@ export async function POST(request: NextRequest) {
         themeId: themeId || defaultThemeSettings.themeId,
         borderRadius: borderRadius || defaultThemeSettings.borderRadius,
         buttonStyle: buttonStyle || defaultThemeSettings.buttonStyle,
+        headingStyle: headingStyle || defaultThemeSettings.headingStyle,
+        accentColor: accentColor || defaultThemeSettings.accentColor,
+        fontScale: fontScale || defaultThemeSettings.fontScale,
         updatedBy: userId,
       },
     });
@@ -138,6 +190,9 @@ export async function POST(request: NextRequest) {
           themeId: themeId || undefined,
           borderRadius: borderRadius || undefined,
           buttonStyle: buttonStyle || undefined,
+          headingStyle: headingStyle || undefined,
+          accentColor: accentColor || undefined,
+          fontScale: fontScale || undefined,
         },
       },
     });
@@ -148,6 +203,9 @@ export async function POST(request: NextRequest) {
         themeId: settings.themeId as ThemeId,
         borderRadius: settings.borderRadius as BorderRadiusStyle,
         buttonStyle: settings.buttonStyle as ButtonStyle,
+        headingStyle: (settings.headingStyle || "normal") as HeadingStyle,
+        accentColor: (settings.accentColor || "amber") as AccentColor,
+        fontScale: (settings.fontScale || "default") as FontScale,
       },
     });
   } catch (error) {

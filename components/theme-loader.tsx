@@ -6,6 +6,9 @@ import {
   getTheme,
   getGoogleFontsUrl,
   borderRadiusOptions,
+  accentColorOptions,
+  fontScaleOptions,
+  headingStyleOptions,
   defaultThemeSettings,
 } from "@/lib/themes";
 
@@ -35,6 +38,9 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
   // Apply theme CSS variables and load fonts
   useEffect(() => {
     const theme = getTheme(settings.themeId);
+    const accent = accentColorOptions[settings.accentColor];
+    const scale = fontScaleOptions[settings.fontScale];
+    const headingStyle = headingStyleOptions[settings.headingStyle];
 
     // Load Google Fonts
     const fontsUrl = getGoogleFontsUrl(theme);
@@ -50,8 +56,10 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
       document.head.appendChild(link);
     }
 
-    // Apply CSS variables
+    // Apply CSS variables to root
     const root = document.documentElement;
+
+    // Font families
     root.style.setProperty(
       "--font-heading",
       `"${theme.headingFont.family}", ${theme.headingFont.fallback}`
@@ -60,10 +68,24 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
       "--font-body",
       `"${theme.bodyFont.family}", ${theme.bodyFont.fallback}`
     );
+
+    // Border radius
     root.style.setProperty(
       "--radius",
       borderRadiusOptions[settings.borderRadius].value
     );
+
+    // Accent color (HSL format for Tailwind compatibility)
+    root.style.setProperty("--accent", accent.hsl);
+    root.style.setProperty("--accent-foreground", "0 0% 98%");
+
+    // Font scale
+    root.style.setProperty("--font-size-base", scale.baseSize);
+    root.style.setProperty("--heading-scale", scale.headingScale.toString());
+    root.style.setProperty("--line-height", scale.lineHeight);
+
+    // Heading transform
+    root.style.setProperty("--heading-transform", headingStyle.css);
 
     // Apply to body
     document.body.style.fontFamily = `var(--font-body)`;
