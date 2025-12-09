@@ -1,4 +1,3 @@
-import reviewsData from "@/data/reviews.json";
 import { db } from "@/lib/db";
 
 export interface Review {
@@ -12,20 +11,14 @@ export interface Review {
 }
 
 export async function getFeaturedReviews(): Promise<Review[]> {
-  // Get reviews from JSON file (imported reviews)
-  const jsonReviews = reviewsData.map((review, index) => ({
-    ...review,
-    id: review.id || `review-${index}`,
-    rating: 5, // All reviews are 5 stars
-  })) as Review[];
-
-  // Get featured reviews from database (customer-submitted reviews)
+  // Get featured reviews from database - limit to 3
   const dbReviews = await db.review.findMany({
     where: {
       approved: true,
       featured: true,
     },
     orderBy: { createdAt: "desc" },
+    take: 3,
     select: {
       id: true,
       customerName: true,
@@ -38,7 +31,7 @@ export async function getFeaturedReviews(): Promise<Review[]> {
   });
 
   // Convert database reviews to match Review interface
-  const convertedDbReviews: Review[] = dbReviews.map((review) => ({
+  return dbReviews.map((review) => ({
     id: review.id,
     author: review.customerName,
     date: review.createdAt.toISOString(),
@@ -47,19 +40,9 @@ export async function getFeaturedReviews(): Promise<Review[]> {
     photos: review.imageUrls,
     verified: review.verified,
   }));
-
-  // Combine both sources, with database reviews first
-  return [...convertedDbReviews, ...jsonReviews];
 }
 
 export async function getAllReviews(): Promise<Review[]> {
-  // Get all reviews from JSON file
-  const jsonReviews = reviewsData.map((review, index) => ({
-    ...review,
-    id: review.id || `review-${index}`,
-    rating: 5,
-  })) as Review[];
-
   // Get all approved reviews from database
   const dbReviews = await db.review.findMany({
     where: {
@@ -78,7 +61,7 @@ export async function getAllReviews(): Promise<Review[]> {
   });
 
   // Convert database reviews to match Review interface
-  const convertedDbReviews: Review[] = dbReviews.map((review) => ({
+  return dbReviews.map((review) => ({
     id: review.id,
     author: review.customerName,
     date: review.createdAt.toISOString(),
@@ -87,7 +70,4 @@ export async function getAllReviews(): Promise<Review[]> {
     photos: review.imageUrls,
     verified: review.verified,
   }));
-
-  // Combine both sources
-  return [...convertedDbReviews, ...jsonReviews];
 }
