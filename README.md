@@ -1,35 +1,80 @@
 # Bad Scandi E-Commerce
 
-A modern, minimalist e-commerce platform built with Next.js 15, featuring native passkey authentication and Stripe payments.
+A modern, minimalist e-commerce platform built with Next.js 15, featuring native passkey authentication, comprehensive theming, and Stripe payments.
 
 ## Features
 
-- **Modern Stack**: Next.js 15 App Router, TypeScript, Tailwind CSS
-- **Native Passkey Auth**: WebAuthn/Passkeys via Better Auth
+### Core Features
+- **Modern Stack**: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS
+- **Native Passkey Auth**: WebAuthn/Passkeys via Better Auth for phishing-resistant authentication
 - **Social Login**: Google, Apple, Facebook, Microsoft OAuth
-- **Payments**: Stripe Checkout integration with automatic order creation
+- **Payments**: Stripe Checkout integration with 3D Secure support
+- **Shipping**: Real-time shipping rate calculation with flat-rate options
+
+### Admin Dashboard
+- **Product Management**: Full CRUD with multi-image support, SEO fields, shipping dimensions
+- **Order Management**: View orders, shipping labels, tracking info, label refunds
+- **Review Moderation**: Approve, reject, and feature customer reviews
+- **Theme Customization**: 11 font themes, 6 accent colors, dark mode support
+
+### Design System
+- **11 Font Themes**: System, Classic, Nordic, Artisan, Elegant, Modern, Warm, Editorial, Handcraft, Minimalist, Bold
+- **6 Accent Colors**: Amber, Rose, Teal, Slate, Forest, Indigo
+- **Dark Mode**: System, Light, Dark preferences
+- **CSS Variables**: Fully customizable theming system
+
+### Infrastructure
 - **Email Integration**: AWS SES for transactional emails & drip campaigns
 - **Image Storage**: AWS S3 for product and review images
 - **Database**: Supabase PostgreSQL with Prisma ORM
-- **UI Components**: shadcn/ui with Scandinavian minimalist design
+- **Rate Limiting**: Upstash Redis for API protection
 - **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag (optional)
 - **Auto-Deploy**: Vercel with GitHub integration
 
 ## Tech Stack
 
-- **Framework**: Next.js 15+ (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Authentication**: Better Auth v1.0 with Passkey plugin
-- **Database**: Supabase (PostgreSQL)
-- **ORM**: Prisma
-- **Payments**: Stripe
-- **Email**: AWS SES
-- **Storage**: AWS S3
-- **Analytics**: Google Analytics 4, Meta Pixel, Pinterest Tag
-- **Hosting**: Vercel
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 15+ (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| Authentication | Better Auth v1.0 with Passkey plugin |
+| Database | Supabase (PostgreSQL) |
+| ORM | Prisma |
+| Payments | Stripe |
+| Email | AWS SES |
+| Storage | AWS S3 |
+| Rate Limiting | Upstash Redis |
+| Hosting | Vercel |
 
-## Getting Started
+## Documentation
+
+### Getting Started
+- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Complete setup instructions
+- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment guide
+
+### Technical Documentation
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture overview
+- **[API_REFERENCE.md](./API_REFERENCE.md)** - Complete API documentation
+- **[DATABASE.md](./DATABASE.md)** - Database schema documentation
+- **[SECURITY.md](./SECURITY.md)** - Security practices guide
+
+### Feature Guides
+- **[THEMING.md](./THEMING.md)** - Theme customization guide
+- **[ADMIN_SETUP.md](./ADMIN_SETUP.md)** - Admin dashboard & S3 setup
+- **[AWS_SES_SETUP.md](./AWS_SES_SETUP.md)** - Email configuration
+- **[STRIPE_WEBHOOK_SETUP.md](./STRIPE_WEBHOOK_SETUP.md)** - Payment webhooks
+
+### Operations
+- **[AUTOMATION_SETUP.md](./AUTOMATION_SETUP.md)** - CI/CD & GitHub Actions
+- **[DISASTER_RECOVERY.md](./DISASTER_RECOVERY.md)** - Backup & recovery procedures
+- **[SEO_GUIDE.md](./SEO_GUIDE.md)** - SEO optimization guide
+- **[ANALYTICS_SETUP.md](./ANALYTICS_SETUP.md)** - Tracking setup
+
+### Development
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
+
+## Quick Start
 
 ### Prerequisites
 
@@ -37,44 +82,29 @@ A modern, minimalist e-commerce platform built with Next.js 15, featuring native
 - Supabase account (PostgreSQL database)
 - Stripe account (payment processing)
 - AWS account (for SES email and S3 storage)
-- OAuth credentials (Google, Apple, etc.)
+- OAuth credentials (Google, etc.)
 
 ### Installation
 
-1. Clone the repository:
 ```bash
+# Clone the repository
 git clone https://github.com/x907/website-badscandi.git
 cd website-badscandi
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Set up environment variables:
-```bash
+# Set up environment variables
 cp .env.example .env
-```
+# Edit .env with your credentials
 
-Edit `.env` and fill in your credentials:
-- `DATABASE_URL`: Your Supabase PostgreSQL connection string
-- OAuth provider credentials (Google, etc.)
-- Stripe API keys
-- AWS credentials (IAM Access Keys)
-
-4. Set up the database:
-```bash
+# Push database schema
 npm run db:push
-```
 
-5. Seed sample products:
-```bash
-npx tsx prisma/seed.ts
-```
+# Seed sample products
+npm run db:seed
 
-6. Run the development server:
-```bash
+# Start development server
 npm run dev
 ```
 
@@ -83,180 +113,101 @@ Open [http://localhost:3000](http://localhost:3000) to see your app.
 ## Project Structure
 
 ```
-app/
-├── layout.tsx                 # Root layout with Header/Footer
-├── page.tsx                   # Home page with hero + featured products
-├── shop/page.tsx              # Product grid
-├── product/[slug]/page.tsx    # Product details
-├── account/page.tsx           # User orders + passkey management
-├── auth/signin/page.tsx       # Sign in page
-├── admin/                     # Admin dashboard
-│   ├── page.tsx               # Dashboard with stats
-│   ├── products/              # Product CRUD
-│   ├── orders/                # Order management
-│   └── reviews/               # Review moderation
-└── api/
-    ├── auth/[...all]/         # Better Auth endpoints
-    ├── checkout/              # Stripe checkout session
-    ├── webhooks/stripe/       # Payment confirmations
-    ├── reviews/               # Customer reviews CRUD
-    ├── reviews/[id]/approve/  # Review approval
-    ├── reviews/[id]/featured/ # Feature reviews
-    ├── contact/               # Contact form email handler
-    ├── cart/                  # Cart management
-    ├── user/is-admin/         # Admin check endpoint
-    ├── admin/
-    │   ├── dashboard/         # Admin stats
-    │   ├── products/          # Product CRUD
-    │   ├── orders/            # Order management
-    │   └── upload/            # S3 image uploads
-    └── cron/
-        ├── cart-abandonment/  # Abandoned cart emails
-        ├── review-request/    # Post-purchase review requests
-        └── winback/           # Win-back email campaigns
-
-components/
-├── ui/                        # shadcn/ui components
-├── layout/                    # Header, Footer, HeaderUserSection
-├── passkey-enroll.tsx         # Passkey enrollment UI
-├── product-card.tsx           # Product display card
-├── product-grid.tsx           # Product grid layout
-└── checkout-button.tsx        # Stripe checkout button
-
-lib/
-├── db.ts                      # Prisma client
-├── auth.ts                    # Better Auth configuration
-├── auth-utils.ts              # Auth helper functions (isAdmin, getSession)
-├── auth-client.ts             # Client-side auth utilities
-├── ses-client.ts              # AWS SES email client
-├── email.ts                   # Email sending functions
-├── email-templates.ts         # Drip campaign templates
-├── s3.ts                      # AWS S3 storage client
-├── products.ts                # Product queries
-├── stripe.ts                  # Stripe client
-├── audit.ts                   # Admin action audit logging
-├── rate-limit.ts              # API rate limiting (Upstash Redis)
-├── validations.ts             # Zod validation schemas
-├── use-is-admin.ts            # Client hook for admin check
-└── utils.ts                   # Utility functions
-
-prisma/
-├── schema.prisma              # Database schema
-└── seed.ts                    # Sample data seeder
+website-badscandi/
+├── app/                    # Next.js App Router
+│   ├── admin/             # Admin dashboard pages
+│   ├── api/               # API routes
+│   ├── shop/              # Shop pages
+│   ├── checkout/          # Checkout flow
+│   └── ...                # Other pages
+├── components/            # React components
+│   ├── ui/               # shadcn/ui primitives
+│   ├── layout/           # Header, Footer, Nav
+│   └── admin-*-client.tsx # Admin page clients
+├── lib/                   # Shared utilities
+│   ├── auth.ts           # Better Auth config
+│   ├── themes.ts         # Theme definitions
+│   ├── stripe.ts         # Stripe client
+│   └── ...               # Other utilities
+├── prisma/                # Database schema
+└── scripts/               # Utility scripts
 ```
+
+## NPM Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run db:push` | Push schema to database |
+| `npm run db:studio` | Open Prisma Studio |
+| `npm run db:seed` | Seed sample products |
+| `npm run test:ses` | Test email configuration |
 
 ## Authentication Flow
 
-### New User (Social Login → Passkey)
+### Social Login + Passkey
 1. User signs in with Google/Apple/Facebook/Microsoft
 2. Better Auth creates account and links by email
 3. User is prompted to enroll a passkey (optional)
-4. Passkey created via WebAuthn API
+4. Passkey created via WebAuthn API (Touch ID, Face ID, etc.)
 
-### Passkey Login
+### Passkey-Only Login
 1. User clicks "Sign in with passkey"
-2. Browser prompts for biometric/PIN authentication
+2. Browser prompts for biometric authentication
 3. Passkey verified via Better Auth
 4. Session created
 
-## Database Schema
+## Payment Flow
 
-See `prisma/schema.prisma` for the complete schema.
+1. User adds items to cart
+2. Checkout validates stock and prices
+3. Stripe Checkout Session created
+4. User completes payment on Stripe
+5. Webhook creates order in database
+6. Confirmation email sent
 
-Key models:
-- **User**: User accounts (with isAdmin flag)
-- **Passkey**: WebAuthn credentials
-- **Account**: OAuth provider accounts
-- **Session**: User sessions
-- **Product**: Store products (multi-image support)
-- **Order**: Purchase orders
-- **Review**: Customer reviews (with moderation)
-- **Cart**: Shopping cart for abandoned cart emails
-- **AuditLog**: Admin action audit trail
-- **EmailLog**: Drip campaign tracking
+## Theming
 
-## Deployment
+The site supports comprehensive theming via the admin dashboard:
 
-### Deploy to Vercel
+### Font Themes
+- **System**: Device native fonts (fastest loading)
+- **Classic**: Inter (highly readable)
+- **Nordic**: Karla (Scandinavian feel)
+- **Artisan**: Lora + DM Sans (craft-focused)
+- **Elegant**: Playfair Display + DM Sans (premium)
+- **Modern**: Plus Jakarta Sans (contemporary)
+- **Warm**: Nunito Sans (friendly)
+- **Editorial**: Cormorant Garamond + Source Sans 3 (magazine style)
+- **Handcraft**: Caveat + Quicksand (artisan maker)
+- **Minimalist**: Work Sans (clean geometric)
+- **Bold**: Archivo Black + Archivo (statement)
 
-1. Push to GitHub:
-```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
-```
+### Style Options
+- Border radius: Sharp, Default, Rounded, Pill
+- Button style: Solid, Outline, Soft
+- Heading style: Normal, Uppercase, Small Caps
+- Font scale: Compact, Default, Spacious
 
-2. Import to Vercel:
-   - Go to [vercel.com](https://vercel.com)
-   - Import your GitHub repository
-   - Add environment variables
-   - Deploy
+### Dark Mode
+- System (follows device preference)
+- Light (always light)
+- Dark (always dark)
 
-3. Set up Stripe webhook:
-   - Get your Vercel deployment URL
-   - Add webhook endpoint: `https://yourdomain.com/api/webhooks/stripe`
-   - Add webhook secret to environment variables
+## Security
 
-### Environment Variables for Production
+- Session-based authentication with HTTP-only cookies
+- Passkey support for phishing-resistant auth
+- Rate limiting on all API endpoints
+- Input validation with Zod schemas
+- Audit logging for admin actions
+- Stripe webhook signature verification
+- Content Security Policy headers
 
-Add these in Vercel:
-- All variables from `.env.example`
-- Update `RP_ID` to your domain (e.g., `yourdomain.com`)
-- Update `RP_ORIGIN` to your full URL
-
-## Development
-
-### Database Commands
-
-```bash
-# Push schema changes
-npm run db:push
-
-# Open Prisma Studio
-npm run db:studio
-
-# Seed database
-npx tsx prisma/seed.ts
-```
-
-### Email Testing
-
-```bash
-# Test AWS SES credentials
-npm run test:ses your-email@example.com
-```
-
-### Stripe Testing
-
-Use Stripe test cards:
-- Success: `4242 4242 4242 4242`
-- Decline: `4000 0000 0000 0002`
-
-### WebAuthn Testing
-
-Passkeys work best on:
-- macOS: Touch ID
-- iOS: Face ID / Touch ID
-- Android: Fingerprint / Face Unlock
-- Windows: Windows Hello
-
-## Design System
-
-### Colors
-- Background: `bg-neutral-50` (off-white)
-- Text: `text-neutral-900` (near-black)
-- Accent: `text-amber-900` (oak brown)
-- Border: `border-neutral-100`
-
-### Typography
-- Clean sans-serif (Inter font)
-- Generous whitespace
-- Large headings with tight tracking
-
-### Components
-- Rounded corners: `rounded-xl`
-- Subtle shadows: `shadow-sm`
-- Hover states with smooth transitions
+See [SECURITY.md](./SECURITY.md) for details.
 
 ## License
 
@@ -264,4 +215,9 @@ MIT
 
 ## Support
 
-For issues, please open a GitHub issue or contact support.
+- **Documentation**: See guides above
+- **Issues**: Open a GitHub issue
+- **Next.js Docs**: https://nextjs.org/docs
+- **Prisma Docs**: https://www.prisma.io/docs
+- **Better Auth Docs**: https://www.better-auth.com/docs
+- **Stripe Docs**: https://stripe.com/docs
