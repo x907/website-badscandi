@@ -141,10 +141,10 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
     <div className="space-y-6">
       {/* Save/Reset Bar */}
       {hasChanges && (
-        <div className="sticky top-20 z-40 bg-amber-50 border border-amber-200 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="sticky top-20 z-40 bg-accent/10 border border-accent/30 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Eye className="h-5 w-5 text-amber-700" />
-            <span className="text-amber-800 font-medium">
+            <Eye className="h-5 w-5 text-accent" />
+            <span className="text-accent font-medium">
               Preview Mode - Changes not yet saved
             </span>
           </div>
@@ -166,8 +166,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
         <div
           className={`p-4 rounded-lg ${
             saveMessage.includes("success")
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
+              ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/30"
+              : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
           }`}
         >
           {saveMessage}
@@ -178,15 +178,15 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
         {/* Settings Panel */}
         <div className="lg:col-span-2 space-y-6">
           {/* Tab Navigation */}
-          <div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
+          <div className="flex gap-1 p-1 bg-muted rounded-lg">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-white text-neutral-900 shadow-sm"
-                    : "text-neutral-600 hover:text-neutral-900"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
@@ -206,8 +206,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                     onClick={() => setThemeCategory(cat.id)}
                     className={`px-3 py-1.5 text-sm rounded-full transition-all ${
                       themeCategory === cat.id
-                        ? "bg-neutral-900 text-white"
-                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                        ? "bg-foreground text-background"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
                     }`}
                   >
                     {cat.label}
@@ -229,51 +229,51 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                       }
                       className={`relative text-left p-4 rounded-lg border-2 transition-all ${
                         isSelected
-                          ? "border-amber-500 bg-amber-50"
-                          : "border-neutral-200 hover:border-neutral-300 bg-white"
+                          ? "border-accent bg-accent/10"
+                          : "border-border hover:border-muted-foreground bg-card"
                       }`}
                     >
                       {isSaved && (
-                        <span className="absolute top-2 right-2 text-xs bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded">
+                        <span className="absolute top-2 right-2 text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
                           Current
                         </span>
                       )}
                       {isSelected && !isSaved && (
-                        <span className="absolute top-2 right-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">
+                        <span className="absolute top-2 right-2 text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">
                           Preview
                         </span>
                       )}
 
                       <div className="mb-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-neutral-900">{theme.name}</h3>
+                          <h3 className="font-semibold text-foreground">{theme.name}</h3>
                           <div className="flex items-center gap-0.5">
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
                                 className={`h-3 w-3 ${
                                   i < theme.readabilityScore
-                                    ? "fill-amber-400 text-amber-400"
-                                    : "text-neutral-300"
+                                    ? "fill-accent text-accent"
+                                    : "text-muted-foreground/30"
                                 }`}
                               />
                             ))}
                           </div>
                         </div>
-                        <p className="text-xs text-neutral-500">{theme.description}</p>
+                        <p className="text-xs text-muted-foreground">{theme.description}</p>
                       </div>
 
                       <div
-                        className="border-t border-neutral-100 pt-3 space-y-1"
+                        className="border-t border-border pt-3 space-y-1"
                         style={{
                           fontFamily: `"${theme.headingFont.family}", ${theme.headingFont.fallback}`,
                         }}
                       >
-                        <div className="text-lg font-semibold text-neutral-900">
+                        <div className="text-lg font-semibold text-foreground">
                           {theme.previewHeading}
                         </div>
                         <div
-                          className="text-sm text-neutral-600 line-clamp-2"
+                          className="text-sm text-muted-foreground line-clamp-2"
                           style={{
                             fontFamily: `"${theme.bodyFont.family}", ${theme.bodyFont.fallback}`,
                           }}
@@ -286,10 +286,10 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                         <span
                           className={`text-xs px-2 py-0.5 rounded ${
                             theme.category === "sans-serif"
-                              ? "bg-blue-100 text-blue-700"
+                              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
                               : theme.category === "serif-heading"
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-orange-100 text-orange-700"
+                              ? "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                              : "bg-orange-500/10 text-orange-600 dark:text-orange-400"
                           }`}
                         >
                           {theme.category === "sans-serif"
@@ -299,7 +299,7 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                             : "Display"}
                         </span>
                         {theme.recommendedAccent && (
-                          <span className="text-xs text-neutral-400 flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <Sparkles className="h-3 w-3" />
                             {accentColorOptions[theme.recommendedAccent].name}
                           </span>
@@ -312,8 +312,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
 
               {/* Font Scale */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Font Scale</h3>
-                <p className="text-sm text-neutral-600 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Font Scale</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Adjust the base text size for better readability.
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -329,17 +329,17 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                         }
                         className={`flex flex-col items-start gap-1 p-3 border-2 rounded-lg transition-all ${
                           isSelected
-                            ? "border-amber-500 bg-amber-50"
-                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                            ? "border-accent bg-accent/10"
+                            : "border-border hover:border-muted-foreground bg-card"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          {isSelected && <Check className="h-4 w-4 text-amber-600" />}
-                          <span className={`font-medium ${isSelected ? "text-amber-900" : "text-neutral-700"}`}>
+                          {isSelected && <Check className="h-4 w-4 text-accent" />}
+                          <span className={`font-medium ${isSelected ? "text-accent" : "text-foreground"}`}>
                             {option.name}
                           </span>
                         </div>
-                        <span className="text-xs text-neutral-500">{option.description}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
                       </button>
                     );
                   })}
@@ -353,8 +353,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
             <div className="space-y-8">
               {/* Heading Style */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Heading Style</h3>
-                <p className="text-sm text-neutral-600 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Heading Style</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Choose how headings are displayed across the site.
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -370,19 +370,19 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                         }
                         className={`flex flex-col items-start gap-1 p-4 border-2 rounded-lg transition-all ${
                           isSelected
-                            ? "border-amber-500 bg-amber-50"
-                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                            ? "border-accent bg-accent/10"
+                            : "border-border hover:border-muted-foreground bg-card"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          {isSelected && <Check className="h-4 w-4 text-amber-600" />}
-                          <span className={`font-medium ${isSelected ? "text-amber-900" : "text-neutral-700"}`}>
+                          {isSelected && <Check className="h-4 w-4 text-accent" />}
+                          <span className={`font-medium ${isSelected ? "text-accent" : "text-foreground"}`}>
                             {option.name}
                           </span>
                         </div>
-                        <span className="text-xs text-neutral-500">{option.description}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
                         <div
-                          className="mt-2 text-sm font-semibold"
+                          className="mt-2 text-sm font-semibold text-foreground"
                           style={{
                             textTransform: option.css as "uppercase" | "none",
                             fontVariant: style === "small-caps" ? "small-caps" : "normal",
@@ -398,8 +398,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
 
               {/* Corner Style */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Corner Style</h3>
-                <p className="text-sm text-neutral-600 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Corner Style</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Set the border radius for cards, buttons, and inputs.
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -415,17 +415,17 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                         }
                         className={`flex items-center gap-2 px-4 py-3 border-2 transition-all ${
                           isSelected
-                            ? "border-amber-500 bg-amber-50"
-                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                            ? "border-accent bg-accent/10"
+                            : "border-border hover:border-muted-foreground bg-card"
                         }`}
                         style={{ borderRadius: option.value }}
                       >
-                        {isSelected && <Check className="h-4 w-4 text-amber-600" />}
+                        {isSelected && <Check className="h-4 w-4 text-accent" />}
                         <div className="text-left">
-                          <div className={`font-medium ${isSelected ? "text-amber-900" : "text-neutral-700"}`}>
+                          <div className={`font-medium ${isSelected ? "text-accent" : "text-foreground"}`}>
                             {option.name}
                           </div>
-                          <div className="text-xs text-neutral-500">{option.description}</div>
+                          <div className="text-xs text-muted-foreground">{option.description}</div>
                         </div>
                       </button>
                     );
@@ -435,8 +435,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
 
               {/* Button Style */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Button Style</h3>
-                <p className="text-sm text-neutral-600 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Button Style</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Choose the default appearance for primary buttons.
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -452,25 +452,25 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                         }
                         className={`flex flex-col items-start gap-2 p-4 border-2 transition-all rounded-lg ${
                           isSelected
-                            ? "border-amber-500 bg-amber-50"
-                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                            ? "border-accent bg-accent/10"
+                            : "border-border hover:border-muted-foreground bg-card"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          {isSelected && <Check className="h-4 w-4 text-amber-600" />}
-                          <span className={`font-medium ${isSelected ? "text-amber-900" : "text-neutral-700"}`}>
+                          {isSelected && <Check className="h-4 w-4 text-accent" />}
+                          <span className={`font-medium ${isSelected ? "text-accent" : "text-foreground"}`}>
                             {option.name}
                           </span>
                         </div>
-                        <span className="text-xs text-neutral-500">{option.description}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
                         {/* Button preview */}
                         <div
                           className={`mt-2 px-4 py-2 text-sm font-medium ${
                             style === "outline"
-                              ? "border-2 border-neutral-900 text-neutral-900 bg-transparent"
+                              ? "border-2 border-foreground text-foreground bg-transparent"
                               : style === "soft"
-                              ? "bg-neutral-100 text-neutral-900"
-                              : "bg-neutral-900 text-white"
+                              ? "bg-muted text-foreground"
+                              : "bg-foreground text-background"
                           }`}
                           style={{ borderRadius: borderRadiusOptions[previewSettings.borderRadius].value }}
                         >
@@ -489,8 +489,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
             <div className="space-y-8">
               {/* Dark Mode */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Appearance</h3>
-                <p className="text-sm text-neutral-600 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Appearance</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Choose how the site appears. System follows your device settings.
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -507,18 +507,18 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                         }
                         className={`flex items-center gap-3 px-4 py-3 border-2 rounded-lg transition-all ${
                           isSelected
-                            ? "border-amber-500 bg-amber-50"
-                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                            ? "border-accent bg-accent/10"
+                            : "border-border hover:border-muted-foreground bg-card"
                         }`}
                       >
-                        <Icon className={`h-5 w-5 ${isSelected ? "text-amber-600" : "text-neutral-500"}`} />
+                        <Icon className={`h-5 w-5 ${isSelected ? "text-accent" : "text-muted-foreground"}`} />
                         <div className="text-left">
-                          <div className={`font-medium ${isSelected ? "text-amber-900" : "text-neutral-700"}`}>
+                          <div className={`font-medium ${isSelected ? "text-accent" : "text-foreground"}`}>
                             {option.name}
                           </div>
-                          <div className="text-xs text-neutral-500">{option.description}</div>
+                          <div className="text-xs text-muted-foreground">{option.description}</div>
                         </div>
-                        {isSelected && <Check className="h-4 w-4 text-amber-600 ml-2" />}
+                        {isSelected && <Check className="h-4 w-4 text-accent ml-2" />}
                       </button>
                     );
                   })}
@@ -527,8 +527,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
 
               {/* Accent Color */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Accent Color</h3>
-                <p className="text-sm text-neutral-600 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Accent Color</h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   The primary color used for buttons, links, and highlights.
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -544,8 +544,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                         }
                         className={`flex items-center gap-3 p-3 border-2 rounded-lg transition-all ${
                           isSelected
-                            ? "border-amber-500 bg-amber-50"
-                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                            ? "border-accent bg-accent/10"
+                            : "border-border hover:border-muted-foreground bg-card"
                         }`}
                       >
                         <div
@@ -553,12 +553,12 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                           style={{ backgroundColor: option.primary }}
                         />
                         <div className="text-left">
-                          <div className={`font-medium ${isSelected ? "text-amber-900" : "text-neutral-700"}`}>
+                          <div className={`font-medium ${isSelected ? "text-accent" : "text-foreground"}`}>
                             {option.name}
                           </div>
-                          <div className="text-xs text-neutral-500">{option.description}</div>
+                          <div className="text-xs text-muted-foreground">{option.description}</div>
                         </div>
-                        {isSelected && <Check className="h-4 w-4 text-amber-600 ml-auto" />}
+                        {isSelected && <Check className="h-4 w-4 text-accent ml-auto" />}
                       </button>
                     );
                   })}
@@ -566,8 +566,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
               </div>
 
               {/* Color Preview */}
-              <div className="p-4 bg-neutral-100 rounded-lg">
-                <h4 className="font-medium mb-3">Color Preview</h4>
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="font-medium text-foreground mb-3">Color Preview</h4>
                 <div className="flex flex-wrap gap-2">
                   <div
                     className="px-4 py-2 text-sm font-medium text-white rounded"
@@ -593,10 +593,10 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
           )}
 
           {/* Reset to Defaults */}
-          <div className="pt-4 border-t border-neutral-200">
+          <div className="pt-4 border-t border-border">
             <button
               onClick={handleResetToDefaults}
-              className="text-sm text-neutral-500 hover:text-neutral-700 underline"
+              className="text-sm text-muted-foreground hover:text-foreground underline"
             >
               Reset all settings to defaults
             </button>
@@ -607,14 +607,14 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
         <div className="lg:col-span-1">
           <div className="sticky top-32">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Live Preview</h2>
-              <div className="flex border border-neutral-200 rounded-lg overflow-hidden">
+              <h2 className="text-lg font-semibold text-foreground">Live Preview</h2>
+              <div className="flex border border-border rounded-lg overflow-hidden">
                 <button
                   onClick={() => setPreviewDevice("desktop")}
                   className={`p-2 ${
                     previewDevice === "desktop"
-                      ? "bg-neutral-100 text-neutral-900"
-                      : "text-neutral-500 hover:text-neutral-700"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                   title="Desktop preview"
                 >
@@ -624,8 +624,8 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                   onClick={() => setPreviewDevice("mobile")}
                   className={`p-2 ${
                     previewDevice === "mobile"
-                      ? "bg-neutral-100 text-neutral-900"
-                      : "text-neutral-500 hover:text-neutral-700"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                   title="Mobile preview"
                 >
@@ -635,15 +635,15 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
             </div>
 
             <div
-              className={`border border-neutral-200 rounded-lg overflow-hidden bg-white shadow-sm ${
+              className={`border border-border rounded-lg overflow-hidden bg-card shadow-sm ${
                 previewDevice === "mobile" ? "max-w-[320px] mx-auto" : ""
               }`}
             >
               {/* Mock header */}
-              <div className="bg-white border-b border-neutral-200 px-4 py-3">
+              <div className="bg-card border-b border-border px-4 py-3">
                 <div className="flex items-center justify-between">
                   <span
-                    className="font-semibold text-neutral-900"
+                    className="font-semibold text-foreground"
                     style={{
                       fontFamily: `"${currentTheme.headingFont.family}", ${currentTheme.headingFont.fallback}`,
                       textTransform: currentHeadingStyle.css as "uppercase" | "none",
@@ -653,16 +653,16 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                     Bad Scandi
                   </span>
                   <div className="flex gap-2">
-                    <div className="w-12 h-2 bg-neutral-200 rounded"></div>
-                    <div className="w-12 h-2 bg-neutral-200 rounded"></div>
+                    <div className="w-12 h-2 bg-muted rounded"></div>
+                    <div className="w-12 h-2 bg-muted rounded"></div>
                   </div>
                 </div>
               </div>
 
               {/* Mock content */}
-              <div className="p-4 space-y-4 bg-neutral-50">
+              <div className="p-4 space-y-4 bg-muted">
                 <div
-                  className="font-bold text-neutral-900"
+                  className="font-bold text-foreground"
                   style={{
                     fontFamily: `"${currentTheme.headingFont.family}", ${currentTheme.headingFont.fallback}`,
                     fontSize: previewDevice === "mobile" ? "1.25rem" : `calc(1.25rem * ${currentScale.headingScale / 1.75})`,
@@ -674,7 +674,7 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                 </div>
 
                 <p
-                  className="text-neutral-600"
+                  className="text-muted-foreground"
                   style={{
                     fontFamily: `"${currentTheme.bodyFont.family}", ${currentTheme.bodyFont.fallback}`,
                     fontSize: previewDevice === "mobile" ? "0.875rem" : currentScale.baseSize,
@@ -686,7 +686,7 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
 
                 {/* Mock product card */}
                 <div
-                  className="bg-white p-3 border border-neutral-200"
+                  className="bg-card p-3 border border-border"
                   style={{ borderRadius: borderRadiusOptions[previewSettings.borderRadius].value }}
                 >
                   <div
@@ -697,7 +697,7 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                     }}
                   />
                   <div
-                    className="font-medium text-sm"
+                    className="font-medium text-sm text-foreground"
                     style={{
                       fontFamily: `"${currentTheme.headingFont.family}", ${currentTheme.headingFont.fallback}`,
                     }}
@@ -746,7 +746,7 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                     Add to Cart
                   </button>
                   <button
-                    className="px-4 py-2 text-sm border border-neutral-300 text-neutral-700"
+                    className="px-4 py-2 text-sm border border-border text-muted-foreground"
                     style={{
                       borderRadius: borderRadiusOptions[previewSettings.borderRadius].value,
                       fontFamily: `"${currentTheme.bodyFont.family}", ${currentTheme.bodyFont.fallback}`,
@@ -759,25 +759,25 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
             </div>
 
             {/* Font & Settings info */}
-            <div className="mt-4 p-3 bg-neutral-100 rounded-lg text-sm space-y-2">
-              <div className="font-medium text-neutral-900">Current Settings:</div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-neutral-600">
-                <div className="text-neutral-500">Theme:</div>
-                <div>{currentTheme.name}</div>
-                <div className="text-neutral-500">Headings:</div>
-                <div>{currentTheme.headingFont.family}</div>
-                <div className="text-neutral-500">Body:</div>
-                <div>{currentTheme.bodyFont.family}</div>
-                <div className="text-neutral-500">Accent:</div>
-                <div className="flex items-center gap-1">
+            <div className="mt-4 p-3 bg-muted rounded-lg text-sm space-y-2">
+              <div className="font-medium text-foreground">Current Settings:</div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
+                <div className="text-muted-foreground">Theme:</div>
+                <div className="text-foreground">{currentTheme.name}</div>
+                <div className="text-muted-foreground">Headings:</div>
+                <div className="text-foreground">{currentTheme.headingFont.family}</div>
+                <div className="text-muted-foreground">Body:</div>
+                <div className="text-foreground">{currentTheme.bodyFont.family}</div>
+                <div className="text-muted-foreground">Accent:</div>
+                <div className="flex items-center gap-1 text-foreground">
                   <span
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: currentAccent.primary }}
                   />
                   {currentAccent.name}
                 </div>
-                <div className="text-neutral-500">Scale:</div>
-                <div>{currentScale.name}</div>
+                <div className="text-muted-foreground">Scale:</div>
+                <div className="text-foreground">{currentScale.name}</div>
               </div>
             </div>
           </div>

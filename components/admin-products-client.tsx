@@ -373,8 +373,8 @@ export function AdminProductsClient() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Product Management</h1>
-          <p className="text-neutral-600">
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Product Management</h1>
+          <p className="text-muted-foreground">
             Add, edit, and manage your products
           </p>
         </div>
@@ -387,16 +387,16 @@ export function AdminProductsClient() {
       {/* Search & Stats */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           />
         </div>
-        <div className="flex gap-4 text-sm text-neutral-600">
+        <div className="flex gap-4 text-sm text-muted-foreground">
           <span>{products.length} products</span>
           <span>{products.filter((p) => p.featured).length} featured</span>
           <span>{products.filter((p) => p.hidden).length} hidden</span>
@@ -408,14 +408,14 @@ export function AdminProductsClient() {
 
       {/* Products Grid/Table */}
       {isLoading ? (
-        <div className="text-center py-12 text-neutral-600">
+        <div className="text-center py-12 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           Loading products...
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="text-center py-12">
-          <Package className="h-12 w-12 mx-auto text-neutral-400 mb-4" />
-          <p className="text-neutral-600">
+          <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">
             {search ? "No products match your search" : "No products yet"}
           </p>
           {!search && (
@@ -426,78 +426,78 @@ export function AdminProductsClient() {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+        <div className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-neutral-50 border-b border-neutral-200">
+              <thead className="bg-muted border-b border-border">
                 <tr>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">
                     Product
                   </th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">
                     Category
                   </th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">
                     Price
                   </th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">
                     Stock
                   </th>
-                  <th className="text-center px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-center px-4 py-3 text-sm font-medium text-muted-foreground">
                     Images
                   </th>
-                  <th className="text-center px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-center px-4 py-3 text-sm font-medium text-muted-foreground">
                     Featured
                   </th>
-                  <th className="text-center px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-center px-4 py-3 text-sm font-medium text-muted-foreground">
                     Visible
                   </th>
-                  <th className="text-right px-4 py-3 text-sm font-medium text-neutral-600">
+                  <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-border">
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className={`hover:bg-neutral-50 ${product.hidden ? "opacity-50" : ""}`}>
+                  <tr key={product.id} className={`hover:bg-muted ${product.hidden ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {product.imageUrl && (
                           <img
                             src={product.imageUrl}
                             alt={product.altText || product.name}
-                            className="h-12 w-12 object-cover rounded border border-neutral-200"
+                            className="h-12 w-12 object-cover rounded border border-border"
                           />
                         )}
                         <div>
-                          <div className="font-medium">{product.name}</div>
-                          <div className="text-sm text-neutral-500">
+                          <div className="font-medium text-foreground">{product.name}</div>
+                          <div className="text-sm text-muted-foreground">
                             /{product.slug}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-neutral-600">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       {product.category || "-"}
                     </td>
-                    <td className="px-4 py-3 text-right font-medium">
+                    <td className="px-4 py-3 text-right font-medium text-foreground">
                       {formatPrice(product.priceCents)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span
                         className={`px-2 py-0.5 rounded text-sm ${
                           product.stock <= 0
-                            ? "bg-red-100 text-red-800"
+                            ? "bg-red-500/10 text-red-600 dark:text-red-400"
                             : product.stock <= 5
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
+                            ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
+                            : "bg-green-500/10 text-green-600 dark:text-green-400"
                         }`}
                       >
                         {product.stock}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="text-sm text-neutral-600">
+                      <span className="text-sm text-muted-foreground">
                         {product.imageUrls?.length || 1}
                       </span>
                     </td>
@@ -506,12 +506,12 @@ export function AdminProductsClient() {
                         onClick={() => toggleFeatured(product)}
                         className={`p-1 rounded transition-colors ${
                           product.featured
-                            ? "text-amber-600 hover:bg-amber-50"
-                            : "text-neutral-400 hover:bg-neutral-100"
+                            ? "text-accent hover:bg-accent/10"
+                            : "text-muted-foreground hover:bg-muted"
                         }`}
                         title={product.featured ? "Remove from featured" : "Add to featured"}
                       >
-                        <Star className={`h-5 w-5 ${product.featured ? "fill-amber-600" : ""}`} />
+                        <Star className={`h-5 w-5 ${product.featured ? "fill-accent" : ""}`} />
                       </button>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -519,8 +519,8 @@ export function AdminProductsClient() {
                         onClick={() => toggleHidden(product)}
                         className={`p-1 rounded transition-colors ${
                           product.hidden
-                            ? "text-red-500 hover:bg-red-50"
-                            : "text-green-600 hover:bg-green-50"
+                            ? "text-red-500 dark:text-red-400 hover:bg-red-500/10"
+                            : "text-green-600 dark:text-green-400 hover:bg-green-500/10"
                         }`}
                         title={product.hidden ? "Hidden from shop (click to show)" : "Visible in shop (click to hide)"}
                       >
@@ -535,14 +535,14 @@ export function AdminProductsClient() {
                       <div className="flex justify-end gap-1">
                         <button
                           onClick={() => openEditModal(product)}
-                          className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors"
+                          className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
                           title="Edit product"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(product)}
-                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                          className="p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
                           title="Delete product"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -560,14 +560,14 @@ export function AdminProductsClient() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
+          <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-foreground">
                 {editingProduct ? "Edit Product" : "Add New Product"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded"
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -575,30 +575,30 @@ export function AdminProductsClient() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm">
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded text-red-600 dark:text-red-400 text-sm">
                   {error}
                 </div>
               )}
 
               {/* Basic Info */}
               <div className="space-y-4">
-                <h3 className="font-medium text-neutral-900">Basic Information</h3>
+                <h3 className="font-medium text-foreground">Basic Information</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Product Name *
                     </label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={(e) => handleNameChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       URL Slug *
                     </label>
                     <input
@@ -607,14 +607,14 @@ export function AdminProductsClient() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, slug: e.target.value }))
                       }
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Description *
                   </label>
                   <textarea
@@ -623,14 +623,14 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, description: e.target.value }))
                     }
                     rows={4}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Price (USD) *
                     </label>
                     <input
@@ -641,12 +641,12 @@ export function AdminProductsClient() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, priceCents: e.target.value }))
                       }
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Stock
                     </label>
                     <input
@@ -656,11 +656,11 @@ export function AdminProductsClient() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, stock: e.target.value }))
                       }
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Category
                     </label>
                     <input
@@ -670,7 +670,7 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, category: e.target.value }))
                       }
                       placeholder="e.g., Rugs, Wall Art"
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                 </div>
@@ -683,9 +683,9 @@ export function AdminProductsClient() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, featured: e.target.checked }))
                     }
-                    className="h-4 w-4 text-amber-900 border-neutral-300 rounded focus:ring-amber-900"
+                    className="h-4 w-4 text-accent border-border rounded focus:ring-ring"
                   />
-                  <label htmlFor="featured" className="text-sm text-neutral-700">
+                  <label htmlFor="featured" className="text-sm text-foreground">
                     Featured product (shown on homepage)
                   </label>
                 </div>
@@ -698,9 +698,9 @@ export function AdminProductsClient() {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, hidden: e.target.checked }))
                     }
-                    className="h-4 w-4 text-amber-900 border-neutral-300 rounded focus:ring-amber-900"
+                    className="h-4 w-4 text-accent border-border rounded focus:ring-ring"
                   />
-                  <label htmlFor="hidden" className="text-sm text-neutral-700">
+                  <label htmlFor="hidden" className="text-sm text-foreground">
                     Hidden product (not visible in shop or homepage)
                   </label>
                 </div>
@@ -708,8 +708,8 @@ export function AdminProductsClient() {
 
               {/* Images */}
               <div className="space-y-4">
-                <h3 className="font-medium text-neutral-900">Product Images</h3>
-                <p className="text-sm text-neutral-500">
+                <h3 className="font-medium text-foreground">Product Images</h3>
+                <p className="text-sm text-muted-foreground">
                   Upload multiple images. The first image will be the primary/hero image.
                   Click the star to set a different image as primary.
                 </p>
@@ -722,13 +722,13 @@ export function AdminProductsClient() {
                         key={url}
                         className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
                           index === 0
-                            ? "border-amber-500 ring-2 ring-amber-500/20"
-                            : "border-neutral-200 hover:border-neutral-300"
+                            ? "border-accent ring-2 ring-accent/20"
+                            : "border-border hover:border-muted-foreground"
                         }`}
                       >
                         {/* Grip handle for drag indication */}
-                        <div className="absolute top-1 right-1 z-10 p-1 bg-white/80 rounded opacity-50 group-hover:opacity-100 transition-opacity cursor-grab">
-                          <GripVertical className="h-3 w-3 text-neutral-500" />
+                        <div className="absolute top-1 right-1 z-10 p-1 bg-background/80 rounded opacity-50 group-hover:opacity-100 transition-opacity cursor-grab">
+                          <GripVertical className="h-3 w-3 text-muted-foreground" />
                         </div>
 
                         {/* Image position number */}
@@ -744,7 +744,7 @@ export function AdminProductsClient() {
 
                         {/* Primary badge */}
                         {index === 0 && (
-                          <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded">
+                          <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-medium rounded">
                             Primary
                           </div>
                         )}
@@ -755,7 +755,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => setPrimaryImage(index)}
-                              className="p-2 bg-white rounded-full text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                              className="p-2 bg-background rounded-full text-accent hover:bg-accent/10 transition-colors"
                               title="Set as primary image"
                             >
                               <Star className="h-4 w-4" />
@@ -764,7 +764,7 @@ export function AdminProductsClient() {
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
-                            className="p-2 bg-white rounded-full text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                            className="p-2 bg-background rounded-full text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors"
                             title="Remove image"
                           >
                             <X className="h-4 w-4" />
@@ -777,7 +777,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => moveImage(index, index - 1)}
-                              className="p-1.5 bg-white rounded shadow-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 text-xs font-medium"
+                              className="p-1.5 bg-background rounded shadow-sm text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium"
                               title="Move left"
                             >
                               &larr;
@@ -787,7 +787,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => moveImage(index, index + 1)}
-                              className="p-1.5 bg-white rounded shadow-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 text-xs font-medium"
+                              className="p-1.5 bg-background rounded shadow-sm text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium"
                               title="Move right"
                             >
                               &rarr;
@@ -803,8 +803,8 @@ export function AdminProductsClient() {
                 <div className="flex items-center gap-3 flex-wrap">
                   <label className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
                     formData.imageUrls.length >= MAX_PRODUCT_IMAGES
-                      ? "bg-neutral-100 text-neutral-400 cursor-not-allowed"
-                      : "bg-neutral-100 hover:bg-neutral-200"
+                      ? "bg-muted text-muted-foreground cursor-not-allowed"
+                      : "bg-muted hover:bg-muted/80 text-foreground"
                   }`}>
                     <Upload className="h-4 w-4" />
                     {isUploading ? "Uploading..." : "Upload Images"}
@@ -819,13 +819,13 @@ export function AdminProductsClient() {
                   </label>
                   <span className={`text-sm ${
                     formData.imageUrls.length >= MAX_PRODUCT_IMAGES
-                      ? "text-amber-600 font-medium"
-                      : "text-neutral-500"
+                      ? "text-accent font-medium"
+                      : "text-muted-foreground"
                   }`}>
                     {formData.imageUrls.length} / {MAX_PRODUCT_IMAGES} images
                   </span>
                   {formData.imageUrls.length >= MAX_PRODUCT_IMAGES && (
-                    <span className="text-xs text-amber-600 flex items-center gap-1">
+                    <span className="text-xs text-accent flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       Maximum reached
                     </span>
@@ -833,20 +833,20 @@ export function AdminProductsClient() {
                 </div>
 
                 {formData.imageUrls.length === 0 && !isUploading && (
-                  <p className="text-sm text-red-600">
+                  <p className="text-sm text-red-600 dark:text-red-400">
                     At least one image is required
                   </p>
                 )}
 
                 {isUploading && (
-                  <div className="flex items-center gap-2 text-sm text-amber-600">
+                  <div className="flex items-center gap-2 text-sm text-accent">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Uploading images...
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Alt Text (for all images)
                   </label>
                   <input
@@ -856,18 +856,18 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, altText: e.target.value }))
                     }
                     placeholder="Describe the image for accessibility"
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
               </div>
 
               {/* Details */}
               <div className="space-y-4">
-                <h3 className="font-medium text-neutral-900">Product Details</h3>
+                <h3 className="font-medium text-foreground">Product Details</h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Materials
                     </label>
                     <input
@@ -877,11 +877,11 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, materials: e.target.value }))
                       }
                       placeholder="e.g., 100% wool"
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Colors
                     </label>
                     <input
@@ -891,11 +891,11 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, colors: e.target.value }))
                       }
                       placeholder="e.g., Natural, Cream"
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Dimensions
                     </label>
                     <input
@@ -905,11 +905,11 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, dimensions: e.target.value }))
                       }
                       placeholder='e.g., 24" x 36"'
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    <label className="block text-sm font-medium text-foreground mb-1">
                       Room
                     </label>
                     <input
@@ -919,13 +919,13 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, room: e.target.value }))
                       }
                       placeholder="e.g., Living Room, Bedroom"
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Tags
                   </label>
                   <input
@@ -935,17 +935,17 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, tags: e.target.value }))
                     }
                     placeholder="Comma-separated tags"
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
               </div>
 
               {/* SEO */}
               <div className="space-y-4">
-                <h3 className="font-medium text-neutral-900">SEO</h3>
+                <h3 className="font-medium text-foreground">SEO</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Meta Title
                   </label>
                   <input
@@ -955,12 +955,12 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, metaTitle: e.target.value }))
                     }
                     placeholder="Custom title for search engines"
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Meta Description
                   </label>
                   <textarea
@@ -970,13 +970,13 @@ export function AdminProductsClient() {
                     }
                     rows={2}
                     placeholder="Custom description for search engines"
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900/20 focus:border-amber-900"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t border-neutral-200">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"

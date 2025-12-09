@@ -89,25 +89,25 @@ export function AdminReviewsClient() {
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Review Management</h1>
-          <p className="text-neutral-600">
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Review Management</h1>
+          <p className="text-muted-foreground">
             Manage customer reviews and testimonials
           </p>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-neutral-200">
+        <div className="flex gap-2 mb-6 border-b border-border">
           <button
             onClick={() => setFilter("pending")}
             className={`px-4 py-2 font-medium transition-colors ${
               filter === "pending"
-                ? "text-amber-900 border-b-2 border-amber-900"
-                : "text-neutral-600 hover:text-neutral-900"
+                ? "text-accent border-b-2 border-accent"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Pending
             {pendingCount > 0 && (
-              <span className="ml-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-900 rounded-full">
+              <span className="ml-2 px-2 py-0.5 text-xs bg-accent/10 text-accent rounded-full">
                 {pendingCount}
               </span>
             )}
@@ -116,8 +116,8 @@ export function AdminReviewsClient() {
             onClick={() => setFilter("approved")}
             className={`px-4 py-2 font-medium transition-colors ${
               filter === "approved"
-                ? "text-amber-900 border-b-2 border-amber-900"
-                : "text-neutral-600 hover:text-neutral-900"
+                ? "text-accent border-b-2 border-accent"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Approved
@@ -126,8 +126,8 @@ export function AdminReviewsClient() {
             onClick={() => setFilter("all")}
             className={`px-4 py-2 font-medium transition-colors ${
               filter === "all"
-                ? "text-amber-900 border-b-2 border-amber-900"
-                : "text-neutral-600 hover:text-neutral-900"
+                ? "text-accent border-b-2 border-accent"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             All
@@ -136,43 +136,43 @@ export function AdminReviewsClient() {
 
         {/* Reviews List */}
         {isLoading ? (
-          <div className="text-center py-12 text-neutral-600">
+          <div className="text-center py-12 text-muted-foreground">
             Loading reviews...
           </div>
         ) : reviews.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-neutral-600">No reviews found</p>
+            <p className="text-muted-foreground">No reviews found</p>
           </div>
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
               <div
                 key={review.id}
-                className="bg-white rounded-lg border border-neutral-200 p-6"
+                className="bg-card rounded-lg border border-border p-6"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-foreground">
                         {review.customerName}
                       </h3>
                       {review.approved && (
-                        <span className="px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full">
+                        <span className="px-2 py-0.5 text-xs bg-green-500/10 text-green-600 dark:text-green-400 rounded-full">
                           Approved
                         </span>
                       )}
                       {!review.approved && (
-                        <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                        <span className="px-2 py-0.5 text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full">
                           Pending
                         </span>
                       )}
                       {review.featured && (
-                        <span className="px-2 py-0.5 text-xs bg-amber-100 text-amber-900 rounded-full">
+                        <span className="px-2 py-0.5 text-xs bg-accent/10 text-accent rounded-full">
                           Featured
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-neutral-600">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       {review.email && (
                         <span>{review.email}</span>
                       )}
@@ -192,8 +192,8 @@ export function AdminReviewsClient() {
                         key={i}
                         className={`h-4 w-4 ${
                           i < review.rating
-                            ? "fill-amber-900 text-amber-900"
-                            : "text-neutral-300"
+                            ? "fill-accent text-accent"
+                            : "text-muted-foreground/30"
                         }`}
                       />
                     ))}
@@ -201,7 +201,7 @@ export function AdminReviewsClient() {
                 </div>
 
                 {/* Comment */}
-                <p className="text-neutral-700 mb-4 leading-relaxed">
+                <p className="text-foreground mb-4 leading-relaxed">
                   {review.comment}
                 </p>
 
@@ -213,14 +213,14 @@ export function AdminReviewsClient() {
                         key={i}
                         src={url}
                         alt={`Review image ${i + 1}`}
-                        className="h-20 w-20 object-cover rounded border border-neutral-200"
+                        className="h-20 w-20 object-cover rounded border border-border"
                       />
                     ))}
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-4 border-t border-neutral-100">
+                <div className="flex gap-2 pt-4 border-t border-border">
                   {!review.approved && (
                     <Button
                       onClick={() => handleApprove(review.id)}
@@ -248,7 +248,7 @@ export function AdminReviewsClient() {
                     onClick={() => handleReject(review.id)}
                     size="sm"
                     variant="outline"
-                    className="gap-2 text-red-600 hover:text-red-700 hover:border-red-300"
+                    className="gap-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:border-red-300 dark:hover:border-red-700"
                   >
                     <X className="h-4 w-4" />
                     Delete

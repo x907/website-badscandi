@@ -42,10 +42,10 @@ export default async function AdminThemesPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
           Theme Settings
         </h1>
-        <p className="text-neutral-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Customize fonts, colors, and styles. Preview changes before applying them site-wide.
         </p>
       </div>

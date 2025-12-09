@@ -159,10 +159,10 @@ export function AdminDashboardClient() {
     return (
       <div className="container mx-auto px-4 sm:px-6 py-8">
         <div className="animate-pulse space-y-6">
-          <div className="h-8 w-48 bg-neutral-200 rounded" />
+          <div className="h-8 w-48 bg-muted rounded" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-neutral-200 rounded-lg" />
+              <div key={i} className="h-32 bg-muted rounded-lg" />
             ))}
           </div>
         </div>
@@ -174,7 +174,7 @@ export function AdminDashboardClient() {
     return (
       <div className="container mx-auto px-4 sm:px-6 py-8">
         <div className="text-center py-12">
-          <p className="text-neutral-600">Failed to load dashboard</p>
+          <p className="text-muted-foreground">Failed to load dashboard</p>
           <Button onClick={fetchStats} className="mt-4">
             Retry
           </Button>
@@ -188,9 +188,9 @@ export function AdminDashboardClient() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
           {lastUpdated && (
-            <p className="text-sm text-neutral-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </p>
           )}
@@ -211,28 +211,28 @@ export function AdminDashboardClient() {
         <div
           className={`mb-6 p-4 rounded-lg border ${
             sandboxStatus.enabled
-              ? "bg-purple-50 border-purple-300"
-              : "bg-neutral-50 border-neutral-200"
+              ? "bg-purple-500/10 border-purple-500/30 dark:bg-purple-500/20 dark:border-purple-500/40"
+              : "bg-muted border-border"
           }`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <div
                 className={`p-2 rounded-full ${
-                  sandboxStatus.enabled ? "bg-purple-200" : "bg-neutral-200"
+                  sandboxStatus.enabled ? "bg-purple-500/20" : "bg-muted"
                 }`}
               >
                 <FlaskConical
                   className={`h-5 w-5 ${
-                    sandboxStatus.enabled ? "text-purple-700" : "text-neutral-600"
+                    sandboxStatus.enabled ? "text-purple-600 dark:text-purple-400" : "text-muted-foreground"
                   }`}
                 />
               </div>
               <div>
-                <p className="font-semibold text-neutral-900">
+                <p className="font-semibold text-foreground">
                   {sandboxStatus.enabled ? "Sandbox Mode Active" : "Production Mode"}
                 </p>
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-muted-foreground">
                   {sandboxStatus.enabled ? (
                     <>
                       Stripe: {sandboxStatus.stripeMode} | EasyPost:{" "}
@@ -335,57 +335,57 @@ export function AdminDashboardClient() {
       {/* Main Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Revenue Today */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-4 sm:p-6">
-          <div className="flex items-center gap-2 text-neutral-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
+          <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <DollarSign className="h-4 w-4" />
             <span className="text-sm font-medium">Today</span>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-neutral-900">
+          <p className="text-xl sm:text-2xl font-bold text-foreground">
             {formatPrice(stats.revenue.todayCents)}
           </p>
-          <p className="text-xs text-neutral-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {stats.orders.today} order{stats.orders.today !== 1 && "s"}
           </p>
         </div>
 
         {/* Revenue This Week */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-4 sm:p-6">
-          <div className="flex items-center gap-2 text-neutral-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
+          <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <TrendingUp className="h-4 w-4" />
             <span className="text-sm font-medium">This Week</span>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-neutral-900">
+          <p className="text-xl sm:text-2xl font-bold text-foreground">
             {formatPrice(stats.revenue.thisWeekCents)}
           </p>
-          <p className="text-xs text-neutral-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {stats.orders.thisWeek} order{stats.orders.thisWeek !== 1 && "s"}
           </p>
         </div>
 
         {/* Revenue This Month */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-4 sm:p-6">
-          <div className="flex items-center gap-2 text-neutral-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
+          <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <Clock className="h-4 w-4" />
             <span className="text-sm font-medium">This Month</span>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-neutral-900">
+          <p className="text-xl sm:text-2xl font-bold text-foreground">
             {formatPrice(stats.revenue.thisMonthCents)}
           </p>
-          <p className="text-xs text-neutral-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {stats.orders.thisMonth} order{stats.orders.thisMonth !== 1 && "s"}
           </p>
         </div>
 
         {/* Total Revenue */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-4 sm:p-6">
-          <div className="flex items-center gap-2 text-neutral-600 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
+          <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <Package className="h-4 w-4" />
             <span className="text-sm font-medium">All Time</span>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-neutral-900">
+          <p className="text-xl sm:text-2xl font-bold text-foreground">
             {formatPrice(stats.revenue.totalCents)}
           </p>
-          <p className="text-xs text-neutral-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {stats.orders.total} order{stats.orders.total !== 1 && "s"}
           </p>
         </div>
@@ -394,21 +394,21 @@ export function AdminDashboardClient() {
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Orders */}
-        <div className="bg-white rounded-lg border border-neutral-200">
-          <div className="p-4 sm:p-6 border-b border-neutral-200">
+        <div className="bg-card rounded-lg border border-border">
+          <div className="p-4 sm:p-6 border-b border-border">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-neutral-900">Recent Orders</h2>
+              <h2 className="font-semibold text-foreground">Recent Orders</h2>
               <Link
                 href="/admin/orders"
-                className="text-sm text-amber-900 hover:text-amber-700 font-medium"
+                className="text-sm text-accent hover:text-accent/80 font-medium"
               >
                 View all
               </Link>
             </div>
           </div>
-          <div className="divide-y divide-neutral-100">
+          <div className="divide-y divide-border">
             {stats.orders.recent.length === 0 ? (
-              <div className="p-6 text-center text-neutral-500">
+              <div className="p-6 text-center text-muted-foreground">
                 No orders yet
               </div>
             ) : (
@@ -416,28 +416,28 @@ export function AdminDashboardClient() {
                 <Link
                   key={order.id}
                   href="/admin/orders"
-                  className="flex items-center justify-between p-4 hover:bg-neutral-50 transition-colors"
+                  className="flex items-center justify-between p-4 hover:bg-muted transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-neutral-900 truncate">
+                    <p className="font-medium text-foreground truncate">
                       {order.user.name || order.user.email}
                     </p>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-muted-foreground">
                       #{order.id.slice(-8).toUpperCase()} •{" "}
                       {formatTime(order.createdAt)}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 ml-4">
                     {order.trackingNumber ? (
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                      <span className="text-xs px-2 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full">
                         Shipped
                       </span>
                     ) : (
-                      <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full">
+                      <span className="text-xs px-2 py-1 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full">
                         Pending
                       </span>
                     )}
-                    <span className="font-semibold text-neutral-900">
+                    <span className="font-semibold text-foreground">
                       {formatPrice(order.totalCents)}
                     </span>
                   </div>
@@ -451,27 +451,27 @@ export function AdminDashboardClient() {
         <div className="space-y-6">
           {/* Low Stock Alert */}
           {stats.products.lowStock.length > 0 && (
-            <div className="bg-white rounded-lg border border-neutral-200">
-              <div className="p-4 sm:p-6 border-b border-neutral-200">
+            <div className="bg-card rounded-lg border border-border">
+              <div className="p-4 sm:p-6 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-amber-600" />
-                  <h2 className="font-semibold text-neutral-900">Low Stock</h2>
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <h2 className="font-semibold text-foreground">Low Stock</h2>
                 </div>
               </div>
-              <div className="divide-y divide-neutral-100">
+              <div className="divide-y divide-border">
                 {stats.products.lowStock.map((product) => (
                   <div
                     key={product.id}
                     className="flex items-center justify-between p-4"
                   >
-                    <p className="font-medium text-neutral-900 truncate flex-1">
+                    <p className="font-medium text-foreground truncate flex-1">
                       {product.name}
                     </p>
                     <span
                       className={`text-sm font-semibold ${
                         product.stock === 1
-                          ? "text-red-600"
-                          : "text-amber-600"
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-amber-600 dark:text-amber-400"
                       }`}
                     >
                       {product.stock} left
@@ -483,23 +483,23 @@ export function AdminDashboardClient() {
           )}
 
           {/* Quick Stats */}
-          <div className="bg-white rounded-lg border border-neutral-200 p-4 sm:p-6">
-            <h2 className="font-semibold text-neutral-900 mb-4">Quick Stats</h2>
+          <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
+            <h2 className="font-semibold text-foreground mb-4">Quick Stats</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-neutral-600">Total Products</span>
+                <span className="text-muted-foreground">Total Products</span>
                 <span className="font-semibold">{stats.products.total}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-600">Total Reviews</span>
+                <span className="text-muted-foreground">Total Reviews</span>
                 <span className="font-semibold">{stats.reviews.total}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-600">Pending Reviews</span>
+                <span className="text-muted-foreground">Pending Reviews</span>
                 <span className="font-semibold">{stats.reviews.pending}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-neutral-600">Orders w/o Labels</span>
+                <span className="text-muted-foreground">Orders w/o Labels</span>
                 <span className="font-semibold">
                   {stats.orders.needingLabels}
                 </span>
@@ -508,19 +508,19 @@ export function AdminDashboardClient() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-lg border border-neutral-200 p-4 sm:p-6">
-            <h2 className="font-semibold text-neutral-900 mb-4">Quick Actions</h2>
+          <div className="bg-card rounded-lg border border-border p-4 sm:p-6">
+            <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3">
               <Link
                 href="/admin/orders"
-                className="flex items-center justify-center gap-2 p-3 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-colors text-sm font-medium"
+                className="flex items-center justify-center gap-2 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-sm font-medium"
               >
                 <Package className="h-4 w-4" />
                 Orders
               </Link>
               <Link
                 href="/admin/reviews"
-                className="flex items-center justify-center gap-2 p-3 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-colors text-sm font-medium"
+                className="flex items-center justify-center gap-2 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-sm font-medium"
               >
                 <Star className="h-4 w-4" />
                 Reviews
@@ -528,7 +528,7 @@ export function AdminDashboardClient() {
               <Link
                 href="/shop"
                 target="_blank"
-                className="flex items-center justify-center gap-2 p-3 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-colors text-sm font-medium col-span-2"
+                className="flex items-center justify-center gap-2 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-sm font-medium col-span-2"
               >
                 View Store
               </Link>

@@ -139,25 +139,25 @@ export function AdminOrdersClient() {
     <div className="container mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Order Management</h1>
-          <p className="text-neutral-600">
+          <p className="text-muted-foreground">
             View orders, tracking info, and manage shipping labels
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg border border-neutral-200 p-4">
-            <div className="text-sm text-neutral-600">Total Orders</div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-sm text-muted-foreground">Total Orders</div>
             <div className="text-2xl font-bold">{orders.length}</div>
           </div>
-          <div className="bg-white rounded-lg border border-neutral-200 p-4">
-            <div className="text-sm text-neutral-600">With Labels</div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-sm text-muted-foreground">With Labels</div>
             <div className="text-2xl font-bold">
               {orders.filter((o) => o.trackingNumber).length}
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-neutral-200 p-4">
-            <div className="text-sm text-neutral-600">Total Revenue</div>
+          <div className="bg-card rounded-lg border border-border p-4">
+            <div className="text-sm text-muted-foreground">Total Revenue</div>
             <div className="text-2xl font-bold">
               {formatPrice(orders.reduce((sum, o) => sum + o.totalCents, 0))}
             </div>
@@ -166,30 +166,30 @@ export function AdminOrdersClient() {
 
         {/* Orders List */}
         {isLoading ? (
-          <div className="text-center py-12 text-neutral-600">
+          <div className="text-center py-12 text-muted-foreground">
             Loading orders...
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-12">
-            <Package className="h-12 w-12 mx-auto text-neutral-400 mb-4" />
-            <p className="text-neutral-600">No orders yet</p>
+            <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No orders yet</p>
           </div>
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
               <div
                 key={order.id}
-                className="bg-white rounded-lg border border-neutral-200 overflow-hidden"
+                className="bg-card rounded-lg border border-border overflow-hidden"
               >
                 {/* Order Header */}
                 <div
-                  className="p-4 cursor-pointer hover:bg-neutral-50 transition-colors"
+                  className="p-4 cursor-pointer hover:bg-muted transition-colors"
                   onClick={() => toggleExpand(order.id)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div>
-                        <div className="font-mono text-sm text-neutral-500">
+                        <div className="font-mono text-sm text-muted-foreground">
                           #{order.id.slice(-8).toUpperCase()}
                         </div>
                         <div className="font-semibold">
@@ -203,29 +203,29 @@ export function AdminOrdersClient() {
                       <div className="flex gap-2 flex-wrap">
                         {/* 3D Secure Status */}
                         {order.threeDSecureStatus === "authenticated" ? (
-                          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full flex items-center gap-1" title="3D Secure verified - liability shift to card issuer">
+                          <span className="px-2 py-1 text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full flex items-center gap-1" title="3D Secure verified - liability shift to card issuer">
                             <ShieldCheck className="h-3 w-3" />
                             3DS
                           </span>
                         ) : order.threeDSecureStatus && order.threeDSecureStatus !== "authenticated" ? (
-                          <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full flex items-center gap-1" title={`3D Secure: ${order.threeDSecureStatus} - no liability shift`}>
+                          <span className="px-2 py-1 text-xs bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-full flex items-center gap-1" title={`3D Secure: ${order.threeDSecureStatus} - no liability shift`}>
                             <AlertTriangle className="h-3 w-3" />
                             No 3DS
                           </span>
                         ) : null}
                         {order.trackingNumber && !order.labelRefunded && (
-                          <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full flex items-center gap-1">
+                          <span className="px-2 py-1 text-xs bg-green-500/10 text-green-600 dark:text-green-400 rounded-full flex items-center gap-1">
                             <Truck className="h-3 w-3" />
                             Label Ready
                           </span>
                         )}
                         {order.labelRefunded && (
-                          <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                          <span className="px-2 py-1 text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full">
                             Label Refunded
                           </span>
                         )}
                         {!order.trackingNumber && !order.labelRefunded && (
-                          <span className="px-2 py-1 text-xs bg-neutral-100 text-neutral-600 rounded-full">
+                          <span className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-full">
                             No Label
                           </span>
                         )}
@@ -235,15 +235,15 @@ export function AdminOrdersClient() {
                         <div className="font-semibold">
                           {formatPrice(order.totalCents)}
                         </div>
-                        <div className="text-xs text-neutral-500">
+                        <div className="text-xs text-muted-foreground">
                           {formatDate(order.createdAt)}
                         </div>
                       </div>
 
                       {expandedOrder === order.id ? (
-                        <ChevronUp className="h-5 w-5 text-neutral-400" />
+                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
                       ) : (
-                        <ChevronDown className="h-5 w-5 text-neutral-400" />
+                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
                       )}
                     </div>
                   </div>
@@ -251,7 +251,7 @@ export function AdminOrdersClient() {
 
                 {/* Expanded Details */}
                 {expandedOrder === order.id && (
-                  <div className="border-t border-neutral-200 p-4 bg-neutral-50">
+                  <div className="border-t border-border p-4 bg-muted">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Order Items */}
                       <div>
@@ -260,7 +260,7 @@ export function AdminOrdersClient() {
                           {order.items.map((item, idx) => (
                             <div
                               key={idx}
-                              className="flex items-center gap-3 bg-white p-2 rounded border border-neutral-200"
+                              className="flex items-center gap-3 bg-card p-2 rounded border border-border"
                             >
                               {item.imageUrl && (
                                 <img
@@ -273,7 +273,7 @@ export function AdminOrdersClient() {
                                 <div className="font-medium text-sm">
                                   {item.name}
                                 </div>
-                                <div className="text-xs text-neutral-500">
+                                <div className="text-xs text-muted-foreground">
                                   Qty: {item.quantity} x{" "}
                                   {formatPrice(item.priceCents)}
                                 </div>
@@ -282,9 +282,9 @@ export function AdminOrdersClient() {
                           ))}
                         </div>
 
-                        <div className="mt-4 pt-4 border-t border-neutral-200 text-sm">
+                        <div className="mt-4 pt-4 border-t border-border text-sm">
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Shipping</span>
+                            <span className="text-muted-foreground">Shipping</span>
                             <span>{formatPrice(order.shippingCents)}</span>
                           </div>
                           <div className="flex justify-between font-semibold mt-1">
@@ -299,7 +299,7 @@ export function AdminOrdersClient() {
                         <h4 className="font-semibold mb-3">Shipping</h4>
 
                         {order.shippingAddress && (
-                          <div className="bg-white p-3 rounded border border-neutral-200 mb-4">
+                          <div className="bg-card p-3 rounded border border-border mb-4">
                             <div className="text-sm">
                               <div className="font-medium">
                                 {order.shippingAddress.name}
@@ -323,25 +323,25 @@ export function AdminOrdersClient() {
                         )}
 
                         {order.trackingNumber && (
-                          <div className="bg-white p-3 rounded border border-neutral-200 space-y-2">
+                          <div className="bg-card p-3 rounded border border-border space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-neutral-600">Carrier</span>
+                              <span className="text-muted-foreground">Carrier</span>
                               <span className="font-medium">
                                 {order.carrier} {order.shippingService}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-neutral-600">Tracking</span>
+                              <span className="text-muted-foreground">Tracking</span>
                               <span className="font-mono">{order.trackingNumber}</span>
                             </div>
                             {order.labelCostCents && (
                               <div className="flex justify-between text-sm">
-                                <span className="text-neutral-600">Label Cost</span>
+                                <span className="text-muted-foreground">Label Cost</span>
                                 <span>{formatPrice(order.labelCostCents)}</span>
                               </div>
                             )}
 
-                            <div className="flex gap-2 pt-2 border-t border-neutral-200">
+                            <div className="flex gap-2 pt-2 border-t border-border">
                               {order.labelUrl && !order.labelRefunded && (
                                 <Button
                                   size="sm"
@@ -380,7 +380,7 @@ export function AdminOrdersClient() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="gap-1 text-red-600 hover:text-red-700 hover:border-red-300"
+                              className="gap-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:border-red-300 dark:hover:border-red-700"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleRefundLabel(order.id);
@@ -399,14 +399,14 @@ export function AdminOrdersClient() {
                                 </>
                               )}
                             </Button>
-                            <p className="text-xs text-neutral-500 mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                               Cancel unused label for refund (5-7 days)
                             </p>
                           </div>
                         )}
 
                         {order.labelRefunded && (
-                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                          <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded text-sm text-yellow-600 dark:text-yellow-400">
                             Label has been refunded. You may need to purchase a new
                             label manually if reshipping.
                           </div>
@@ -415,7 +415,7 @@ export function AdminOrdersClient() {
                         {/* Customer Info */}
                         <div className="mt-4">
                           <h4 className="font-semibold mb-2 text-sm">Customer</h4>
-                          <div className="text-sm text-neutral-600">
+                          <div className="text-sm text-muted-foreground">
                             <div>{order.user.email}</div>
                             {order.customerEmail &&
                               order.customerEmail !== order.user.email && (
