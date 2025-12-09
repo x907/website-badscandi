@@ -43,12 +43,15 @@ export async function getFeaturedReviews(): Promise<Review[]> {
 }
 
 export async function getAllReviews(): Promise<Review[]> {
-  // Get all approved reviews from database
+  // Get all approved reviews from database, featured first
   const dbReviews = await db.review.findMany({
     where: {
       approved: true,
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [
+      { featured: "desc" },
+      { createdAt: "desc" },
+    ],
     select: {
       id: true,
       customerName: true,

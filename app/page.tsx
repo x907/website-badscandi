@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProductGrid } from "@/components/product-grid";
 import { getFeaturedProducts } from "@/lib/products";
-import { getFeaturedReviews } from "@/lib/reviews";
+import { getAllReviews } from "@/lib/reviews";
 import { ReviewsGrid } from "@/components/reviews-grid";
 import { ArrowRight, Instagram, Facebook, Youtube } from "lucide-react";
 import { getBaseMetadata } from "@/lib/metadata";
@@ -12,9 +12,9 @@ import { HeroCarousel } from "@/components/hero-carousel";
 export const metadata = getBaseMetadata();
 
 export default async function HomePage() {
-  const [featuredProducts, featuredReviews] = await Promise.all([
+  const [featuredProducts, allReviews] = await Promise.all([
     getFeaturedProducts(),
-    getFeaturedReviews(),
+    getAllReviews(),
   ]);
 
   return (
@@ -185,14 +185,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featuredReviews.length > 0 && (
+      {allReviews.length > 0 && (
         <section className="bg-neutral-50 py-12 sm:py-24">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="text-center mb-8 sm:mb-12">
               <h2 className="text-2xl sm:text-3xl font-bold mb-2">What Our Customers Say</h2>
               <p className="text-neutral-600">Real reviews from real customers</p>
             </div>
-            <ReviewsGrid reviews={featuredReviews} initialLimit={6} />
+            <ReviewsGrid reviews={allReviews} initialLimit={3} />
           </div>
         </section>
       )}
