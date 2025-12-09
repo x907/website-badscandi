@@ -254,6 +254,11 @@ model AuditLog {
 model SiteSettings {
   id            String   @id @default("settings")
   sandboxMode   Boolean  @default(false)
+  // Theme settings
+  themeId       String   @default("classic")  // Theme identifier (classic, nordic, artisan, elegant, modern, warm)
+  // Additional style overrides (optional)
+  borderRadius  String   @default("default")  // default, sharp, rounded, pill
+  buttonStyle   String   @default("default")  // default, outline, soft
   updatedAt     DateTime @updatedAt
   updatedBy     String?  // userId of admin who last changed
 }

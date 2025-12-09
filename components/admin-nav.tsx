@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Menu,
   X,
+  Palette,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -33,6 +34,11 @@ const navItems = [
     href: "/admin/reviews",
     label: "Reviews",
     icon: Star,
+  },
+  {
+    href: "/admin/themes",
+    label: "Themes",
+    icon: Palette,
   },
 ];
 

@@ -10,6 +10,7 @@ import { CartProvider } from "@/contexts/cart-context";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { CookieConsent } from "@/components/cookie-consent";
 import { getBaseMetadata } from "@/lib/metadata";
+import { ThemeLoader } from "@/components/theme-loader";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <CartProvider>
+          <ThemeLoader />
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:bg-white focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg focus:text-amber-900 focus:font-medium"
