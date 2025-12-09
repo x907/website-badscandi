@@ -11,10 +11,12 @@ import {
   HeadingStyle,
   AccentColor,
   FontScale,
+  DarkMode,
   defaultThemeSettings,
   accentColorOptions,
   fontScaleOptions,
   headingStyleOptions,
+  darkModeOptions,
 } from "@/lib/themes";
 
 // Valid options for validation
@@ -24,6 +26,7 @@ const validButtonStyles: ButtonStyle[] = ["default", "outline", "soft"];
 const validHeadingStyles: HeadingStyle[] = ["normal", "uppercase", "small-caps"];
 const validAccentColors: AccentColor[] = ["amber", "rose", "teal", "slate", "forest", "indigo"];
 const validFontScales: FontScale[] = ["compact", "default", "spacious"];
+const validDarkModes: DarkMode[] = ["system", "light", "dark"];
 
 // GET - Retrieve current theme settings
 export async function GET() {
@@ -44,6 +47,7 @@ export async function GET() {
           headingStyle: defaultThemeSettings.headingStyle,
           accentColor: defaultThemeSettings.accentColor,
           fontScale: defaultThemeSettings.fontScale,
+          darkMode: defaultThemeSettings.darkMode,
         },
       });
     }
@@ -56,6 +60,7 @@ export async function GET() {
         headingStyle: (settings.headingStyle || "normal") as HeadingStyle,
         accentColor: (settings.accentColor || "amber") as AccentColor,
         fontScale: (settings.fontScale || "default") as FontScale,
+        darkMode: ((settings as Record<string, unknown>).darkMode || "system") as DarkMode,
       },
       themes: Object.values(themes).map((t) => ({
         id: t.id,
@@ -70,6 +75,7 @@ export async function GET() {
         accentColors: accentColorOptions,
         fontScales: fontScaleOptions,
         headingStyles: headingStyleOptions,
+        darkModes: darkModeOptions,
       },
     });
   } catch (error) {
@@ -91,7 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { themeId, borderRadius, buttonStyle, headingStyle, accentColor, fontScale } = body;
+    const { themeId, borderRadius, buttonStyle, headingStyle, accentColor, fontScale, darkMode } = body;
 
     // Validate inputs
     if (themeId && !validThemeIds.includes(themeId)) {
@@ -136,6 +142,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (darkMode && !validDarkModes.includes(darkMode)) {
+      return NextResponse.json(
+        { error: `Invalid dark mode. Valid options: ${validDarkModes.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     // Get current user for audit
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -150,6 +163,7 @@ export async function POST(request: NextRequest) {
       headingStyle?: string;
       accentColor?: string;
       fontScale?: string;
+      darkMode?: string;
       updatedBy: string;
     } = {
       updatedBy: userId,
@@ -161,6 +175,7 @@ export async function POST(request: NextRequest) {
     if (headingStyle) updateData.headingStyle = headingStyle;
     if (accentColor) updateData.accentColor = accentColor;
     if (fontScale) updateData.fontScale = fontScale;
+    if (darkMode) updateData.darkMode = darkMode;
 
     // Upsert settings
     const settings = await db.siteSettings.upsert({
@@ -174,6 +189,7 @@ export async function POST(request: NextRequest) {
         headingStyle: headingStyle || defaultThemeSettings.headingStyle,
         accentColor: accentColor || defaultThemeSettings.accentColor,
         fontScale: fontScale || defaultThemeSettings.fontScale,
+        darkMode: darkMode || defaultThemeSettings.darkMode,
         updatedBy: userId,
       },
     });
@@ -193,6 +209,7 @@ export async function POST(request: NextRequest) {
           headingStyle: headingStyle || undefined,
           accentColor: accentColor || undefined,
           fontScale: fontScale || undefined,
+          darkMode: darkMode || undefined,
         },
       },
     });
@@ -206,6 +223,7 @@ export async function POST(request: NextRequest) {
         headingStyle: (settings.headingStyle || "normal") as HeadingStyle,
         accentColor: (settings.accentColor || "amber") as AccentColor,
         fontScale: (settings.fontScale || "default") as FontScale,
+        darkMode: ((settings as Record<string, unknown>).darkMode || "system") as DarkMode,
       },
     });
   } catch (error) {

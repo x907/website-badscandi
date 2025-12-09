@@ -255,13 +255,14 @@ model SiteSettings {
   id            String   @id @default("settings")
   sandboxMode   Boolean  @default(false)
   // Theme settings
-  themeId       String   @default("classic")  // Theme identifier (classic, nordic, artisan, elegant, modern, warm, editorial, handcraft, minimalist, bold)
+  themeId       String   @default("system")   // Theme identifier (system, classic, nordic, artisan, elegant, modern, warm, editorial, handcraft, minimalist, bold)
   // Style overrides
   borderRadius  String   @default("default")  // default, sharp, rounded, pill
   buttonStyle   String   @default("default")  // default, outline, soft
   headingStyle  String   @default("normal")   // normal, uppercase, small-caps
   accentColor   String   @default("amber")    // amber, rose, teal, slate, forest, indigo
   fontScale     String   @default("default")  // compact, default, spacious
+  darkMode      String   @default("system")   // system, light, dark - respects user's device preference when set to system
   updatedAt     DateTime @updatedAt
   updatedBy     String?  // userId of admin who last changed
 }

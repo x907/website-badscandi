@@ -9,6 +9,7 @@ import {
   HeadingStyle,
   AccentColor,
   FontScale,
+  DarkMode,
 } from "@/lib/themes";
 
 async function getThemeSettings(): Promise<ThemeSettings> {
@@ -28,6 +29,7 @@ async function getThemeSettings(): Promise<ThemeSettings> {
       headingStyle: (settings.headingStyle || "normal") as HeadingStyle,
       accentColor: (settings.accentColor || "amber") as AccentColor,
       fontScale: (settings.fontScale || "default") as FontScale,
+      darkMode: ((settings as Record<string, unknown>).darkMode || "system") as DarkMode,
     };
   } catch {
     return defaultThemeSettings;

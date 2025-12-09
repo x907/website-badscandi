@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   ThemeSettings,
+  DarkMode,
   getTheme,
   getGoogleFontsUrl,
   borderRadiusOptions,
@@ -20,6 +21,7 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
   const [settings, setSettings] = useState<ThemeSettings>(
     initialSettings || defaultThemeSettings
   );
+  const [isDark, setIsDark] = useState(false);
 
   // Fetch settings on mount if not provided
   useEffect(() => {
@@ -35,6 +37,45 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
     }
   }, [initialSettings]);
 
+  // Handle dark mode based on settings and system preference
+  useEffect(() => {
+    const darkModeSetting = settings.darkMode || "system";
+
+    const updateDarkMode = (prefersDark: boolean) => {
+      if (darkModeSetting === "dark") {
+        setIsDark(true);
+      } else if (darkModeSetting === "light") {
+        setIsDark(false);
+      } else {
+        // System preference
+        setIsDark(prefersDark);
+      }
+    };
+
+    // Check system preference
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    updateDarkMode(mediaQuery.matches);
+
+    // Listen for system preference changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (darkModeSetting === "system") {
+        updateDarkMode(e.matches);
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [settings.darkMode]);
+
+  // Apply dark class to html element
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
+
   // Apply theme CSS variables and load fonts
   useEffect(() => {
     const theme = getTheme(settings.themeId);
@@ -42,18 +83,23 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
     const scale = fontScaleOptions[settings.fontScale];
     const headingStyle = headingStyleOptions[settings.headingStyle];
 
-    // Load Google Fonts
+    // Load Google Fonts (only if not system theme)
     const fontsUrl = getGoogleFontsUrl(theme);
     const existingLink = document.querySelector("link[data-theme-fonts]");
 
-    if (existingLink) {
-      existingLink.setAttribute("href", fontsUrl);
-    } else {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = fontsUrl;
-      link.setAttribute("data-theme-fonts", "true");
-      document.head.appendChild(link);
+    if (fontsUrl) {
+      if (existingLink) {
+        existingLink.setAttribute("href", fontsUrl);
+      } else {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = fontsUrl;
+        link.setAttribute("data-theme-fonts", "true");
+        document.head.appendChild(link);
+      }
+    } else if (existingLink) {
+      // Remove the font link if switching to system theme
+      existingLink.remove();
     }
 
     // Apply CSS variables to root
@@ -75,9 +121,14 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
       borderRadiusOptions[settings.borderRadius].value
     );
 
-    // Accent color (HSL format for Tailwind compatibility)
-    root.style.setProperty("--accent", accent.hsl);
-    root.style.setProperty("--accent-foreground", "0 0% 98%");
+    // Accent color - use dark mode variants when in dark mode
+    if (isDark) {
+      root.style.setProperty("--accent", accent.darkHsl);
+      root.style.setProperty("--accent-foreground", "0 0% 9%");
+    } else {
+      root.style.setProperty("--accent", accent.hsl);
+      root.style.setProperty("--accent-foreground", "0 0% 98%");
+    }
 
     // Font scale
     root.style.setProperty("--font-size-base", scale.baseSize);
@@ -89,7 +140,7 @@ export function ThemeLoader({ initialSettings }: ThemeLoaderProps) {
 
     // Apply to body
     document.body.style.fontFamily = `var(--font-body)`;
-  }, [settings]);
+  }, [settings, isDark]);
 
   // This component doesn't render anything visible
   return null;

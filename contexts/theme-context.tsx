@@ -75,18 +75,23 @@ export function ThemeProvider({ children, initialSettings }: ThemeProviderProps)
 
   // Apply theme CSS variables and load fonts
   useEffect(() => {
-    // Load Google Fonts
+    // Load Google Fonts (only if URL exists - system theme doesn't need external fonts)
     const fontsUrl = getGoogleFontsUrl(theme);
     const existingLink = document.querySelector('link[data-theme-fonts]');
 
-    if (existingLink) {
-      existingLink.setAttribute("href", fontsUrl);
-    } else {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = fontsUrl;
-      link.setAttribute("data-theme-fonts", "true");
-      document.head.appendChild(link);
+    if (fontsUrl) {
+      if (existingLink) {
+        existingLink.setAttribute("href", fontsUrl);
+      } else {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = fontsUrl;
+        link.setAttribute("data-theme-fonts", "true");
+        document.head.appendChild(link);
+      }
+    } else if (existingLink) {
+      // Remove the font link if switching to system theme
+      existingLink.remove();
     }
 
     // Apply CSS variables

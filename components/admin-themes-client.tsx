@@ -10,12 +10,14 @@ import {
   HeadingStyle,
   AccentColor,
   FontScale,
+  DarkMode,
   themes,
   borderRadiusOptions,
   buttonStyleOptions,
   headingStyleOptions,
   accentColorOptions,
   fontScaleOptions,
+  darkModeOptions,
   getTheme,
   getGoogleFontsUrl,
   defaultThemeSettings,
@@ -32,6 +34,8 @@ import {
   Palette,
   SlidersHorizontal,
   Sparkles,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 interface AdminThemesClientProps {
@@ -57,19 +61,23 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
     previewSettings.buttonStyle !== savedSettings.buttonStyle ||
     previewSettings.headingStyle !== savedSettings.headingStyle ||
     previewSettings.accentColor !== savedSettings.accentColor ||
-    previewSettings.fontScale !== savedSettings.fontScale;
+    previewSettings.fontScale !== savedSettings.fontScale ||
+    previewSettings.darkMode !== savedSettings.darkMode;
 
   // Load fonts for preview
   useEffect(() => {
     const theme = getTheme(previewSettings.themeId);
     const fontsUrl = getGoogleFontsUrl(theme);
 
-    const existingLink = document.querySelector(`link[href="${fontsUrl}"]`);
-    if (!existingLink) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = fontsUrl;
-      document.head.appendChild(link);
+    // Only load fonts if URL exists (system theme doesn't need external fonts)
+    if (fontsUrl) {
+      const existingLink = document.querySelector(`link[href="${fontsUrl}"]`);
+      if (!existingLink) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = fontsUrl;
+        document.head.appendChild(link);
+      }
     }
   }, [previewSettings.themeId]);
 
@@ -479,6 +487,44 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
           {/* Colors Tab */}
           {activeTab === "colors" && (
             <div className="space-y-8">
+              {/* Dark Mode */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Appearance</h3>
+                <p className="text-sm text-neutral-600 mb-4">
+                  Choose how the site appears. System follows your device settings.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {(Object.keys(darkModeOptions) as DarkMode[]).map((mode) => {
+                    const isSelected = previewSettings.darkMode === mode;
+                    const option = darkModeOptions[mode];
+                    const Icon = mode === "light" ? Sun : mode === "dark" ? Moon : Monitor;
+
+                    return (
+                      <button
+                        key={mode}
+                        onClick={() =>
+                          setPreviewSettings((prev) => ({ ...prev, darkMode: mode }))
+                        }
+                        className={`flex items-center gap-3 px-4 py-3 border-2 rounded-lg transition-all ${
+                          isSelected
+                            ? "border-amber-500 bg-amber-50"
+                            : "border-neutral-200 hover:border-neutral-300 bg-white"
+                        }`}
+                      >
+                        <Icon className={`h-5 w-5 ${isSelected ? "text-amber-600" : "text-neutral-500"}`} />
+                        <div className="text-left">
+                          <div className={`font-medium ${isSelected ? "text-amber-900" : "text-neutral-700"}`}>
+                            {option.name}
+                          </div>
+                          <div className="text-xs text-neutral-500">{option.description}</div>
+                        </div>
+                        {isSelected && <Check className="h-4 w-4 text-amber-600 ml-2" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Accent Color */}
               <div>
                 <h3 className="text-lg font-semibold mb-3">Accent Color</h3>

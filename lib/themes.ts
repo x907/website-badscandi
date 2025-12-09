@@ -2,6 +2,7 @@
 // Each theme defines fonts, readability characteristics, and style properties
 
 export type ThemeId =
+  | "system"
   | "classic"
   | "nordic"
   | "artisan"
@@ -18,6 +19,7 @@ export type ButtonStyle = "default" | "outline" | "soft";
 export type HeadingStyle = "normal" | "uppercase" | "small-caps";
 export type AccentColor = "amber" | "rose" | "teal" | "slate" | "forest" | "indigo";
 export type FontScale = "compact" | "default" | "spacious";
+export type DarkMode = "system" | "light" | "dark";
 
 export interface FontConfig {
   family: string;
@@ -49,10 +51,34 @@ export interface ThemeSettings {
   headingStyle: HeadingStyle;
   accentColor: AccentColor;
   fontScale: FontScale;
+  darkMode: DarkMode;
 }
 
-// Theme definitions - 10 unique font combinations
+// Theme definitions - 11 unique font combinations
 export const themes: Record<ThemeId, ThemeDefinition> = {
+  system: {
+    id: "system",
+    name: "System Default",
+    description: "Uses your device's native fonts. Fast loading, no external fonts. The original Bad Scandi experience.",
+    category: "sans-serif",
+    readabilityScore: 5,
+    headingFont: {
+      family: "system-ui",
+      googleFont: "", // No Google Font needed
+      weights: ["400", "500", "600", "700"],
+      fallback: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
+    },
+    bodyFont: {
+      family: "system-ui",
+      googleFont: "", // No Google Font needed
+      weights: ["400", "500", "600"],
+      fallback: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
+    },
+    previewHeading: "Hand-Dyed Fiber Art",
+    previewBody: "Each tapestry is handcrafted using a unique dip-dyeing technique that incorporates traditional painting methods.",
+    recommendedAccent: "amber",
+  },
+
   classic: {
     id: "classic",
     name: "Classic",
@@ -311,15 +337,22 @@ export const headingStyleOptions: Record<HeadingStyle, { name: string; descripti
   "small-caps": { name: "Small Caps", description: "Elegant small capitals", css: "small-caps" },
 };
 
-// Accent color configurations with full color palette
+// Accent color configurations with full color palette (light and dark modes)
 export const accentColorOptions: Record<AccentColor, {
   name: string;
   description: string;
+  // Light mode colors
   primary: string;
   primaryForeground: string;
   light: string;
   dark: string;
-  hsl: string; // HSL values for CSS variable
+  hsl: string; // HSL values for CSS variable (light mode)
+  // Dark mode colors
+  darkPrimary: string;
+  darkPrimaryForeground: string;
+  darkLight: string;
+  darkDark: string;
+  darkHsl: string; // HSL values for CSS variable (dark mode)
 }> = {
   amber: {
     name: "Amber",
@@ -329,6 +362,12 @@ export const accentColorOptions: Record<AccentColor, {
     light: "#fef3c7",
     dark: "#92400e",
     hsl: "30 81% 28%",
+    // Dark mode - brighter for visibility
+    darkPrimary: "#fbbf24",
+    darkPrimaryForeground: "#1c1917",
+    darkLight: "#451a03",
+    darkDark: "#fcd34d",
+    darkHsl: "45 93% 58%",
   },
   rose: {
     name: "Rose",
@@ -338,6 +377,12 @@ export const accentColorOptions: Record<AccentColor, {
     light: "#ffe4e6",
     dark: "#9f1239",
     hsl: "347 77% 50%",
+    // Dark mode
+    darkPrimary: "#fb7185",
+    darkPrimaryForeground: "#1c1917",
+    darkLight: "#4c0519",
+    darkDark: "#fda4af",
+    darkHsl: "351 91% 71%",
   },
   teal: {
     name: "Teal",
@@ -347,6 +392,12 @@ export const accentColorOptions: Record<AccentColor, {
     light: "#ccfbf1",
     dark: "#115e59",
     hsl: "174 72% 32%",
+    // Dark mode
+    darkPrimary: "#2dd4bf",
+    darkPrimaryForeground: "#1c1917",
+    darkLight: "#042f2e",
+    darkDark: "#5eead4",
+    darkHsl: "171 77% 64%",
   },
   slate: {
     name: "Slate",
@@ -356,6 +407,12 @@ export const accentColorOptions: Record<AccentColor, {
     light: "#f1f5f9",
     dark: "#1e293b",
     hsl: "215 16% 47%",
+    // Dark mode
+    darkPrimary: "#94a3b8",
+    darkPrimaryForeground: "#1c1917",
+    darkLight: "#1e293b",
+    darkDark: "#cbd5e1",
+    darkHsl: "215 20% 65%",
   },
   forest: {
     name: "Forest",
@@ -365,6 +422,12 @@ export const accentColorOptions: Record<AccentColor, {
     light: "#dcfce7",
     dark: "#14532d",
     hsl: "142 71% 45%",
+    // Dark mode
+    darkPrimary: "#4ade80",
+    darkPrimaryForeground: "#1c1917",
+    darkLight: "#052e16",
+    darkDark: "#86efac",
+    darkHsl: "142 71% 73%",
   },
   indigo: {
     name: "Indigo",
@@ -374,7 +437,20 @@ export const accentColorOptions: Record<AccentColor, {
     light: "#e0e7ff",
     dark: "#3730a3",
     hsl: "239 84% 67%",
+    // Dark mode
+    darkPrimary: "#818cf8",
+    darkPrimaryForeground: "#1c1917",
+    darkLight: "#1e1b4b",
+    darkDark: "#a5b4fc",
+    darkHsl: "239 84% 74%",
   },
+};
+
+// Dark mode configurations
+export const darkModeOptions: Record<DarkMode, { name: string; description: string; icon: string }> = {
+  system: { name: "System", description: "Follow device settings", icon: "monitor" },
+  light: { name: "Light", description: "Always use light mode", icon: "sun" },
+  dark: { name: "Dark", description: "Always use dark mode", icon: "moon" },
 };
 
 // Font scale configurations
@@ -414,17 +490,28 @@ export function getTheme(themeId: string): ThemeDefinition {
 }
 
 // Generate Google Fonts URL for a theme
-export function getGoogleFontsUrl(theme: ThemeDefinition): string {
+export function getGoogleFontsUrl(theme: ThemeDefinition): string | null {
+  // System theme doesn't need Google Fonts
+  if (!theme.headingFont.googleFont && !theme.bodyFont.googleFont) {
+    return null;
+  }
+
   const fonts = new Set<string>();
 
-  // Add heading font
-  const headingWeights = theme.headingFont.weights.join(";");
-  fonts.add(`family=${theme.headingFont.googleFont}:wght@${headingWeights}`);
+  // Add heading font if it's a Google Font
+  if (theme.headingFont.googleFont) {
+    const headingWeights = theme.headingFont.weights.join(";");
+    fonts.add(`family=${theme.headingFont.googleFont}:wght@${headingWeights}`);
+  }
 
-  // Add body font if different
-  if (theme.bodyFont.googleFont !== theme.headingFont.googleFont) {
+  // Add body font if different and it's a Google Font
+  if (theme.bodyFont.googleFont && theme.bodyFont.googleFont !== theme.headingFont.googleFont) {
     const bodyWeights = theme.bodyFont.weights.join(";");
     fonts.add(`family=${theme.bodyFont.googleFont}:wght@${bodyWeights}`);
+  }
+
+  if (fonts.size === 0) {
+    return null;
   }
 
   return `https://fonts.googleapis.com/css2?${Array.from(fonts).join("&")}&display=swap`;
@@ -488,10 +575,11 @@ export function getThemesByCategory(category: ThemeDefinition["category"]): Them
 
 // Default theme settings
 export const defaultThemeSettings: ThemeSettings = {
-  themeId: "classic",
+  themeId: "system",
   borderRadius: "default",
   buttonStyle: "default",
   headingStyle: "normal",
   accentColor: "amber",
   fontScale: "default",
+  darkMode: "system",
 };
