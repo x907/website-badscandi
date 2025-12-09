@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { uploadToS3 } from "@/lib/s3";
 import { auth } from "@/lib/auth";
-import { checkRateLimit, rateLimits } from "@/lib/rate-limit";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   // Rate limiting - 3 review submissions per hour
@@ -116,58 +115,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get photo files (if any)
-    const photoFiles = formData.getAll("photos") as File[];
-    const imageUrls: string[] = [];
-
-    // File upload limits
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
-    const MAX_FILES = 5;
-    const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-
-    // Validate file count
-    if (photoFiles.length > MAX_FILES) {
-      return NextResponse.json(
-        { error: `Maximum ${MAX_FILES} photos allowed` },
-        { status: 400 }
-      );
-    }
-
-    // Upload photos to S3
-    if (photoFiles.length > 0) {
-      for (const file of photoFiles) {
-        if (file.size > 0) {
-          // Validate file size
-          if (file.size > MAX_FILE_SIZE) {
-            return NextResponse.json(
-              { error: `File "${file.name}" exceeds maximum size of 5MB` },
-              { status: 400 }
-            );
-          }
-
-          // Validate file type
-          if (!ALLOWED_TYPES.includes(file.type)) {
-            return NextResponse.json(
-              { error: `File "${file.name}" has invalid type. Allowed: JPEG, PNG, WebP, GIF` },
-              { status: 400 }
-            );
-          }
-          try {
-            // Convert File to Buffer
-            const bytes = await file.arrayBuffer();
-            const buffer = Buffer.from(bytes);
-
-            // Upload to S3
-            const url = await uploadToS3(buffer, file.name, file.type);
-            imageUrls.push(url);
-          } catch (uploadError) {
-            console.error("Error uploading image to S3:", uploadError);
-            // Continue with other images even if one fails
-          }
-        }
-      }
-    }
-
     // Create the review in the database
     const review = await db.review.create({
       data: {
@@ -176,7 +123,7 @@ export async function POST(request: NextRequest) {
         rating,
         comment: comment.trim(),
         productName: productName?.trim() || null,
-        imageUrls,
+        imageUrls: [], // Photo uploads disabled
         approved: false, // Requires admin approval
         verified: true, // User has verified purchase
         featured: false,
