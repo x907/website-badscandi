@@ -16,6 +16,8 @@ const tables = [
   "Event",
   "EmailSubscription",
   "EmailLog",
+  "SiteSettings",
+  "AuditLog",
 ];
 
 async function enableRLS() {
