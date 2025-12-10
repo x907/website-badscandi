@@ -16,10 +16,10 @@ export function ReviewCard({ author, text, photos, verified = false }: ReviewCar
   const mainPhoto = photos[0];
 
   return (
-    <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-card rounded-lg border border-border overflow-hidden hover:shadow-lg transition-shadow">
       {/* Large Image */}
       {mainPhoto && (
-        <div className="aspect-square relative bg-neutral-100">
+        <div className="aspect-square relative bg-muted">
           <Image
             src={mainPhoto}
             alt={`Review by ${author}`}
@@ -37,24 +37,24 @@ export function ReviewCard({ author, text, photos, verified = false }: ReviewCar
           {STAR_INDICES.map((i) => (
             <Star
               key={i}
-              className="h-4 w-4 fill-amber-900 text-amber-900"
+              className="h-4 w-4 fill-amber-600 dark:fill-amber-400 text-amber-600 dark:text-amber-400"
               aria-hidden="true"
             />
           ))}
         </div>
 
         {/* Review Text */}
-        <p className="text-neutral-700 leading-relaxed text-sm line-clamp-4">
+        <p className="text-muted-foreground leading-relaxed text-sm line-clamp-4">
           {text}
         </p>
 
         {/* Author & Verified Badge */}
         <div className="flex items-center gap-2 pt-2">
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-muted-foreground">
             {author}
           </p>
           {verified && (
-            <span className="inline-flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">
               <BadgeCheck className="h-3 w-3" />
               Verified Purchase
             </span>

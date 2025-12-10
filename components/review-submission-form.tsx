@@ -118,9 +118,9 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
       <div>
         <label
           htmlFor="customerName"
-          className="block text-sm font-medium text-neutral-700 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
-          Your Name <span className="text-red-500">*</span>
+          Your Name <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <input
           type="text"
@@ -130,7 +130,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           onChange={handleInputChange}
           required
           autoComplete="name"
-          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-900 focus:border-transparent outline-none"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none bg-background text-foreground"
           placeholder="Enter your name"
         />
       </div>
@@ -139,9 +139,9 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-neutral-700 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
-          Email <span className="text-neutral-400">(optional)</span>
+          Email <span className="text-muted-foreground">(optional)</span>
         </label>
         <input
           type="email"
@@ -151,18 +151,18 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           onChange={handleInputChange}
           autoComplete="email"
           inputMode="email"
-          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-900 focus:border-transparent outline-none"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none bg-background text-foreground"
           placeholder="your@email.com"
         />
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           We'll only use this for follow-up if needed
         </p>
       </div>
 
       {/* Rating */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 mb-2">
-          Rating <span className="text-red-500">*</span>
+        <label className="block text-sm font-medium text-foreground mb-2">
+          Rating <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
@@ -175,8 +175,8 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
               <Star
                 className={`h-8 w-8 ${
                   star <= formData.rating
-                    ? "fill-amber-900 text-amber-900"
-                    : "text-neutral-300"
+                    ? "fill-amber-600 dark:fill-amber-400 text-amber-600 dark:text-amber-400"
+                    : "text-muted-foreground/30"
                 }`}
               />
             </button>
@@ -188,9 +188,9 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
       <div>
         <label
           htmlFor="productName"
-          className="block text-sm font-medium text-neutral-700 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
-          Product Purchased <span className="text-neutral-400">(optional)</span>
+          Product Purchased <span className="text-muted-foreground">(optional)</span>
         </label>
         <input
           type="text"
@@ -198,7 +198,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           name="productName"
           value={formData.productName}
           onChange={handleInputChange}
-          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-900 focus:border-transparent outline-none"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none bg-background text-foreground"
           placeholder="e.g., Cream Wave Wall Hanging"
         />
       </div>
@@ -207,9 +207,9 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
       <div>
         <label
           htmlFor="comment"
-          className="block text-sm font-medium text-neutral-700 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
-          Your Review <span className="text-red-500">*</span>
+          Your Review <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <textarea
           id="comment"
@@ -219,10 +219,10 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           required
           rows={5}
           maxLength={1000}
-          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-900 focus:border-transparent outline-none resize-none"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none resize-none bg-background text-foreground"
           placeholder="Tell us about your experience with your Bad Scandi piece..."
         />
-        <p className="mt-1 text-sm text-neutral-500 text-right">
+        <p className="mt-1 text-sm text-muted-foreground text-right">
           {formData.comment.length}/1000 characters
         </p>
       </div>
@@ -232,8 +232,8 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
         <div
           className={`p-4 rounded-lg ${
             submitStatus.type === "success"
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
+              ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20"
+              : "bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20"
           }`}
         >
           {submitStatus.message}

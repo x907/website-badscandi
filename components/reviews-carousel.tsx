@@ -81,7 +81,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
 
   return (
     <div
-      className="relative bg-neutral-50 rounded-2xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto touch-pan-y"
+      className="relative bg-muted rounded-2xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto touch-pan-y"
       onTouchStart={hasMultipleReviews ? onTouchStart : undefined}
       onTouchMove={hasMultipleReviews ? onTouchMove : undefined}
       onTouchEnd={hasMultipleReviews ? onTouchEnd : undefined}
@@ -95,10 +95,10 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
               setIsPaused(true);
               setTimeout(() => setIsPaused(false), 5000);
             }}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white hover:bg-neutral-100 active:bg-neutral-200 active:scale-95 rounded-full shadow-md transition-all touch-manipulation z-10"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-card hover:bg-muted active:bg-muted/80 active:scale-95 rounded-full shadow-md transition-all touch-manipulation z-10 border border-border"
             aria-label="Previous review"
           >
-            <ChevronLeft className="h-5 w-5 text-neutral-700" />
+            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
           </button>
           <button
             onClick={() => {
@@ -106,10 +106,10 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
               setIsPaused(true);
               setTimeout(() => setIsPaused(false), 5000);
             }}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white hover:bg-neutral-100 active:bg-neutral-200 active:scale-95 rounded-full shadow-md transition-all touch-manipulation z-10"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-card hover:bg-muted active:bg-muted/80 active:scale-95 rounded-full shadow-md transition-all touch-manipulation z-10 border border-border"
             aria-label="Next review"
           >
-            <ChevronRight className="h-5 w-5 text-neutral-700" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </button>
         </>
       )}
@@ -120,7 +120,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
-              className="h-5 w-5 fill-amber-900 text-amber-900"
+              className="h-5 w-5 fill-amber-600 dark:fill-amber-400 text-amber-600 dark:text-amber-400"
             />
           ))}
         </div>
@@ -129,7 +129,7 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
         {currentReview.photos.length > 0 && (
           <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
             {currentReview.photos.slice(0, 2).map((photo, index) => (
-              <div key={index} className="aspect-square rounded-xl overflow-hidden bg-neutral-100 relative">
+              <div key={index} className="aspect-square rounded-xl overflow-hidden bg-muted relative">
                 <Image
                   src={photo}
                   alt={`Customer photo ${index + 1}`}
@@ -144,13 +144,13 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
         )}
 
         {/* Comment */}
-        <p className="text-base sm:text-lg md:text-xl text-neutral-700 leading-relaxed italic max-w-2xl">
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed italic max-w-2xl">
           &ldquo;{currentReview.text}&rdquo;
         </p>
 
         {/* Customer Info */}
         <div className="space-y-1">
-          <p className="font-semibold text-neutral-900">
+          <p className="font-semibold text-foreground">
             {currentReview.author}
           </p>
         </div>
@@ -172,8 +172,8 @@ export function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
                 <span
                   className={`rounded-full transition-all ${
                     index === currentIndex
-                      ? "w-8 h-2.5 bg-neutral-900"
-                      : "w-2.5 h-2.5 bg-neutral-300 hover:bg-neutral-400 active:bg-neutral-500"
+                      ? "w-8 h-2.5 bg-foreground"
+                      : "w-2.5 h-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50 active:bg-muted-foreground/70"
                   }`}
                 />
               </button>

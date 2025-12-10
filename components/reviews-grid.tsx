@@ -40,14 +40,17 @@ export function ReviewsGrid({ reviews, initialLimit = 6 }: ReviewsGridProps) {
         ))}
       </div>
 
-      {hasMore && !showAll && (
+      {hasMore && (
         <div className="flex justify-center">
           <Button
-            onClick={() => setShowAll(true)}
+            onClick={() => setShowAll(!showAll)}
             variant="outline"
             size="lg"
           >
-            Load More Reviews ({reviews.length - initialLimit} more)
+            {showAll
+              ? "Show Less"
+              : `Load More Reviews (${reviews.length - initialLimit} more)`
+            }
           </Button>
         </div>
       )}
