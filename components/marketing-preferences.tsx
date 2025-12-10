@@ -56,8 +56,8 @@ export function MarketingPreferences({ initialConsent }: MarketingPreferencesPro
       <CardContent>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Marketing emails</p>
-            <p className="text-xs text-neutral-500">
+            <p className="text-sm font-medium text-foreground">Marketing emails</p>
+            <p className="text-xs text-muted-foreground">
               Receive product updates, special offers, and promotions
             </p>
           </div>
@@ -67,7 +67,7 @@ export function MarketingPreferences({ initialConsent }: MarketingPreferencesPro
             disabled={isLoading}
           />
         </div>
-        <p className="mt-4 text-xs text-neutral-400">
+        <p className="mt-4 text-xs text-muted-foreground">
           You will always receive order confirmations and shipping updates regardless of this setting.
         </p>
       </CardContent>

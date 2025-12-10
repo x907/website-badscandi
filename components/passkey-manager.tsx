@@ -86,13 +86,13 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
   }
 
   if (passkeys.length === 0) {
-    return <p className="text-sm text-neutral-600">No passkeys registered yet</p>;
+    return <p className="text-sm text-muted-foreground">No passkeys registered yet</p>;
   }
 
   return (
     <div className="space-y-3">
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+        <div className="text-sm text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
           {error}
         </div>
       )}
@@ -101,15 +101,15 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
         {passkeys.map((pk) => (
           <li
             key={pk.id}
-            className="p-3 sm:p-4 bg-neutral-50 rounded-lg"
+            className="p-3 sm:p-4 bg-muted rounded-lg"
           >
             {/* Delete confirmation state */}
             {confirmDeleteId === pk.id ? (
               <div className="space-y-3">
-                <p className="text-sm font-medium text-neutral-900">
+                <p className="text-sm font-medium text-foreground">
                   Delete "{pk.name || "Unnamed Passkey"}"?
                 </p>
-                <p className="text-xs text-neutral-600">
+                <p className="text-xs text-muted-foreground">
                   You won't be able to use this passkey to sign in anymore.
                 </p>
                 <div className="flex gap-2">
@@ -147,7 +147,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Passkey name"
                   autoFocus
                 />
@@ -175,8 +175,8 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
               /* Normal state */
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{pk.name || "Unnamed Passkey"}</p>
-                  <p className="text-xs text-neutral-600">
+                  <p className="font-medium text-sm truncate text-foreground">{pk.name || "Unnamed Passkey"}</p>
+                  <p className="text-xs text-muted-foreground">
                     Created: {formatDate(pk.createdAt)}
                   </p>
                 </div>
@@ -197,7 +197,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
                     className="h-10 w-10 sm:h-9 sm:w-9 p-0"
                     aria-label="Delete passkey"
                   >
-                    <Trash2 className="h-4 w-4 text-red-600" />
+                    <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                   </Button>
                 </div>
               </div>

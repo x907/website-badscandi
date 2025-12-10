@@ -154,18 +154,18 @@ export function PasskeyEnroll() {
       </CardHeader>
       <CardContent>
         {success ? (
-          <div className="text-sm text-green-600">
+          <div className="text-sm text-green-600 dark:text-green-400">
             Passkey enrolled successfully! Redirecting...
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-muted-foreground">
               Passkeys let you sign in securely using your fingerprint, face, or device PIN.
               No passwords needed!
             </p>
 
             <div>
-              <label htmlFor="passkey-name" className="block text-sm font-medium text-neutral-700 mb-1">
+              <label htmlFor="passkey-name" className="block text-sm font-medium text-foreground mb-1">
                 Passkey Name (optional)
               </label>
               <input
@@ -174,13 +174,13 @@ export function PasskeyEnroll() {
                 value={passkeyName}
                 onChange={(e) => setPasskeyName(e.target.value)}
                 placeholder="e.g., My iPhone, Work Laptop"
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 disabled={loading}
               />
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+              <div className="text-sm text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
                 {error}
               </div>
             )}

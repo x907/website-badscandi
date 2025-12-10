@@ -61,14 +61,14 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
 
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Order Details</h1>
-            <p className="text-neutral-600 mt-1">Order #{order.id.slice(0, 8)}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Order Details</h1>
+            <p className="text-muted-foreground mt-1">Order #{order.id.slice(0, 8)}</p>
           </div>
           <div className="sm:text-right">
-            <p className="text-xl sm:text-2xl font-bold text-amber-900">
+            <p className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-400">
               {formatPrice(order.totalCents)}
             </p>
-            <p className="text-sm text-neutral-600 capitalize mt-1">{order.status}</p>
+            <p className="text-sm text-muted-foreground capitalize mt-1">{order.status}</p>
           </div>
         </div>
 
@@ -78,16 +78,16 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-600">Order Date:</span>
-              <span className="font-medium">{formatDate(order.createdAt)}</span>
+              <span className="text-muted-foreground">Order Date:</span>
+              <span className="font-medium text-foreground">{formatDate(order.createdAt)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-600">Order ID:</span>
-              <span className="font-medium font-mono">{order.id}</span>
+              <span className="text-muted-foreground">Order ID:</span>
+              <span className="font-medium font-mono text-foreground">{order.id}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-600">Payment ID:</span>
-              <span className="font-medium font-mono text-xs">{order.stripeId}</span>
+              <span className="text-muted-foreground">Payment ID:</span>
+              <span className="font-medium font-mono text-xs text-foreground">{order.stripeId}</span>
             </div>
           </CardContent>
         </Card>
@@ -107,32 +107,32 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
               {items.map((item, index) => (
                 <div
                   key={index}
-                  className="border border-neutral-200 rounded-lg overflow-hidden"
+                  className="border border-border rounded-lg overflow-hidden"
                 >
                   <div className="grid sm:grid-cols-[150px_1fr] md:grid-cols-[200px_1fr] gap-4 sm:gap-6 p-4">
                     <Link href={`/product/${item.id}`} className="group">
                       <img
                         src={item.imageUrl}
                         alt={item.name}
-                        className="w-full aspect-square object-cover rounded border border-neutral-200 group-hover:opacity-80 transition-opacity"
+                        className="w-full aspect-square object-cover rounded border border-border group-hover:opacity-80 transition-opacity"
                       />
                     </Link>
 
                     <div className="flex flex-col justify-between">
                       <div>
                         <Link href={`/product/${item.id}`}>
-                          <h3 className="text-lg font-semibold hover:text-amber-900 transition-colors">
+                          <h3 className="text-lg font-semibold text-foreground hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
                             {item.name}
                           </h3>
                         </Link>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-neutral-600">
+                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                           <span>Quantity: {item.quantity}</span>
                           <span>•</span>
-                          <span className="font-medium text-neutral-900">
+                          <span className="font-medium text-foreground">
                             {formatPrice(item.priceCents)}
                           </span>
                         </div>
-                        <div className="mt-2 text-sm text-neutral-600">
+                        <div className="mt-2 text-sm text-muted-foreground">
                           Subtotal: {formatPrice(item.priceCents * item.quantity)}
                         </div>
                       </div>
@@ -166,17 +166,17 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-600">Subtotal:</span>
-              <span className="font-medium">{formatPrice(order.totalCents)}</span>
+              <span className="text-muted-foreground">Subtotal:</span>
+              <span className="font-medium text-foreground">{formatPrice(order.totalCents)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-600">Shipping:</span>
-              <span className="font-medium">Free</span>
+              <span className="text-muted-foreground">Shipping:</span>
+              <span className="font-medium text-foreground">Free</span>
             </div>
-            <div className="border-t border-neutral-200 pt-2 mt-2">
+            <div className="border-t border-border pt-2 mt-2">
               <div className="flex justify-between">
-                <span className="font-semibold">Total:</span>
-                <span className="font-bold text-amber-900 text-lg">
+                <span className="font-semibold text-foreground">Total:</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400 text-lg">
                   {formatPrice(order.totalCents)}
                 </span>
               </div>
@@ -185,9 +185,9 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
         </Card>
 
         {order.status === "completed" && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-            <h3 className="font-semibold text-amber-900 mb-2">Share Your Experience</h3>
-            <p className="text-sm text-amber-800 mb-4">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-6">
+            <h3 className="font-semibold text-amber-700 dark:text-amber-400 mb-2">Share Your Experience</h3>
+            <p className="text-sm text-amber-600 dark:text-amber-300 mb-4">
               We'd love to hear about your purchase! Write a review to help other customers.
             </p>
             <Link href="/submit-review">
