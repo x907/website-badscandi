@@ -9,19 +9,49 @@ const S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "";
 /**
  * Validate that an image URL is from our S3 bucket
  * This prevents external URL injection attacks
+ *
+ * Uses strict hostname matching to prevent substring bypass attacks:
+ * - Validates hostname ends with ".amazonaws.com" (exact suffix match)
+ * - Validates hostname matches S3 pattern: bucket.s3.region.amazonaws.com
+ * - Validates bucket name matches our bucket exactly
  */
 export function validateImageUrlOrigin(url: string): boolean {
   if (!url) return true; // Allow empty/optional
 
   try {
     const parsed = new URL(url);
-    // Check if it's an S3 URL from our bucket
-    // Format: https://bucket.s3.region.amazonaws.com/...
-    const isS3Url = parsed.hostname.includes(".s3.") && parsed.hostname.includes(".amazonaws.com");
-    const isOurBucket = S3_BUCKET_NAME ? parsed.hostname.startsWith(S3_BUCKET_NAME) : true;
-    const isProductPath = parsed.pathname.startsWith("/products/");
+    const hostname = parsed.hostname.toLowerCase();
 
-    return isS3Url && isOurBucket && isProductPath;
+    // Must end with exactly ".amazonaws.com" (prevents amazonaws.com.attacker.com)
+    if (!hostname.endsWith(".amazonaws.com")) {
+      return false;
+    }
+
+    // Parse S3 hostname format: bucket.s3.region.amazonaws.com
+    // or legacy format: s3.region.amazonaws.com/bucket
+    const hostParts = hostname.split(".");
+    // Minimum: bucket.s3.region.amazonaws.com = 5 parts
+    if (hostParts.length < 5) {
+      return false;
+    }
+
+    // Verify "s3" is in the second position (bucket.s3.region.amazonaws.com)
+    if (hostParts[1] !== "s3") {
+      return false;
+    }
+
+    // Extract and validate bucket name (first part of hostname)
+    const bucketFromHost = hostParts[0];
+    if (S3_BUCKET_NAME && bucketFromHost !== S3_BUCKET_NAME.toLowerCase()) {
+      return false;
+    }
+
+    // Validate the path starts with /products/
+    if (!parsed.pathname.startsWith("/products/")) {
+      return false;
+    }
+
+    return true;
   } catch {
     return false;
   }

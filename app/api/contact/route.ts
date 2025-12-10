@@ -13,8 +13,22 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#39;");
 }
 
-// Email validation regex
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/**
+ * Validate email using a simple, ReDoS-safe approach
+ * Uses basic structural check without complex regex
+ */
+function isValidEmail(email: string): boolean {
+  if (!email || email.length > 254) return false;
+  const atIndex = email.indexOf("@");
+  if (atIndex < 1) return false; // Must have something before @
+  const lastAtIndex = email.lastIndexOf("@");
+  if (atIndex !== lastAtIndex) return false; // Only one @ allowed
+  const domain = email.slice(atIndex + 1);
+  if (!domain || domain.length < 3) return false; // Must have domain
+  const dotIndex = domain.indexOf(".");
+  if (dotIndex < 1 || dotIndex === domain.length - 1) return false; // Must have . in domain (not at start/end)
+  return true;
+}
 
 export async function POST(request: Request) {
   // Rate limiting
@@ -34,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     // Validate email format
-    if (!EMAIL_REGEX.test(email.trim())) {
+    if (!isValidEmail(email.trim())) {
       return NextResponse.json(
         { error: "Invalid email address" },
         { status: 400 }
