@@ -54,9 +54,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       {/* Visible Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="flex items-center gap-1 text-sm text-neutral-600">
+        <ol className="flex items-center gap-1 text-sm text-muted-foreground">
           <li>
-            <Link href="/" className="hover:text-neutral-900 transition-colors">
+            <Link href="/" className="hover:text-foreground transition-colors">
               Home
             </Link>
           </li>
@@ -64,14 +64,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <ChevronRight className="h-4 w-4" />
           </li>
           <li>
-            <Link href="/shop" className="hover:text-neutral-900 transition-colors">
+            <Link href="/shop" className="hover:text-foreground transition-colors">
               Shop
             </Link>
           </li>
           <li aria-hidden="true">
             <ChevronRight className="h-4 w-4" />
           </li>
-          <li aria-current="page" className="text-neutral-900 font-medium truncate max-w-[200px]">
+          <li aria-current="page" className="text-foreground font-medium truncate max-w-[200px]">
             {product.name}
           </li>
         </ol>
@@ -87,31 +87,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="space-y-6 sm:space-y-8">
           <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-3">
-              <p className="text-2xl sm:text-3xl font-semibold text-amber-900">
+              <p className="text-2xl sm:text-3xl font-semibold text-amber-700 dark:text-amber-400">
                 {formatPrice(product.priceCents)}
               </p>
               {product.stock === 0 && (
-                <span className="px-3 py-1 text-sm font-medium bg-neutral-100 text-neutral-600 rounded-full">
+                <span className="px-3 py-1 text-sm font-medium bg-muted text-muted-foreground rounded-full">
                   SOLD OUT
                 </span>
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-normal text-neutral-600">{product.name}</h1>
+            <h1 className="text-base sm:text-lg font-normal text-muted-foreground">{product.name}</h1>
           </div>
 
-          <div className="prose prose-neutral max-w-none">
-            <p className="text-neutral-600 leading-relaxed whitespace-pre-line">{product.description}</p>
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{product.description}</p>
           </div>
 
           <div className="space-y-4 pt-4">
             {product.stock === 0 ? (
               <div className="space-y-2">
-                <div className="flex items-center justify-center gap-2 h-11 px-6 py-2 bg-neutral-100 text-neutral-500 rounded-xl">
+                <div className="flex items-center justify-center gap-2 h-11 px-6 py-2 bg-muted text-muted-foreground rounded-xl">
                   <span className="font-medium">This piece has been sold</span>
                 </div>
-                <p className="text-sm text-neutral-600 text-center">
+                <p className="text-sm text-muted-foreground text-center">
                   Interested in a custom commission?{" "}
-                  <Link href="/contact" className="text-amber-900 hover:underline font-medium">
+                  <Link href="/contact" className="text-amber-700 dark:text-amber-400 hover:underline font-medium">
                     Visit our contact page
                   </Link>
                 </p>
@@ -129,31 +129,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
             )}
           </div>
 
-          <div className="border-t border-neutral-100 pt-6 sm:pt-8">
-            <h3 className="font-semibold mb-4">Product Details</h3>
+          <div className="border-t border-border pt-6 sm:pt-8">
+            <h3 className="font-semibold mb-4 text-foreground">Product Details</h3>
             <dl className="space-y-3 text-sm">
               {product.materials && (
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-                  <dt className="text-neutral-600">Materials</dt>
-                  <dd className="font-medium">{product.materials}</dd>
+                  <dt className="text-muted-foreground">Materials</dt>
+                  <dd className="font-medium text-foreground">{product.materials}</dd>
                 </div>
               )}
               {product.dimensions && (
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-                  <dt className="text-neutral-600">Dimensions</dt>
-                  <dd className="font-medium">{product.dimensions}</dd>
+                  <dt className="text-muted-foreground">Dimensions</dt>
+                  <dd className="font-medium text-foreground">{product.dimensions}</dd>
                 </div>
               )}
               {product.colors && (
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-                  <dt className="text-neutral-600">Colors</dt>
-                  <dd className="font-medium capitalize">{product.colors.split(',').join(', ')}</dd>
+                  <dt className="text-muted-foreground">Colors</dt>
+                  <dd className="font-medium text-foreground capitalize">{product.colors.split(',').join(', ')}</dd>
                 </div>
               )}
               {product.category && (
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4">
-                  <dt className="text-neutral-600">Category</dt>
-                  <dd className="font-medium capitalize">{product.category.replace('-', ' ')}</dd>
+                  <dt className="text-muted-foreground">Category</dt>
+                  <dd className="font-medium text-foreground capitalize">{product.category.replace('-', ' ')}</dd>
                 </div>
               )}
             </dl>

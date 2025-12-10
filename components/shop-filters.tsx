@@ -94,7 +94,7 @@ export function ShopFilters({ products }: ShopFiltersProps) {
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         {/* Search Input */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search products..."
@@ -105,7 +105,7 @@ export function ShopFilters({ products }: ShopFiltersProps) {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />
@@ -155,9 +155,9 @@ export function ShopFilters({ products }: ShopFiltersProps) {
 
       {/* Mobile Filters (Collapsible) */}
       {showFilters && (
-        <div className="sm:hidden flex flex-col gap-4 mb-6 p-4 bg-neutral-50 rounded-lg">
+        <div className="sm:hidden flex flex-col gap-4 mb-6 p-4 bg-muted rounded-lg">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Availability</label>
+            <label className="text-sm font-medium text-foreground">Availability</label>
             <Select
               value={availability}
               onValueChange={(value) => setAvailability(value as AvailabilityFilter)}
@@ -174,7 +174,7 @@ export function ShopFilters({ products }: ShopFiltersProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Sort by</label>
+            <label className="text-sm font-medium text-foreground">Sort by</label>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
               <SelectTrigger className="h-11">
                 <SelectValue placeholder="Sort by" />
@@ -198,7 +198,7 @@ export function ShopFilters({ products }: ShopFiltersProps) {
 
       {/* Active Filters Summary */}
       {hasActiveFilters && (
-        <div className="flex items-center gap-2 mb-6 text-sm text-neutral-600">
+        <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
           <span>
             Showing {filteredAndSortedProducts.length} of {products.length} products
           </span>
@@ -211,7 +211,7 @@ export function ShopFilters({ products }: ShopFiltersProps) {
       {/* Product Grid */}
       {filteredAndSortedProducts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-neutral-600 mb-4">No products match your search.</p>
+          <p className="text-muted-foreground mb-4">No products match your search.</p>
           <Button variant="outline" onClick={clearFilters}>
             Clear Filters
           </Button>

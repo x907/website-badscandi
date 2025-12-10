@@ -25,7 +25,7 @@ export function ProductCard({ slug, name, description, priceCents, imageUrl, sto
   return (
     <Link href={`/product/${slug}`} className="block touch-manipulation">
       <Card className="group overflow-hidden hover:shadow-md active:shadow-lg active:scale-[0.98] transition-all duration-300">
-        <div className="aspect-square relative overflow-hidden bg-neutral-100">
+        <div className="aspect-square relative overflow-hidden bg-muted">
           <Image
             src={imageUrl}
             alt={name}
@@ -34,23 +34,23 @@ export function ProductCard({ slug, name, description, priceCents, imageUrl, sto
             className="object-cover group-hover:scale-105 group-active:scale-105 transition-transform duration-500"
           />
           {stock === 0 && (
-            <div className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-white/90 backdrop-blur-sm text-neutral-700 rounded-full shadow-md">
+            <div className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-background/90 backdrop-blur-sm text-muted-foreground rounded-full shadow-md">
               SOLD
             </div>
           )}
         </div>
         <CardContent className="p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-2">
-            <p className="text-base sm:text-lg font-semibold text-amber-900">{formatPrice(priceCents)}</p>
+            <p className="text-base sm:text-lg font-semibold text-amber-700 dark:text-amber-400">{formatPrice(priceCents)}</p>
             {stock === 0 && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-600 rounded-full">
+              <span className="px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded-full">
                 SOLD
               </span>
             )}
           </div>
-          <h3 className="font-medium text-sm sm:text-base mb-2 text-neutral-700">{name}</h3>
+          <h3 className="font-medium text-sm sm:text-base mb-2 text-foreground">{name}</h3>
           {showDescription && (
-            <p className="text-xs sm:text-sm text-neutral-500 line-clamp-2">{cleanDescription}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{cleanDescription}</p>
           )}
         </CardContent>
       </Card>

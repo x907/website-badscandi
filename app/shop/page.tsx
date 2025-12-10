@@ -11,8 +11,8 @@ export default async function ShopPage() {
   return (
     <div className="container mx-auto px-6 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4">Shop Hand-Dyed Fiber Art & Wall Hangings</h1>
-        <p className="text-neutral-600 text-lg">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">Shop Hand-Dyed Fiber Art & Wall Hangings</h1>
+        <p className="text-muted-foreground text-lg">
           Explore our collection of unique boho wall hangings, macrame tapestries, and Scandinavian minimalist fiber art for your home
         </p>
       </div>
