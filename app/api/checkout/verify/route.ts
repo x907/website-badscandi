@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import { getStripeClientForMode } from "@/lib/stripe";
 import { db } from "@/lib/db";
 
@@ -6,6 +8,18 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get("session_id");
   const paymentIntentId = searchParams.get("payment_intent");
+
+  // Require authentication to view order details
+  const authSession = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!authSession?.user?.id) {
+    return NextResponse.json(
+      { error: "Authentication required", code: "AUTH_REQUIRED" },
+      { status: 401 }
+    );
+  }
 
   // Handle PaymentIntent flow (new Stripe Elements checkout)
   if (paymentIntentId) {
@@ -28,6 +42,14 @@ export async function GET(request: Request) {
             pending: true
           },
           { status: 202 }
+        );
+      }
+
+      // Verify the authenticated user owns this order
+      if (order.userId !== authSession.user.id) {
+        return NextResponse.json(
+          { error: "Access denied" },
+          { status: 403 }
         );
       }
 
@@ -102,6 +124,14 @@ export async function GET(request: Request) {
       return NextResponse.json(
         { error: "Payment not completed", status: session.payment_status },
         { status: 400 }
+      );
+    }
+
+    // Verify the authenticated user owns this checkout session
+    if (session.metadata?.userId !== authSession.user.id) {
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
       );
     }
 
