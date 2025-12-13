@@ -185,7 +185,7 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-card text-foreground shadow-sm"
+                    ? "bg-card text-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -635,7 +635,7 @@ export function AdminThemesClient({ initialSettings }: AdminThemesClientProps) {
             </div>
 
             <div
-              className={`border border-border rounded-lg overflow-hidden bg-card shadow-sm ${
+              className={`border border-border rounded-lg overflow-hidden bg-card shadow-xs ${
                 previewDevice === "mobile" ? "max-w-[320px] mx-auto" : ""
               }`}
             >

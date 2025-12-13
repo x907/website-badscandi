@@ -147,7 +147,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Passkey name"
                   autoFocus
                 />

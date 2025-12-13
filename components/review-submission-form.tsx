@@ -130,7 +130,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           onChange={handleInputChange}
           required
           autoComplete="name"
-          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none bg-background text-foreground"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-hidden bg-background text-foreground"
           placeholder="Enter your name"
         />
       </div>
@@ -151,7 +151,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           onChange={handleInputChange}
           autoComplete="email"
           inputMode="email"
-          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none bg-background text-foreground"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-hidden bg-background text-foreground"
           placeholder="your@email.com"
         />
         <p className="mt-1 text-sm text-muted-foreground">
@@ -198,7 +198,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           name="productName"
           value={formData.productName}
           onChange={handleInputChange}
-          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none bg-background text-foreground"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-hidden bg-background text-foreground"
           placeholder="e.g., Cream Wave Wall Hanging"
         />
       </div>
@@ -219,7 +219,7 @@ export function ReviewSubmissionForm({ preSelectedProductId }: ReviewSubmissionF
           required
           rows={5}
           maxLength={1000}
-          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-none resize-none bg-background text-foreground"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-amber-600 dark:focus:ring-amber-400 focus:border-transparent outline-hidden resize-none bg-background text-foreground"
           placeholder="Tell us about your experience with your Bad Scandi piece..."
         />
         <p className="mt-1 text-sm text-muted-foreground text-right">

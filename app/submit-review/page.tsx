@@ -36,7 +36,7 @@ export default async function SubmitReviewPage({ searchParams }: SubmitReviewPag
               </p>
             </div>
 
-            <div className="bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-8 md:p-12 text-center">
+            <div className="bg-card rounded-2xl shadow-xs border border-border p-6 sm:p-8 md:p-12 text-center">
               <p className="text-muted-foreground mb-6">
                 You must be signed in and have purchased a product to submit a review.
                 This helps us ensure all reviews are from real customers.
@@ -72,7 +72,7 @@ export default async function SubmitReviewPage({ searchParams }: SubmitReviewPag
             </p>
           </div>
 
-          <div className="bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-8 md:p-12">
+          <div className="bg-card rounded-2xl shadow-xs border border-border p-6 sm:p-8 md:p-12">
             <ReviewSubmissionForm preSelectedProductId={product} />
           </div>
 

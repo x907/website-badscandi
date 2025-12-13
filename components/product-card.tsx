@@ -34,7 +34,7 @@ export function ProductCard({ slug, name, description, priceCents, imageUrl, sto
             className="object-cover group-hover:scale-105 group-active:scale-105 transition-transform duration-500"
           />
           {stock === 0 && (
-            <div className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-background/90 backdrop-blur-sm text-muted-foreground rounded-full shadow-md">
+            <div className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-background/90 backdrop-blur-xs text-muted-foreground rounded-full shadow-md">
               SOLD
             </div>
           )}

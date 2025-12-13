@@ -393,7 +393,7 @@ export function AdminProductsClient() {
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
           />
         </div>
         <div className="flex gap-4 text-sm text-muted-foreground">
@@ -593,7 +593,7 @@ export function AdminProductsClient() {
                       type="text"
                       value={formData.name}
                       onChange={(e) => handleNameChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                       required
                     />
                   </div>
@@ -607,7 +607,7 @@ export function AdminProductsClient() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, slug: e.target.value }))
                       }
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                       required
                     />
                   </div>
@@ -623,7 +623,7 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, description: e.target.value }))
                     }
                     rows={4}
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                     required
                   />
                 </div>
@@ -641,7 +641,7 @@ export function AdminProductsClient() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, priceCents: e.target.value }))
                       }
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                       required
                     />
                   </div>
@@ -656,7 +656,7 @@ export function AdminProductsClient() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, stock: e.target.value }))
                       }
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
@@ -670,7 +670,7 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, category: e.target.value }))
                       }
                       placeholder="e.g., Rugs, Wall Art"
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                 </div>
@@ -777,7 +777,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => moveImage(index, index - 1)}
-                              className="p-1.5 bg-background rounded shadow-sm text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium"
+                              className="p-1.5 bg-background rounded shadow-xs text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium"
                               title="Move left"
                             >
                               &larr;
@@ -787,7 +787,7 @@ export function AdminProductsClient() {
                             <button
                               type="button"
                               onClick={() => moveImage(index, index + 1)}
-                              className="p-1.5 bg-background rounded shadow-sm text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium"
+                              className="p-1.5 bg-background rounded shadow-xs text-muted-foreground hover:text-foreground hover:bg-muted text-xs font-medium"
                               title="Move right"
                             >
                               &rarr;
@@ -856,7 +856,7 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, altText: e.target.value }))
                     }
                     placeholder="Describe the image for accessibility"
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
               </div>
@@ -877,7 +877,7 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, materials: e.target.value }))
                       }
                       placeholder="e.g., 100% wool"
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
@@ -891,7 +891,7 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, colors: e.target.value }))
                       }
                       placeholder="e.g., Natural, Cream"
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
@@ -905,7 +905,7 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, dimensions: e.target.value }))
                       }
                       placeholder='e.g., 24" x 36"'
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <div>
@@ -919,7 +919,7 @@ export function AdminProductsClient() {
                         setFormData((prev) => ({ ...prev, room: e.target.value }))
                       }
                       placeholder="e.g., Living Room, Bedroom"
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                     />
                   </div>
                 </div>
@@ -935,7 +935,7 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, tags: e.target.value }))
                     }
                     placeholder="Comma-separated tags"
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
               </div>
@@ -955,7 +955,7 @@ export function AdminProductsClient() {
                       setFormData((prev) => ({ ...prev, metaTitle: e.target.value }))
                     }
                     placeholder="Custom title for search engines"
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
 
@@ -970,7 +970,7 @@ export function AdminProductsClient() {
                     }
                     rows={2}
                     placeholder="Custom description for search engines"
-                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:border-ring"
                   />
                 </div>
               </div>
