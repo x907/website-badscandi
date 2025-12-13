@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { getStripeClient, getStripeWebhookSecret, getStripeWebhookSecretForMode } from "@/lib/stripe";
 import { isSandboxMode } from "@/lib/sandbox";
 import { db } from "@/lib/db";
+import { Prisma } from "@/generated/prisma/client";
 import { sendDripEmail, TEMPLATE_KEYS } from "@/lib/email-templates";
 import { purchaseShippingLabel, purchaseShippingLabelWithRate } from "@/lib/shipping";
 import { sendEmail } from "@/lib/email";
@@ -188,7 +189,7 @@ export async function POST(request: NextRequest) {
 
       // Use a transaction to ensure order creation and stock updates are atomic
       // This prevents partial updates if something fails mid-operation
-      const order = await db.$transaction(async (tx) => {
+      const order = await db.$transaction(async (tx: Prisma.TransactionClient) => {
         // First, validate stock for all items before creating order
         for (const item of orderItems) {
           const product = await tx.product.findUnique({
@@ -511,7 +512,7 @@ export async function POST(request: NextRequest) {
       const totalCents = paymentIntent.amount;
 
       // Create order in transaction
-      const order = await db.$transaction(async (tx) => {
+      const order = await db.$transaction(async (tx: Prisma.TransactionClient) => {
         // Validate stock
         for (const item of orderItems) {
           const product = await tx.product.findUnique({
