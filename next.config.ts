@@ -60,6 +60,14 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Cache optimized images for 31 days (reduces re-transformations)
+    minimumCacheTTL: 2678400,
+    // Use only WebP format (cuts transformations in half vs avif+webp)
+    formats: ["image/webp"],
+    // Limit device sizes to reduce transformation variants (default has 8 sizes)
+    deviceSizes: [640, 1080, 1920],
+    // Limit image sizes for fixed-width images like thumbnails (default has 8 sizes)
+    imageSizes: [80, 160, 320],
     remotePatterns: [
       {
         protocol: "https",
