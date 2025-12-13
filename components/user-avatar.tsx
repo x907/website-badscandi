@@ -54,6 +54,7 @@ export function UserAvatar({
             fill
             className="object-cover"
             sizes={size === "sm" ? "32px" : size === "md" ? "36px" : "40px"}
+            unoptimized
           />
         </div>
       ) : (

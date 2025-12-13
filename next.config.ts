@@ -68,6 +68,8 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 1080, 1920],
     // Limit image sizes for fixed-width images like thumbnails (default has 8 sizes)
     imageSizes: [80, 160, 320],
+    // Lock quality to single value to prevent quality-based variants
+    qualities: [75],
     remotePatterns: [
       {
         protocol: "https",
