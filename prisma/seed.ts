@@ -1,6 +1,17 @@
-import { PrismaClient } from "@prisma/client";
+import 'dotenv/config';
+import { PrismaClient } from "../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+// Get connection string and ensure sslmode=no-verify for Supabase
+let connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL || "";
+if (connectionString.includes("sslmode=require")) {
+  connectionString = connectionString.replace("sslmode=require", "sslmode=no-verify");
+} else if (!connectionString.includes("sslmode=")) {
+  connectionString += connectionString.includes("?") ? "&sslmode=no-verify" : "?sslmode=no-verify";
+}
+
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("Seeding database...");
