@@ -17,7 +17,7 @@
     "@aws-sdk/client-s3": "^3.948.0",
     "@aws-sdk/client-ses": "^3.948.0",
     "@aws-sdk/s3-request-presigner": "^3.948.0",
-    "@better-auth/passkey": "^1.4.6",
+    "@better-auth/passkey": "^1.4.7",
     "@easypost/api": "^8.4.0",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
