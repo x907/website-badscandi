@@ -17,7 +17,7 @@ function createStripeClient(isSandbox: boolean): Stripe {
       console.error(`CRITICAL: Stripe secret key not configured for ${mode} mode`);
     }
     return new Stripe("", {
-      apiVersion: "2025-11-17.clover",
+      apiVersion: "2025-12-15.clover",
       typescript: true,
     });
   }
@@ -27,7 +27,7 @@ function createStripeClient(isSandbox: boolean): Stripe {
   console.log(`Stripe initialized in ${mode} mode (using ${keyType} key)`);
 
   return new Stripe(secretKey, {
-    apiVersion: "2025-11-17.clover",
+    apiVersion: "2025-12-15.clover",
     typescript: true,
   });
 }
