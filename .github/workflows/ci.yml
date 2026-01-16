@@ -72,12 +72,11 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      # Auto-merge patch and minor security updates
-      - name: Auto-merge patch and minor security updates
+      # Auto-merge patch and minor updates
+      - name: Auto-merge patch and minor updates
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          (steps.metadata.outputs.update-type == 'version-update:semver-minor' &&
-           contains(steps.metadata.outputs.dependency-names, 'next'))
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
         run: |
           gh pr review --approve "$PR_URL"
           gh pr merge --auto --squash "$PR_URL"
