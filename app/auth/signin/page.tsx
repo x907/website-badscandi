@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Fingerprint, Mail, Loader2 } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -14,6 +16,8 @@ export default function SignInPage() {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   async function handlePasskeySignIn() {
     try {
@@ -71,9 +75,27 @@ export default function SignInPage() {
       return;
     }
 
+    if (!turnstileToken) {
+      setError("Please wait for the security check to complete.");
+      return;
+    }
+
     try {
       setLoading("email");
       setError("");
+
+      const verify = await fetch("/api/auth/verify-turnstile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+
+      if (!verify.ok) {
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
+        setError("Security check failed. Please try again.");
+        return;
+      }
 
       await signIn.magicLink({
         email,
@@ -83,6 +105,8 @@ export default function SignInPage() {
       setEmailSent(true);
     } catch (err: any) {
       setError(err.message || "Failed to send magic link");
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     } finally {
       setLoading(null);
     }
@@ -203,11 +227,19 @@ export default function SignInPage() {
                     autoComplete="email"
                     inputMode="email"
                   />
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                    onSuccess={setTurnstileToken}
+                    onExpire={() => setTurnstileToken(null)}
+                    onError={() => setTurnstileToken(null)}
+                    options={{ theme: "auto" }}
+                  />
                   <Button
                     type="submit"
                     variant="outline"
                     className="w-full"
-                    disabled={loading !== null}
+                    disabled={loading !== null || !turnstileToken}
                   >
                     <Mail className="h-4 w-4 mr-2" aria-hidden="true" />
                     {loading === "email" ? (
