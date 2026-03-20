@@ -155,7 +155,7 @@ export function AdminUsersClient() {
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-accent-soft flex items-center justify-center shrink-0">
                             <span className="text-xs font-medium text-accent-soft-foreground">
-                              {(user.name ?? user.email)[0].toUpperCase()}
+                              {(user.name?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}
                             </span>
                           </div>
                           <div>
