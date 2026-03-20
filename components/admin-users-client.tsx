@@ -164,7 +164,7 @@ export function AdminUsersClient() {
                               <Mail className="h-3 w-3" />
                               {user.email}
                               {user.emailVerified && (
-                                <ShieldCheck className="h-3 w-3 text-green-500" title="Email verified" />
+                                <ShieldCheck className="h-3 w-3 text-green-500" aria-label="Email verified" />
                               )}
                             </p>
                           </div>
