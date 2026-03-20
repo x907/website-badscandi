@@ -1,0 +1,66 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "UTC",
+  "schedule": ["before 4am on weekdays"],
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "labels": ["dependencies", "automated"],
+  "commitMessagePrefix": "chore(deps):",
+
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "automerge": true,
+    "labels": ["security", "automated"]
+  },
+
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 4am on monday"],
+    "automerge": true
+  },
+
+  "packageRules": [
+    {
+      "description": "Auto-merge patch and minor updates for all deps including overrides",
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchDepTypes": ["dependencies", "devDependencies", "overrides"],
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group AWS SDK updates",
+      "groupName": "AWS SDK",
+      "matchPackagePrefixes": ["@aws-sdk/"],
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group Prisma updates",
+      "groupName": "Prisma",
+      "matchPackageNames": ["prisma", "@prisma/client", "@prisma/adapter-pg"],
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group Radix UI updates",
+      "groupName": "Radix UI",
+      "matchPackagePrefixes": ["@radix-ui/"],
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group Stripe updates",
+      "groupName": "Stripe",
+      "matchPackageNames": ["stripe", "@stripe/stripe-js", "@stripe/react-stripe-js"],
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Do not auto-merge major updates — require manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "major-update"]
+    }
+  ]
+}

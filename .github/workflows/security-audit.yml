@@ -1,0 +1,49 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Daily at 6 AM UTC
+  workflow_dispatch: # Allow manual runs
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          DATABASE_URL: "postgresql://user:pass@localhost:5432/test"
+
+      - name: Run security audit
+        id: audit
+        run: npm audit --audit-level=moderate --json > audit-report.json 2>&1; echo "exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Parse audit results
+        if: steps.audit.outputs.exit_code != '0'
+        run: |
+          VULN_COUNT=$(cat audit-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('metadata',{}).get('vulnerabilities',{}).get('total',0))" 2>/dev/null || echo "unknown")
+          echo "## Security Audit Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**$VULN_COUNT vulnerabilities found.** Run \`npm audit\` locally for details." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Consider running \`npm audit fix\` or adding \`overrides\` to package.json for transitive dependencies." >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if vulnerabilities found
+        if: steps.audit.outputs.exit_code != '0'
+        run: exit 1

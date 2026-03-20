@@ -51,8 +51,7 @@ jobs:
           EASYPOST_API_KEY: "EZTKdummy_build_time_key"
 
       - name: Check for security vulnerabilities
-        run: npm audit --audit-level=high
-        continue-on-error: true # Report but don't fail
+        run: npm audit --audit-level=moderate
 
   # Auto-approve and merge Dependabot PRs for security patches
   dependabot:
