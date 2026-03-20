@@ -34,11 +34,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://accounts.google.com https://appleid.cdn-apple.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://accounts.google.com https://appleid.cdn-apple.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://badscandi-assets.s3.us-east-1.amazonaws.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.stripe.com",
+      "img-src 'self' data: blob: https://badscandi-assets.s3.us-east-1.amazonaws.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.stripe.com https://i.etsystatic.com",
       "font-src 'self'",
-      "connect-src 'self' https://api.stripe.com https://accounts.google.com https://appleid.apple.com",
+      "connect-src 'self' https://api.stripe.com https://accounts.google.com https://appleid.apple.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net",
       "frame-src 'self' https://js.stripe.com https://accounts.google.com https://appleid.apple.com",
       "object-src 'none'",
       "base-uri 'self'",
@@ -86,6 +86,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "badscandi-assets.s3.us-east-1.amazonaws.com", // S3 images (products, reviews)
+      },
+      {
+        protocol: "https",
+        hostname: "i.etsystatic.com", // Etsy product images
       },
     ],
   },
