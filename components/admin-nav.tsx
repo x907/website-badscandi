@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Palette,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -34,6 +35,11 @@ const navItems = [
     href: "/admin/reviews",
     label: "Reviews",
     icon: Star,
+  },
+  {
+    href: "/admin/users",
+    label: "Users",
+    icon: Users,
   },
   {
     href: "/admin/themes",
