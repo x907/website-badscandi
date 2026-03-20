@@ -63,9 +63,9 @@ export function ContactForm() {
       </CardHeader>
       <CardContent>
         {success ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-            <p className="text-green-900 font-medium mb-2">Message Sent Successfully!</p>
-            <p className="text-green-700 text-sm">
+          <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
+            <p className="text-green-900 dark:text-green-100 font-medium mb-2">Message Sent Successfully!</p>
+            <p className="text-green-700 dark:text-green-300 text-sm">
               We've received your message and will respond within 24-48 hours.
             </p>
             <Button
@@ -129,13 +129,13 @@ export function ContactForm() {
                 required
                 rows={6}
                 placeholder="Tell us about your inquiry..."
-                className="flex min-h-[120px] w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-neutral-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-[120px] w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 ring-offset-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-neutral-100 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-900 text-sm">{error}</p>
+              <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-red-900 dark:text-red-100 text-sm">{error}</p>
               </div>
             )}
 

@@ -280,52 +280,52 @@ export function AdminDashboardClient() {
           {stats.reviews.pending > 0 && (
             <Link
               href="/admin/reviews"
-              className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
+              className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900 transition-colors"
             >
-              <div className="p-2 bg-amber-100 rounded-full">
-                <Star className="h-5 w-5 text-amber-700" />
+              <div className="p-2 bg-amber-100 dark:bg-amber-900 rounded-full">
+                <Star className="h-5 w-5 text-amber-700 dark:text-amber-400" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-amber-900">
+                <p className="font-medium text-amber-900 dark:text-amber-100">
                   {stats.reviews.pending} pending review
                   {stats.reviews.pending !== 1 && "s"}
                 </p>
-                <p className="text-sm text-amber-700">Needs moderation</p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">Needs moderation</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-amber-700" />
+              <ArrowRight className="h-5 w-5 text-amber-700 dark:text-amber-400" />
             </Link>
           )}
 
           {stats.orders.needingLabels > 0 && (
             <Link
               href="/admin/orders"
-              className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+              className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
             >
-              <div className="p-2 bg-blue-100 rounded-full">
-                <Truck className="h-5 w-5 text-blue-700" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                <Truck className="h-5 w-5 text-blue-700 dark:text-blue-400" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-blue-900">
+                <p className="font-medium text-blue-900 dark:text-blue-100">
                   {stats.orders.needingLabels} order
                   {stats.orders.needingLabels !== 1 && "s"} without labels
                 </p>
-                <p className="text-sm text-blue-700">Check shipping</p>
+                <p className="text-sm text-blue-700 dark:text-blue-300">Check shipping</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-blue-700" />
+              <ArrowRight className="h-5 w-5 text-blue-700 dark:text-blue-400" />
             </Link>
           )}
 
           {stats.products.outOfStock > 0 && (
-            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="p-2 bg-red-100 rounded-full">
-                <PackageX className="h-5 w-5 text-red-700" />
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full">
+                <PackageX className="h-5 w-5 text-red-700 dark:text-red-400" />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-red-900">
+                <p className="font-medium text-red-900 dark:text-red-100">
                   {stats.products.outOfStock} product
                   {stats.products.outOfStock !== 1 && "s"} out of stock
                 </p>
-                <p className="text-sm text-red-700">Update inventory</p>
+                <p className="text-sm text-red-700 dark:text-red-300">Update inventory</p>
               </div>
             </div>
           )}
