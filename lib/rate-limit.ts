@@ -34,11 +34,17 @@ const rateLimiters = {
     limiter: Ratelimit.slidingWindow(60, "1 m"),
     prefix: "ratelimit:events",
   }),
-  // Auth attempts: 10 per minute
+  // Auth attempts: 10 per minute per IP
   auth: new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(10, "1 m"),
     prefix: "ratelimit:auth",
+  }),
+  // Magic link: 3 per hour per email address (prevents email bombing)
+  magicLink: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(3, "1 h"),
+    prefix: "ratelimit:magic-link",
   }),
   // General API: 30 requests per minute
   general: new Ratelimit({
@@ -141,6 +147,25 @@ export async function checkRateLimit(
   }
 }
 
+/**
+ * Check rate limit by a custom identifier (e.g. email address)
+ * Returns true if allowed, false if rate limited
+ */
+export async function checkRateLimitByKey(
+  key: string,
+  type: RateLimitType
+): Promise<boolean> {
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return true;
+  }
+  try {
+    const { success } = await rateLimiters[type].limit(key);
+    return success;
+  } catch {
+    return false; // fail closed for security
+  }
+}
+
 // Export rate limit types for backwards compatibility
 export const rateLimits = {
   contact: "contact" as const,
@@ -148,6 +173,7 @@ export const rateLimits = {
   reviewSubmit: "reviewSubmit" as const,
   events: "events" as const,
   auth: "auth" as const,
+  magicLink: "magicLink" as const,
   general: "general" as const,
   admin: "admin" as const,
   shipping: "shipping" as const,
