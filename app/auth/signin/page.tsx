@@ -44,7 +44,7 @@ export default function SignInPage() {
       });
 
       if (error) {
-        const message = error.message || "";
+        const message = typeof error.message === "string" ? error.message : "";
         // Handle "auth cancelled" or similar - means no passkey found
         if (message.includes("cancelled") || message.includes("No credential") || message.includes("not found")) {
           setError("No passkey found for this site.");
