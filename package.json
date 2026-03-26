@@ -10,6 +10,7 @@
     "db:push": "prisma db push && prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:cleanup-fake-users": "tsx --env-file=.env scripts/cleanup-fake-users.ts",
     "test:ses": "tsx --env-file=.env scripts/test-ses.ts",
     "postinstall": "prisma generate"
   },

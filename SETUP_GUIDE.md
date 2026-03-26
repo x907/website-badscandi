@@ -79,7 +79,28 @@ Your site is now on GitHub! Follow these steps to get it running locally and dep
 4. Create a client secret
 5. Copy Application (client) ID and client secret
 
-## Step 4: Local Development Setup
+## Step 4: Set Up Cloudflare Turnstile
+
+Turnstile protects the sign-in form from bots. It's free and doesn't require your site to be proxied through Cloudflare.
+
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com) and sign in (or create a free account)
+2. In the sidebar, go to **Turnstile**
+3. Click **Add widget**
+4. Fill in:
+   - Name: `Bad Scandi Sign-In`
+   - Hostname: your production domain (e.g. `badscandi.com`) — also add `localhost` for local dev
+   - Widget type: **Managed** (recommended)
+5. Click **Create**
+6. Copy the **Site Key** and **Secret Key**
+
+Add to your `.env` and Vercel environment variables:
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Site Key from Cloudflare (public, safe for browser) |
+| `TURNSTILE_SECRET_KEY` | Secret Key from Cloudflare (server-side only) |
+
+## Step 5: Local Development Setup
 
 1. Clone the repository (if not already):
 ```bash
@@ -132,6 +153,10 @@ AWS_ACCESS_KEY_ID=""              # IAM Access Key ID (starts with AKIA...)
 AWS_SECRET_ACCESS_KEY=""          # IAM Secret Access Key
 EMAIL_FROM="noreply@badscandi.com"         # Verified email for magic links
 CONTACT_EMAIL="hello@badscandi.com"        # Where contact form submissions are sent
+
+# Cloudflare Turnstile (from Cloudflare Dashboard → Turnstile)
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=""   # Public site key (safe for browser)
+TURNSTILE_SECRET_KEY=""             # Secret key (server-side only)
 ```
 
 5. Push database schema to Supabase:
@@ -151,7 +176,7 @@ npm run dev
 
 7. Open http://localhost:3000 in your browser!
 
-## Step 5: Deploy to Vercel
+## Step 6: Deploy to Vercel
 
 1. Push to GitHub (already done):
 ```bash
@@ -196,7 +221,7 @@ EMAIL_FROM="..."
 
 8. Wait for deployment (~2 minutes)
 
-## Step 6: Post-Deployment Setup
+## Step 7: Post-Deployment Setup
 
 ### Update OAuth Redirect URIs
 
@@ -225,7 +250,7 @@ EMAIL_FROM="..."
 6. Check your account page for orders
 7. Verify webhook worked (order appears in database)
 
-## Step 7: Custom Domain (Optional)
+## Step 8: Custom Domain (Optional)
 
 1. In Vercel project settings, go to "Domains"
 2. Add your custom domain
@@ -289,12 +314,14 @@ Before launching:
 - [ ] Configure AWS SES with verified email domain (use IAM Access Keys, not SMTP)
 - [ ] Request AWS SES production access (to send to any email address)
 - [ ] Test email functionality with `npm run test:ses your-email@example.com`
+- [ ] Create Cloudflare Turnstile widget and add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` to Vercel
 - [ ] Switch Stripe to production mode
 - [ ] Update Stripe webhook with production URL
 - [ ] Update OAuth redirect URIs with production domain
 - [ ] Test full purchase flow
 - [ ] Test passkey enrollment and login
 - [ ] Test contact form email delivery
+- [ ] Test sign-in form Turnstile widget appears and validates
 - [ ] Set up monitoring (Vercel Analytics)
 - [ ] Configure custom domain
 - [ ] Add real product data

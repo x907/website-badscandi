@@ -28,6 +28,8 @@ Security practices and guidelines for Bad Scandi e-commerce platform.
 ┌─────────────────────────────────────────────┐
 │              Vercel Edge Network            │  DDoS protection
 ├─────────────────────────────────────────────┤
+│              Cloudflare Turnstile           │  Bot protection (sign-in)
+├─────────────────────────────────────────────┤
 │              Rate Limiting                  │  Upstash Redis
 ├─────────────────────────────────────────────┤
 │              Authentication                 │  Better Auth (sessions)
@@ -300,13 +302,53 @@ export async function POST(request: Request) {
 
 ### Rate Limit Configuration
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| Checkout | 10 requests | 1 minute |
-| Contact Form | 5 requests | 1 minute |
-| Reviews | 10 requests | 1 minute |
-| Admin APIs | 30 requests | 1 minute |
-| General | 60 requests | 1 minute |
+| Endpoint | Limit | Window | Key |
+|----------|-------|--------|-----|
+| Auth (all POST) | 10 requests | 1 minute | IP address |
+| Magic Link | 3 requests | 1 hour | Email address |
+| Checkout | 10 requests | 1 minute | IP address |
+| Contact Form | 5 requests | 1 minute | IP address |
+| Reviews | 10 requests | 1 minute | IP address |
+| Admin APIs | 30 requests | 1 minute | IP address |
+| General | 60 requests | 1 minute | IP address |
+
+Auth requests have two layers: per-IP limiting on all auth POSTs, plus per-email limiting specifically for magic link requests to prevent email bombing.
+
+---
+
+## Bot Protection
+
+### Cloudflare Turnstile
+
+The sign-in form is protected by Cloudflare Turnstile to prevent bots from abusing magic link email dispatch.
+
+**How it works:**
+
+1. The Turnstile widget renders on the sign-in page and silently validates the visitor
+2. On email submit, the client sends the Turnstile token to `/api/auth/verify-turnstile`
+3. The server verifies the token with Cloudflare's API before sending any magic link
+4. If verification fails, the request is rejected and the widget resets
+
+```typescript
+// app/api/auth/verify-turnstile/route.ts
+const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    secret: process.env.TURNSTILE_SECRET_KEY,
+    response: token,
+  }),
+});
+```
+
+**Required environment variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Public site key from Cloudflare Dashboard |
+| `TURNSTILE_SECRET_KEY` | Secret key for server-side verification |
+
+See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for Cloudflare Turnstile setup instructions.
 
 ---
 
@@ -610,17 +652,19 @@ const securityHeaders = [
 
 ### Content Security Policy
 
-```typescript
-const ContentSecurityPolicy = `
-  default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' *.stripe.com *.google.com *.gstatic.com *.facebook.net *.pinterest.com;
-  style-src 'self' 'unsafe-inline' fonts.googleapis.com;
-  img-src 'self' data: blob: *.amazonaws.com *.stripe.com *.googleusercontent.com;
-  font-src 'self' fonts.gstatic.com;
-  frame-src *.stripe.com;
-  connect-src 'self' *.stripe.com *.google-analytics.com *.supabase.co;
-`;
-```
+The CSP is defined in `next.config.ts` and applied to all routes:
+
+| Directive | Allowed Origins |
+|-----------|----------------|
+| `script-src` | self, Stripe, Google accounts, GTM, GA, Facebook, Cloudflare Turnstile |
+| `style-src` | self, inline |
+| `img-src` | self, data, blob, S3, Unsplash, Google avatars, GitHub avatars, Stripe, Etsy |
+| `font-src` | self |
+| `connect-src` | self, Stripe, Google accounts/analytics, GTM, Facebook |
+| `frame-src` | self, Stripe, Google accounts, Cloudflare Turnstile |
+| `object-src` | none |
+| `form-action` | self |
+| `frame-ancestors` | self |
 
 ---
 
@@ -645,18 +689,34 @@ npm outdated
 2. **Minor updates**: Test and deploy weekly
 3. **Major updates**: Plan and test thoroughly
 
-### Dependabot (GitHub)
+### Automated Dependency Management
 
-```yaml
-# .github/dependabot.yml
-version: 2
-updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+Two tools work together for comprehensive coverage:
+
+**Dependabot** handles direct dependency updates and security alerts via GitHub's native integration (`.github/dependabot.yml`).
+
+**Renovate** (Mend) handles transitive dependency updates by updating the `overrides` section in `package.json`. It runs weekdays before 4am UTC with auto-merge for patch/minor updates. Major updates require manual review.
+
+### Transitive Dependency Overrides
+
+When a transitive dependency has a vulnerability that can't be fixed by updating the direct dependency, npm `overrides` in `package.json` force a patched version:
+
+```json
+"overrides": {
+  "fast-xml-parser": "5.5.8",
+  "hono": "4.12.8",
+  "@hono/node-server": "1.19.11",
+  "lodash": "4.17.23"
+}
 ```
+
+### Known Excluded Vulnerabilities
+
+| Advisory | Package | Reason |
+|----------|---------|--------|
+| GHSA-38f7-945m-qr2g | `effect` | Prisma pins `effect@3.18.4`; vulnerability only affects `@effect/rpc` toWebHandler pattern, which Prisma does not use |
+
+This advisory is excluded from CI audit checks via `.github/workflows/ci.yml`.
 
 ---
 
